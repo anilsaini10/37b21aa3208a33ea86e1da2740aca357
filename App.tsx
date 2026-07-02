@@ -5,6 +5,7 @@
  * @format
  */
 
+import RootApp from '@app/index';
 import { NewAppScreen } from '@react-native/new-app-screen';
 import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import {
@@ -16,10 +17,11 @@ function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
+    // <SafeAreaProvider>
+    //   <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+    //   <AppContent />
+    // </SafeAreaProvider>
+    <RootApp/>
   );
 }
 
