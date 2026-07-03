@@ -1,10 +1,3 @@
-/**
- * Auth API (mock).
- *
- * Accepts any well-formed credentials and returns a coherent session for the
- * chosen role. Demo hint: any email + password >= 6 chars works; parent OTP is
- * always "1234".
- */
 import {respond, fail} from '../../core/mock/mockApi';
 import {permissionsForRole} from '../../core/config/permissions';
 import {generateId} from '../../core/utils/misc';
