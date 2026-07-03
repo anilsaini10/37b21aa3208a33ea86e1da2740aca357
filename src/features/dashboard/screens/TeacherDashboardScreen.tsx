@@ -3,7 +3,7 @@ import React from 'react';
 import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme} from '../../../core/theme';
+import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -22,6 +22,7 @@ import {
 import {useAuthStore} from '../../auth/authStore';
 import {useTeacherDashboard} from '../dashboard.service';
 import type {TeacherStackParamList} from '../../../navigation/types';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {StatCard} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<TeacherStackParamList>;
@@ -32,6 +33,14 @@ export function TeacherDashboardScreen(): React.JSX.Element {
   const user = useAuthStore(s => s.user);
   const {data, isLoading} = useTeacherDashboard();
   const {t} = useLanguage();
+  const styles = useThemedStyles(t2 => ({
+    scrollContent: {
+      padding: t2.spacing.lg,
+    },
+    flexOne: {
+      flex: 1,
+    },
+  }));
 
   if (isLoading || !data) {
     return <Loader message={t('teacherDashboard_loadingDashboard')} />;
@@ -55,28 +64,28 @@ export function TeacherDashboardScreen(): React.JSX.Element {
       <CustomHeader
         title={t('teacherDashboard_greeting', {name: user?.name?.split(' ')[0] ?? 'Teacher'})}
         subtitle={user?.schoolName}
-        actions={[{icon: 'notification', onPress: () => navigation.navigate('Notifications'), badgeCount: 2}]}
+        actions={[{icon: 'notification', onPress: () => navigation.navigate(ScreenNames.Notifications), badgeCount: 2}]}
       />
       <ScrollView
-        contentContainerStyle={{padding: theme.spacing.lg}}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <StatGrid stats={stats} />
 
         <SectionTitle title={t('teacherDashboard_quickActions')} />
         <Row gap={theme.spacing.md}>
-          <View style={{flex: 1}}>
+          <View style={styles.flexOne}>
             <CustomButton
               title={t('teacherDashboard_markAttendance')}
               iconLeft="attendance"
-              onPress={() => navigation.navigate('MarkAttendance')}
+              onPress={() => navigation.navigate(ScreenNames.MarkAttendance)}
             />
           </View>
-          <View style={{flex: 1}}>
+          <View style={styles.flexOne}>
             <CustomButton
               title={t('teacherDashboard_createHomework')}
               variant="outline"
               iconLeft="homework"
-              onPress={() => navigation.navigate('CreateHomework')}
+              onPress={() => navigation.navigate(ScreenNames.CreateHomework)}
             />
           </View>
         </Row>

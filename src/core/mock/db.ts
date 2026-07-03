@@ -18,6 +18,7 @@ import type {
   FeePayment,
   Exam,
   Homework,
+  HomeworkSubmission,
   Announcement,
   SchoolEvent,
   BusRoute,
@@ -284,6 +285,24 @@ const homework: Homework[] = Array.from({length: 14}, (_, i) => {
   };
 });
 
+// ---- Homework submissions (per-student completion) -------------------------
+const homeworkSubmissions: HomeworkSubmission[] = homework.flatMap(hw =>
+  students
+    .filter(s => s.classId === hw.classId && s.sectionId === hw.sectionId)
+    .map(s => {
+      const completed = rnd() > 0.35;
+      return {
+        id: `hws_${hw.id}_${s.id}`,
+        homeworkId: hw.id,
+        studentId: s.id,
+        studentName: s.name,
+        rollNo: s.rollNo,
+        status: completed ? 'completed' : 'pending',
+        completedAt: completed ? isoDate(2026, 7, int(1, 10)) : undefined,
+      } satisfies HomeworkSubmission;
+    }),
+);
+
 // ---- Announcements + Events ----------------------------------------------
 const announcements: Announcement[] = [
   {id: 'an_1', title: 'Annual Sports Day', body: 'Sports day will be held on 20th July. All students must participate.', audience: 'all', category: 'event', publishedAt: isoDate(2026, 6, 25), publishedBy: 'Principal', pinned: true},
@@ -388,6 +407,7 @@ export const db = {
   exams,
   marks,
   homework,
+  homeworkSubmissions,
   announcements,
   events,
   busRoutes,

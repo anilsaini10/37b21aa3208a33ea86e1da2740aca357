@@ -7,6 +7,7 @@ import {useTheme} from '../../../core/theme';
 import {useLanguage, type TranslationKey} from '../../../core/i18n';
 import {Screen, CustomHeader, CustomCard, ListRow, Spacer} from '../../../shared/components';
 import type {AdminStackParamList} from '../../../navigation/types';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
@@ -31,17 +32,17 @@ interface ModuleItem {
 }
 
 const MODULES: ModuleItem[] = [
-  {labelKey: 'moreScreen_teachers', icon: 'teacher', route: 'Teachers'},
-  {labelKey: 'moreScreen_attendance', icon: 'attendance', route: 'Attendance'},
-  {labelKey: 'moreScreen_exams', icon: 'exam', route: 'Exams'},
-  {labelKey: 'moreScreen_announcements', icon: 'announcement', route: 'Announcements'},
-  {labelKey: 'moreScreen_events', icon: 'event', route: 'Events'},
-  {labelKey: 'moreScreen_transport', icon: 'transport', route: 'Transport'},
-  {labelKey: 'moreScreen_library', icon: 'library', route: 'Library'},
-  {labelKey: 'moreScreen_inventory', icon: 'inventory', route: 'Inventory'},
-  {labelKey: 'moreScreen_reports', icon: 'reports', route: 'Reports'},
-  {labelKey: 'moreScreen_settings', icon: 'settings', route: 'Settings'},
-  {labelKey: 'moreScreen_notifications', icon: 'notification', route: 'Notifications'},
+  {labelKey: 'moreScreen_teachers', icon: 'teacher', route: ScreenNames.Teachers},
+  {labelKey: 'moreScreen_attendance', icon: 'attendance', route: ScreenNames.Attendance},
+  {labelKey: 'moreScreen_exams', icon: 'exam', route: ScreenNames.Exams},
+  {labelKey: 'moreScreen_announcements', icon: 'announcement', route: ScreenNames.Announcements},
+  {labelKey: 'moreScreen_events', icon: 'event', route: ScreenNames.Events},
+  {labelKey: 'moreScreen_transport', icon: 'transport', route: ScreenNames.Transport},
+  {labelKey: 'moreScreen_library', icon: 'library', route: ScreenNames.Library},
+  {labelKey: 'moreScreen_inventory', icon: 'inventory', route: ScreenNames.Inventory},
+  {labelKey: 'moreScreen_reports', icon: 'reports', route: ScreenNames.Reports},
+  {labelKey: 'moreScreen_settings', icon: 'settings', route: ScreenNames.Settings},
+  {labelKey: 'moreScreen_notifications', icon: 'notification', route: ScreenNames.Notifications},
 ];
 
 export function MoreScreen(): React.JSX.Element {

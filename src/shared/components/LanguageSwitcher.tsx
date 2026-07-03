@@ -1,7 +1,7 @@
 /** Language icon button — opens a bottom sheet to pick the app language. */
 import React, {useState} from 'react';
 import {Pressable, View, type StyleProp, type ViewStyle} from 'react-native';
-import {useTheme} from '../../core/theme';
+import {useTheme, useThemedStyles} from '../../core/theme';
 import {LANGUAGES, useLanguage} from '../../core/i18n';
 import {AppText} from './AppText';
 import {Icon} from './Icon';
@@ -17,23 +17,26 @@ export function LanguageSwitcher({iconColor, style}: LanguageSwitcherProps): Rea
   const {theme} = useTheme();
   const {language, setLanguage, t} = useLanguage();
   const [open, setOpen] = useState(false);
+  const styles = useThemedStyles(t2 => ({
+    trigger: {
+      width: 40,
+      height: 40,
+      borderRadius: t2.radius.pill,
+      backgroundColor: t2.colors.overlay,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    languageRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: t2.spacing.md,
+    },
+  }));
 
   return (
     <>
-      <Pressable
-        onPress={() => setOpen(true)}
-        hitSlop={8}
-        style={[
-          {
-            width: 40,
-            height: 40,
-            borderRadius: theme.radius.pill,
-            backgroundColor: theme.colors.overlay,
-            alignItems: 'center',
-            justifyContent: 'center',
-          },
-          style,
-        ]}>
+      <Pressable onPress={() => setOpen(true)} hitSlop={8} style={[styles.trigger, style]}>
         <Icon name="globe" size={20} color={iconColor ?? theme.colors.text} />
       </Pressable>
 
@@ -45,12 +48,7 @@ export function LanguageSwitcher({iconColor, style}: LanguageSwitcherProps): Rea
               setLanguage(item.code);
               setOpen(false);
             }}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              paddingVertical: theme.spacing.md,
-            }}>
+            style={styles.languageRow}>
             <View>
               <AppText variant="bodyBold">{item.nativeLabel}</AppText>
               {item.nativeLabel !== item.label ? (

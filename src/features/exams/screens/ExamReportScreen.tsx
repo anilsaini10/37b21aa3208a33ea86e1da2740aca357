@@ -3,7 +3,7 @@ import React from 'react';
 import {ScrollView} from 'react-native';
 import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme} from '../../../core/theme';
+import {useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -23,12 +23,19 @@ import type {MarkEntry} from '../../../shared/types';
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
 export function ExamReportScreen(): React.JSX.Element {
-  const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
   const route = useRoute<RouteProp<AdminStackParamList, 'ExamReport'>>();
   const {examId} = route.params;
   const {data, isLoading} = useExamMarks(examId);
   const {t} = useLanguage();
+  const styles = useThemedStyles(t2 => ({
+    scrollContent: {
+      padding: t2.spacing.lg,
+    },
+    tableCard: {
+      overflow: 'hidden',
+    },
+  }));
 
   if (isLoading || !data) {
     return <Loader message={t('examReport_loadingMarks')} />;
@@ -66,9 +73,9 @@ export function ExamReportScreen(): React.JSX.Element {
         />
       ) : (
         <ScrollView
-          contentContainerStyle={{padding: theme.spacing.lg}}
+          contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}>
-          <CustomCard padded={false} style={{overflow: 'hidden'}}>
+          <CustomCard padded={false} style={styles.tableCard}>
             <CustomTable<MarkEntry>
               columns={columns}
               data={data}

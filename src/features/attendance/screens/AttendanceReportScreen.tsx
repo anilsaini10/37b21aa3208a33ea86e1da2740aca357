@@ -3,7 +3,7 @@ import React from 'react';
 import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme} from '../../../core/theme';
+import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -26,6 +26,20 @@ export function AttendanceReportScreen(): React.JSX.Element {
   const navigation = useNavigation<Nav>();
   const {t} = useLanguage();
   const {data, isLoading} = useAttendanceSummary();
+  const styles = useThemedStyles(t2 => ({
+    scrollContent: {
+      padding: t2.spacing.lg,
+    },
+    breakdownRow: {
+      rowGap: t2.spacing.sm,
+    },
+    tileWrapper: {
+      width: '31%',
+    },
+    tileCard: {
+      alignItems: 'center',
+    },
+  }));
 
   if (isLoading || !data) {
     return <Loader message={t('attendanceReport_loadingAttendance')} />;
@@ -45,7 +59,7 @@ export function AttendanceReportScreen(): React.JSX.Element {
     <Screen padded={false}>
       <CustomHeader title={t('attendanceReport_title')} onBack={() => navigation.goBack()} />
       <ScrollView
-        contentContainerStyle={{padding: theme.spacing.lg}}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <CustomCard>
           <AppText variant="caption" color="textSecondary">
@@ -60,10 +74,10 @@ export function AttendanceReportScreen(): React.JSX.Element {
         </CustomCard>
 
         <SectionTitle title={t('attendanceReport_breakdown')} />
-        <Row gap={theme.spacing.sm} wrap style={{rowGap: theme.spacing.sm}}>
+        <Row gap={theme.spacing.sm} wrap style={styles.breakdownRow}>
           {tiles.map(tile => (
-            <View key={tile.label} style={{width: '31%'}}>
-              <CustomCard style={{alignItems: 'center'}}>
+            <View key={tile.label} style={styles.tileWrapper}>
+              <CustomCard style={styles.tileCard}>
                 <AppText variant="h2" style={{color: tile.color}}>
                   {tile.value}
                 </AppText>

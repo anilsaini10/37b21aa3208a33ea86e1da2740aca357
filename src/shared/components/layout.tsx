@@ -4,12 +4,13 @@ import {
   View,
   ScrollView,
   StatusBar,
+  StyleSheet,
   type ViewStyle,
   type StyleProp,
   type ScrollViewProps,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {useTheme} from '../../core/theme';
+import {useTheme, useThemedStyles} from '../../core/theme';
 
 interface ScreenProps {
   children: React.ReactNode;
@@ -28,25 +29,35 @@ export function Screen({
   contentContainerStyle,
 }: ScreenProps): React.JSX.Element {
   const {theme} = useTheme();
-  const bg = {flex: 1, backgroundColor: theme.colors.background};
-  const pad = padded ? {padding: theme.spacing.lg} : undefined;
+  const styles = useThemedStyles(t => ({
+    bg: {
+      flex: 1,
+      backgroundColor: t.colors.background,
+    },
+    padded: {
+      padding: t.spacing.lg,
+    },
+    grow: {
+      flexGrow: 1,
+    },
+  }));
 
   return (
-    <SafeAreaView style={bg}>
+    <SafeAreaView style={styles.bg}>
       <StatusBar
         barStyle={theme.dark ? 'light-content' : 'dark-content'}
         backgroundColor={theme.colors.headerBackground}
       />
       {scroll ? (
         <ScrollView
-          style={bg}
-          contentContainerStyle={[pad, {flexGrow: 1}, contentContainerStyle]}
+          style={styles.bg}
+          contentContainerStyle={[padded && styles.padded, styles.grow, contentContainerStyle]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>
           {children}
         </ScrollView>
       ) : (
-        <View style={[bg, pad, style]}>{children}</View>
+        <View style={[styles.bg, padded && styles.padded, style]}>{children}</View>
       )}
     </SafeAreaView>
   );
@@ -70,8 +81,8 @@ export function Row({
   return (
     <View
       style={[
+        rowStyles.row,
         {
-          flexDirection: 'row',
           alignItems: align,
           justifyContent: justify,
           columnGap: gap,
@@ -84,20 +95,26 @@ export function Row({
   );
 }
 
+// `align`/`justify`/`gap`/`wrap` vary per call site, so only the constant part
+// of Row's style is hoisted here; the rest is composed inline above.
+const rowStyles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+  },
+});
+
 export function Spacer({size = 8, horizontal}: {size?: number; horizontal?: boolean}): React.JSX.Element {
   return <View style={horizontal ? {width: size} : {height: size}} />;
 }
 
 export function Divider({inset = 0}: {inset?: number}): React.JSX.Element {
-  const {theme} = useTheme();
-  return (
-    <View
-      style={{
-        height: 1,
-        backgroundColor: theme.colors.divider,
-        marginVertical: theme.spacing.sm,
-        marginHorizontal: inset,
-      }}
-    />
-  );
+  const styles = useThemedStyles(theme => ({
+    divider: {
+      height: 1,
+      backgroundColor: theme.colors.divider,
+      marginVertical: theme.spacing.sm,
+    },
+  }));
+  // `inset` varies per call site, so marginHorizontal stays inline.
+  return <View style={[styles.divider, {marginHorizontal: inset}]} />;
 }

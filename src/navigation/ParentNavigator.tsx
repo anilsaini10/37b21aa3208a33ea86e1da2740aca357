@@ -6,6 +6,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTheme} from '../core/theme';
 import {Icon} from '../shared/components';
 import type {ParentStackParamList, ParentTabParamList} from './types';
+import {ScreenNames} from './ScreenNames';
 
 import {ParentDashboardScreen} from '../features/dashboard/screens/ParentDashboardScreen';
 import {ParentAttendanceScreen} from '../features/attendance/screens/ParentAttendanceScreen';
@@ -51,10 +52,10 @@ function ParentTabs(): React.JSX.Element {
         },
         tabBarIcon: ({color}) => <Icon name={TAB_ICON[route.name]} size={22} color={color} />,
       })}>
-      <Tab.Screen name="Dashboard" component={ParentDashboardScreen} />
-      <Tab.Screen name="Attendance" component={ParentAttendanceScreen} />
-      <Tab.Screen name="Fees" component={ParentFeesScreen} />
-      <Tab.Screen name="Profile" component={ParentProfileScreen} />
+      <Tab.Screen name={ScreenNames.Dashboard} component={ParentDashboardScreen} />
+      <Tab.Screen name={ScreenNames.Attendance} component={ParentAttendanceScreen} />
+      <Tab.Screen name={ScreenNames.Fees} component={ParentFeesScreen} />
+      <Tab.Screen name={ScreenNames.Profile} component={ParentProfileScreen} />
     </Tab.Navigator>
   );
 }
@@ -62,18 +63,18 @@ function ParentTabs(): React.JSX.Element {
 export function ParentNavigator(): React.JSX.Element {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
-      <Stack.Screen name="Tabs" component={ParentTabs} />
-      <Stack.Screen name="ChildProfile" component={ChildProfileScreen} />
-      <Stack.Screen name="Results" component={ResultsScreen} />
-      <Stack.Screen name="ReportCard" component={ReportCardScreen} />
-      <Stack.Screen name="Homework" component={ParentHomeworkScreen} />
-      <Stack.Screen name="Timetable" component={TimetableScreen} />
-      <Stack.Screen name="Announcements" component={AnnouncementsScreen} />
-      <Stack.Screen name="Chat" component={ChatScreen} />
-      <Stack.Screen name="Leave" component={LeaveScreen} />
-      <Stack.Screen name="Notifications" component={NotificationsScreen} />
-      <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
-      <Stack.Screen name="FeeReceipt" component={FeeReceiptScreen} />
+      <Stack.Screen name={ScreenNames.Tabs} component={ParentTabs} />
+      <Stack.Screen name={ScreenNames.ChildProfile} component={ChildProfileScreen} />
+      <Stack.Screen name={ScreenNames.Results} component={ResultsScreen} />
+      <Stack.Screen name={ScreenNames.ReportCard} component={ReportCardScreen} />
+      <Stack.Screen name={ScreenNames.Homework} component={ParentHomeworkScreen} />
+      <Stack.Screen name={ScreenNames.Timetable} component={TimetableScreen} />
+      <Stack.Screen name={ScreenNames.Announcements} component={AnnouncementsScreen} />
+      <Stack.Screen name={ScreenNames.Chat} component={ChatScreen} />
+      <Stack.Screen name={ScreenNames.Leave} component={LeaveScreen} />
+      <Stack.Screen name={ScreenNames.Notifications} component={NotificationsScreen} />
+      <Stack.Screen name={ScreenNames.ChangePassword} component={ChangePasswordScreen} />
+      <Stack.Screen name={ScreenNames.FeeReceipt} component={FeeReceiptScreen} />
     </Stack.Navigator>
   );
 }

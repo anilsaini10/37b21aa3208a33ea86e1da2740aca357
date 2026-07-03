@@ -8,7 +8,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import {useTheme} from '../../core/theme';
+import {useTheme, useThemedStyles} from '../../core/theme';
 import {AppText} from './AppText';
 import {Icon} from './Icon';
 
@@ -40,27 +40,38 @@ export function CustomInput({
       ? theme.colors.primary
       : theme.colors.border;
 
+  const styles = useThemedStyles(t => ({
+    container: {marginBottom: t.spacing.md},
+    label: {marginBottom: t.spacing.xs},
+    inputRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      height: t.components.input.height,
+      borderWidth: t.components.input.borderWidth,
+      borderRadius: t.components.input.radius,
+      backgroundColor: t.colors.inputBackground,
+      paddingHorizontal: t.components.input.paddingHorizontal,
+      columnGap: t.spacing.sm,
+    },
+    textInput: {
+      flex: 1,
+      color: t.colors.text,
+      fontSize: t.components.input.fontSize,
+      paddingVertical: 0,
+    },
+    errorText: {marginTop: t.spacing.xs},
+  }));
+
   return (
-    <View style={[{marginBottom: theme.spacing.md}, containerStyle]}>
+    <View style={[styles.container, containerStyle]}>
       {label ? (
-        <AppText variant="label" color="textSecondary" style={{marginBottom: theme.spacing.xs}}>
+        <AppText variant="label" color="textSecondary" style={styles.label}>
           {label}
           {required ? <AppText variant="label" color="error"> *</AppText> : null}
         </AppText>
       ) : null}
 
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          height: theme.components.input.height,
-          borderWidth: theme.components.input.borderWidth,
-          borderColor,
-          borderRadius: theme.components.input.radius,
-          backgroundColor: theme.colors.inputBackground,
-          paddingHorizontal: theme.components.input.paddingHorizontal,
-          columnGap: theme.spacing.sm,
-        }}>
+      <View style={[styles.inputRow, {borderColor}]}>
         {iconLeft ? <Icon name={iconLeft} size={18} color={theme.colors.textMuted} /> : null}
         <TextInput
           {...inputProps}
@@ -74,12 +85,7 @@ export function CustomInput({
             inputProps.onBlur?.(e);
           }}
           placeholderTextColor={theme.colors.placeholder}
-          style={{
-            flex: 1,
-            color: theme.colors.text,
-            fontSize: theme.components.input.fontSize,
-            paddingVertical: 0,
-          }}
+          style={styles.textInput}
         />
         {secure ? (
           <Pressable onPress={() => setHidden(h => !h)} hitSlop={8}>
@@ -89,7 +95,7 @@ export function CustomInput({
       </View>
 
       {error ? (
-        <AppText variant="caption" color="error" style={{marginTop: theme.spacing.xs}}>
+        <AppText variant="caption" color="error" style={styles.errorText}>
           {error}
         </AppText>
       ) : null}

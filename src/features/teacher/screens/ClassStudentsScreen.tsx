@@ -1,9 +1,9 @@
-/** Class Students — roster for the teacher's class with attendance badges. */
+/** Class Students — roster for a specific class/section with attendance badges. */
 import React from 'react';
 import {FlatList, View} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme} from '../../../core/theme';
+import {useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -15,15 +15,31 @@ import {
 } from '../../../shared/components';
 import {useStudents} from '../../students/students.service';
 import type {TeacherStackParamList} from '../../../navigation/types';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {Student} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<TeacherStackParamList>;
 
 export function ClassStudentsScreen(): React.JSX.Element {
-  const {theme} = useTheme();
+  const styles = useThemedStyles(theme => ({
+    listContent: {
+      padding: theme.spacing.lg,
+      flexGrow: 1,
+    },
+    separator: {
+      height: 1,
+      backgroundColor: theme.colors.divider,
+    },
+  }));
   const navigation = useNavigation<Nav>();
+  const route = useRoute<RouteProp<TeacherStackParamList, 'ClassStudents'>>();
   const {t} = useLanguage();
-  const {data, isLoading} = useStudents({pageSize: 50});
+  const {classId, className, sectionId, sectionName} = route.params;
+  const {data, isLoading} = useStudents({classId, sectionId, pageSize: 100});
+
+  const headerTitle = sectionName
+    ? t('classStudents_headerTitleWithSection', {className, sectionName})
+    : t('classStudents_headerTitleNoSection', {className});
 
   if (isLoading || !data) {
     return <Loader message={t('classStudents_loadingStudents')} />;
@@ -38,6 +54,7 @@ export function ClassStudentsScreen(): React.JSX.Element {
         sectionName: item.sectionName,
         rollNo: item.rollNo,
       })}
+      onPress={() => navigation.navigate(ScreenNames.StudentDetail, {id: item.id})}
       right={
         <Badge
           label={`${item.attendancePercentage}%`}
@@ -56,18 +73,16 @@ export function ClassStudentsScreen(): React.JSX.Element {
   return (
     <Screen padded={false}>
       <CustomHeader
-        title={t('classStudents_myClass')}
+        title={headerTitle}
         onBack={navigation.canGoBack() ? () => navigation.goBack() : undefined}
       />
       <FlatList
         data={data.items}
         keyExtractor={item => item.id}
         renderItem={renderItem}
-        contentContainerStyle={{padding: theme.spacing.lg, flexGrow: 1}}
+        contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        ItemSeparatorComponent={() => (
-          <View style={{height: 1, backgroundColor: theme.colors.divider}} />
-        )}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={
           <EmptyState
             icon="students"

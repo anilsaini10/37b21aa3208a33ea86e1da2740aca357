@@ -19,8 +19,16 @@ export interface StudentInput {
 }
 
 export const studentsApi = {
-  list: (params?: QueryParams): Promise<Paginated<Student>> =>
-    respond(paginateList(db.students, params, ['name', 'admissionNo', 'className', 'parentName'])),
+  list: (params?: QueryParams): Promise<Paginated<Student>> => {
+    let items = db.students;
+    if (params?.classId) {
+      items = items.filter(s => s.classId === params.classId);
+    }
+    if (params?.sectionId) {
+      items = items.filter(s => s.sectionId === params.sectionId);
+    }
+    return respond(paginateList(items, params, ['name', 'admissionNo', 'className', 'parentName']));
+  },
 
   getById: (id: string): Promise<Student | undefined> =>
     respond(db.students.find(s => s.id === id)),

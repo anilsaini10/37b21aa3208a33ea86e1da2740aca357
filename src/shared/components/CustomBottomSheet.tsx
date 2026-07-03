@@ -3,8 +3,8 @@
  * Slides content up from the bottom with a dimmed backdrop.
  */
 import React, {useEffect, useRef} from 'react';
-import {Animated, Modal, Pressable, View} from 'react-native';
-import {useTheme} from '../../core/theme';
+import {Animated, Modal, Pressable, ScrollView, useWindowDimensions, View} from 'react-native';
+import {useThemedStyles} from '../../core/theme';
 import {AppText} from './AppText';
 
 export interface CustomBottomSheetProps {
@@ -20,8 +20,29 @@ export function CustomBottomSheet({
   title,
   children,
 }: CustomBottomSheetProps): React.JSX.Element {
-  const {theme} = useTheme();
+  const {height: screenHeight} = useWindowDimensions();
   const translateY = useRef(new Animated.Value(300)).current;
+
+  const styles = useThemedStyles(theme => ({
+    backdrop: {flex: 1, backgroundColor: theme.colors.overlay, justifyContent: 'flex-end'},
+    sheet: {
+      backgroundColor: theme.colors.surface,
+      borderTopLeftRadius: theme.radius.xl,
+      borderTopRightRadius: theme.radius.xl,
+      paddingTop: theme.spacing.lg,
+      paddingHorizontal: theme.spacing.lg,
+      paddingBottom: theme.spacing.xxl,
+    },
+    handle: {
+      alignSelf: 'center',
+      width: 44,
+      height: 5,
+      borderRadius: 3,
+      backgroundColor: theme.colors.border,
+      marginBottom: theme.spacing.sm,
+    },
+    title: {marginBottom: theme.spacing.md},
+  }));
 
   useEffect(() => {
     Animated.timing(translateY, {
@@ -33,34 +54,20 @@ export function CustomBottomSheet({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable
-        onPress={onClose}
-        style={{flex: 1, backgroundColor: theme.colors.overlay, justifyContent: 'flex-end'}}>
+      <Pressable onPress={onClose} style={styles.backdrop}>
         <Animated.View
           style={{transform: [{translateY}]}}
           onStartShouldSetResponder={() => true}>
           <Pressable
             onPress={e => e.stopPropagation()}
-            style={{
-              backgroundColor: theme.colors.surface,
-              borderTopLeftRadius: theme.radius.xl,
-              borderTopRightRadius: theme.radius.xl,
-              padding: theme.spacing.lg,
-              paddingBottom: theme.spacing.xxl,
-              rowGap: theme.spacing.md,
-            }}>
-            <View
-              style={{
-                alignSelf: 'center',
-                width: 44,
-                height: 5,
-                borderRadius: 3,
-                backgroundColor: theme.colors.border,
-                marginBottom: theme.spacing.xs,
-              }}
-            />
-            {title ? <AppText variant="h3">{title}</AppText> : null}
-            {children}
+            style={[styles.sheet, {maxHeight: screenHeight * 0.75}]}>
+            <View style={styles.handle} />
+            {title ? (
+              <AppText variant="h3" style={styles.title}>
+                {title}
+              </AppText>
+            ) : null}
+            <ScrollView showsVerticalScrollIndicator={false}>{children}</ScrollView>
           </Pressable>
         </Animated.View>
       </Pressable>

@@ -3,7 +3,7 @@ import React from 'react';
 import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme} from '../../../core/theme';
+import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -27,6 +27,20 @@ export function TransportScreen(): React.JSX.Element {
   const navigation = useNavigation<Nav>();
   const {t} = useLanguage();
   const {data, isLoading} = useBusRoutes();
+  const styles = useThemedStyles(t2 => ({
+    scrollContent: {
+      padding: t2.spacing.lg,
+    },
+    routeCard: {
+      marginBottom: t2.spacing.md,
+    },
+    routeNameText: {
+      flex: 1,
+    },
+    infoTextBlock: {
+      flex: 1,
+    },
+  }));
 
   if (isLoading || !data) {
     return <Loader message={t('transport_loading')} />;
@@ -49,13 +63,13 @@ export function TransportScreen(): React.JSX.Element {
     <Screen padded={false}>
       <CustomHeader title={t('transport_title')} onBack={() => navigation.goBack()} />
       <ScrollView
-        contentContainerStyle={{padding: theme.spacing.lg}}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         {data.map(route => (
-          <View key={route.id} style={{marginBottom: theme.spacing.md}}>
+          <View key={route.id} style={styles.routeCard}>
             <CustomCard>
               <Row justify="space-between" align="flex-start">
-                <AppText variant="h3" style={{flex: 1}}>
+                <AppText variant="h3" style={styles.routeNameText}>
                   {route.routeName}
                 </AppText>
                 <Badge label={route.busNumber} tone="primary" />
@@ -64,7 +78,7 @@ export function TransportScreen(): React.JSX.Element {
               <Spacer size={theme.spacing.sm} />
               <Row gap={theme.spacing.sm} align="flex-start">
                 <Icon name="phone" size={18} color={theme.colors.textSecondary} />
-                <View style={{flex: 1}}>
+                <View style={styles.infoTextBlock}>
                   <AppText variant="caption" color="textSecondary">
                     {t('transport_driver')}
                   </AppText>
@@ -77,7 +91,7 @@ export function TransportScreen(): React.JSX.Element {
               <Spacer size={theme.spacing.sm} />
               <Row gap={theme.spacing.sm} align="flex-start">
                 <Icon name="transport" size={18} color={theme.colors.textSecondary} />
-                <View style={{flex: 1}}>
+                <View style={styles.infoTextBlock}>
                   <AppText variant="caption" color="textSecondary">
                     {t('transport_stops')}
                   </AppText>
@@ -88,7 +102,7 @@ export function TransportScreen(): React.JSX.Element {
               <Spacer size={theme.spacing.sm} />
               <Row gap={theme.spacing.sm} align="flex-start">
                 <Icon name="students" size={18} color={theme.colors.textSecondary} />
-                <View style={{flex: 1}}>
+                <View style={styles.infoTextBlock}>
                   <AppText variant="caption" color="textSecondary">
                     {t('transport_capacity')}
                   </AppText>

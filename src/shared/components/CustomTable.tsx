@@ -1,7 +1,7 @@
 /** Generic, typed data table with a header row and per-cell renderers. */
 import React from 'react';
 import {ScrollView, View} from 'react-native';
-import {useTheme} from '../../core/theme';
+import {useTheme, useThemedStyles} from '../../core/theme';
 import {AppText} from './AppText';
 
 export interface TableColumn<T> {
@@ -29,6 +29,24 @@ export function CustomTable<T>({
 }: CustomTableProps<T>): React.JSX.Element {
   const {theme} = useTheme();
 
+  const styles = useThemedStyles(t => ({
+    tableWrapper: {minWidth: '100%'},
+    headerRow: {
+      flexDirection: 'row',
+      paddingVertical: t.spacing.sm,
+      backgroundColor: t.colors.surfaceVariant,
+      borderTopLeftRadius: t.radius.md,
+      borderTopRightRadius: t.radius.md,
+    },
+    dataRow: {
+      flexDirection: 'row',
+      paddingVertical: t.spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: t.colors.divider,
+      backgroundColor: t.colors.card,
+    },
+  }));
+
   const cellStyle = (col: TableColumn<T>) => ({
     width: col.width,
     flex: col.width ? undefined : col.flex ?? 1,
@@ -40,16 +58,9 @@ export function CustomTable<T>({
 
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-      <View style={{minWidth: '100%'}}>
+      <View style={styles.tableWrapper}>
         {/* Header */}
-        <View
-          style={{
-            flexDirection: 'row',
-            paddingVertical: theme.spacing.sm,
-            backgroundColor: theme.colors.surfaceVariant,
-            borderTopLeftRadius: theme.radius.md,
-            borderTopRightRadius: theme.radius.md,
-          }}>
+        <View style={styles.headerRow}>
           {columns.map(col => (
             <View key={col.key} style={cellStyle(col)}>
               <AppText variant="label" color="textSecondary">
@@ -64,13 +75,7 @@ export function CustomTable<T>({
           <View
             key={keyExtractor(row, index)}
             onTouchEnd={onRowPress ? () => onRowPress(row) : undefined}
-            style={{
-              flexDirection: 'row',
-              paddingVertical: theme.spacing.md,
-              borderBottomWidth: 1,
-              borderBottomColor: theme.colors.divider,
-              backgroundColor: theme.colors.card,
-            }}>
+            style={styles.dataRow}>
             {columns.map(col => (
               <View key={col.key} style={cellStyle(col)}>
                 {col.render ? (

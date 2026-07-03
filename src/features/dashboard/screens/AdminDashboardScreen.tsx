@@ -24,6 +24,7 @@ import {formatCurrency, formatDate, formatCompact} from '../../../core/utils/for
 import {useAuthStore} from '../../auth/authStore';
 import {useAdminDashboard} from '../dashboard.service';
 import type {AdminStackParamList} from '../../../navigation/types';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {StatCard} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
@@ -51,7 +52,7 @@ export function AdminDashboardScreen(): React.JSX.Element {
       <CustomHeader
         title={t('adminDashboard_greeting', {name: user?.name?.split(' ')[0] ?? 'Admin'})}
         subtitle={user?.schoolName}
-        actions={[{icon: 'notification', onPress: () => navigation.navigate('Notifications'), badgeCount: 3}]}
+        actions={[{icon: 'notification', onPress: () => navigation.navigate(ScreenNames.Notifications), badgeCount: 3}]}
       />
       <ScrollView
         contentContainerStyle={{padding: theme.spacing.lg}}
@@ -75,7 +76,7 @@ export function AdminDashboardScreen(): React.JSX.Element {
           <BarChart series={data.attendanceTrend} height={130} valueFormatter={v => `${v}%`} />
         </CustomCard>
 
-        <SectionTitle title={t('adminDashboard_feeCollection')} actionLabel={t('common_details')} onAction={() => navigation.navigate('Reports')} />
+        <SectionTitle title={t('adminDashboard_feeCollection')} actionLabel={t('common_details')} onAction={() => navigation.navigate(ScreenNames.Reports)} />
         <CustomCard>
           <Row justify="space-between">
             <View>
@@ -94,7 +95,7 @@ export function AdminDashboardScreen(): React.JSX.Element {
           </AppText>
         </CustomCard>
 
-        <SectionTitle title={t('adminDashboard_upcomingEvents')} actionLabel={t('common_seeAll')} onAction={() => navigation.navigate('Events')} />
+        <SectionTitle title={t('adminDashboard_upcomingEvents')} actionLabel={t('common_seeAll')} onAction={() => navigation.navigate(ScreenNames.Events)} />
         <CustomCard padded={false} style={{paddingHorizontal: theme.spacing.lg}}>
           {data.upcomingEvents.map(ev => (
             <ListRow

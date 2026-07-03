@@ -6,6 +6,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTheme} from '../core/theme';
 import {Icon} from '../shared/components';
 import type {AdminStackParamList, AdminTabParamList} from './types';
+import {ScreenNames} from './ScreenNames';
 
 import {AdminDashboardScreen} from '../features/dashboard/screens/AdminDashboardScreen';
 import {StudentsListScreen} from '../features/students/screens/StudentsListScreen';
@@ -57,10 +58,10 @@ function AdminTabs(): React.JSX.Element {
         },
         tabBarIcon: ({color}) => <Icon name={TAB_ICON[route.name]} size={22} color={color} />,
       })}>
-      <Tab.Screen name="Dashboard" component={AdminDashboardScreen} />
-      <Tab.Screen name="Students" component={StudentsListScreen} />
-      <Tab.Screen name="Fees" component={FeesListScreen} />
-      <Tab.Screen name="More" component={MoreScreen} />
+      <Tab.Screen name={ScreenNames.Dashboard} component={AdminDashboardScreen} />
+      <Tab.Screen name={ScreenNames.Students} component={StudentsListScreen} />
+      <Tab.Screen name={ScreenNames.Fees} component={FeesListScreen} />
+      <Tab.Screen name={ScreenNames.More} component={MoreScreen} />
     </Tab.Navigator>
   );
 }
@@ -68,24 +69,24 @@ function AdminTabs(): React.JSX.Element {
 export function AdminNavigator(): React.JSX.Element {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
-      <Stack.Screen name="Tabs" component={AdminTabs} />
-      <Stack.Screen name="StudentDetail" component={StudentDetailScreen} />
-      <Stack.Screen name="StudentForm" component={StudentFormScreen} />
-      <Stack.Screen name="Teachers" component={TeachersListScreen} />
-      <Stack.Screen name="TeacherForm" component={TeacherFormScreen} />
-      <Stack.Screen name="Attendance" component={AttendanceReportScreen} />
-      <Stack.Screen name="Exams" component={ExamsListScreen} />
-      <Stack.Screen name="ExamReport" component={ExamReportScreen} />
-      <Stack.Screen name="Announcements" component={AnnouncementsScreen} />
-      <Stack.Screen name="AnnouncementForm" component={AnnouncementFormScreen} />
-      <Stack.Screen name="Events" component={EventsScreen} />
-      <Stack.Screen name="Transport" component={TransportScreen} />
-      <Stack.Screen name="Library" component={LibraryScreen} />
-      <Stack.Screen name="Inventory" component={InventoryScreen} />
-      <Stack.Screen name="Reports" component={ReportsScreen} />
-      <Stack.Screen name="Settings" component={SettingsScreen} />
-      <Stack.Screen name="Notifications" component={NotificationsScreen} />
-      <Stack.Screen name="FeeReceipt" component={FeeReceiptScreen} />
+      <Stack.Screen name={ScreenNames.Tabs} component={AdminTabs} />
+      <Stack.Screen name={ScreenNames.StudentDetail} component={StudentDetailScreen} />
+      <Stack.Screen name={ScreenNames.StudentForm} component={StudentFormScreen} />
+      <Stack.Screen name={ScreenNames.Teachers} component={TeachersListScreen} />
+      <Stack.Screen name={ScreenNames.TeacherForm} component={TeacherFormScreen} />
+      <Stack.Screen name={ScreenNames.Attendance} component={AttendanceReportScreen} />
+      <Stack.Screen name={ScreenNames.Exams} component={ExamsListScreen} />
+      <Stack.Screen name={ScreenNames.ExamReport} component={ExamReportScreen} />
+      <Stack.Screen name={ScreenNames.Announcements} component={AnnouncementsScreen} />
+      <Stack.Screen name={ScreenNames.AnnouncementForm} component={AnnouncementFormScreen} />
+      <Stack.Screen name={ScreenNames.Events} component={EventsScreen} />
+      <Stack.Screen name={ScreenNames.Transport} component={TransportScreen} />
+      <Stack.Screen name={ScreenNames.Library} component={LibraryScreen} />
+      <Stack.Screen name={ScreenNames.Inventory} component={InventoryScreen} />
+      <Stack.Screen name={ScreenNames.Reports} component={ReportsScreen} />
+      <Stack.Screen name={ScreenNames.Settings} component={SettingsScreen} />
+      <Stack.Screen name={ScreenNames.Notifications} component={NotificationsScreen} />
+      <Stack.Screen name={ScreenNames.FeeReceipt} component={FeeReceiptScreen} />
     </Stack.Navigator>
   );
 }

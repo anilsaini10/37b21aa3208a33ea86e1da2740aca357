@@ -3,7 +3,7 @@ import React from 'react';
 import {FlatList} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme} from '../../../core/theme';
+import {useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -16,12 +16,18 @@ import {
 import {statusTone, capitalize} from '../../../shared/helpers';
 import {useTeachers} from '../teachers.service';
 import type {AdminStackParamList} from '../../../navigation/types';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {Teacher} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
 export function TeachersListScreen(): React.JSX.Element {
-  const {theme} = useTheme();
+  const styles = useThemedStyles(theme => ({
+    listContent: {
+      padding: theme.spacing.lg,
+      flexGrow: 1,
+    },
+  }));
   const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
   const {data, isLoading} = useTeachers({pageSize: 50});
@@ -35,12 +41,12 @@ export function TeachersListScreen(): React.JSX.Element {
       <CustomHeader
         title={t('teachersList_headerTitle')}
         onBack={() => navigation.goBack()}
-        actions={[{icon: 'add', onPress: () => navigation.navigate('TeacherForm')}]}
+        actions={[{icon: 'add', onPress: () => navigation.navigate(ScreenNames.TeacherForm)}]}
       />
       <FlatList
         data={data.items}
         keyExtractor={(item: Teacher) => item.id}
-        contentContainerStyle={{padding: theme.spacing.lg, flexGrow: 1}}
+        contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         renderItem={({item}) => (
           <ListRow
@@ -60,7 +66,7 @@ export function TeachersListScreen(): React.JSX.Element {
             title={t('teachersList_emptyTitle')}
             message={t('teachersList_emptyMessage')}
             actionLabel={t('teachersList_addTeacher')}
-            onAction={() => navigation.navigate('TeacherForm')}
+            onAction={() => navigation.navigate(ScreenNames.TeacherForm)}
           />
         }
       />

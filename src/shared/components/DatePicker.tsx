@@ -6,7 +6,7 @@
  */
 import React, {useMemo, useState} from 'react';
 import {Pressable, View} from 'react-native';
-import {useTheme} from '../../core/theme';
+import {useTheme, useThemedStyles} from '../../core/theme';
 import {useLanguage} from '../../core/i18n';
 import {AppText} from './AppText';
 import {Icon} from './Icon';
@@ -48,6 +48,29 @@ export function DatePicker({
   const {t} = useLanguage();
   const [open, setOpen] = useState(false);
   const [parts, setParts] = useState(() => toParts(value));
+  const styles = useThemedStyles(t2 => ({
+    wrapper: {
+      marginBottom: t2.spacing.md,
+    },
+    label: {
+      marginBottom: t2.spacing.xs,
+    },
+    field: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      height: t2.components.input.height,
+      borderWidth: 1,
+      borderColor: t2.colors.border,
+      borderRadius: t2.components.input.radius,
+      paddingHorizontal: t2.spacing.md,
+      backgroundColor: t2.colors.inputBackground,
+    },
+    pickerRow: {
+      flexDirection: 'row',
+      columnGap: t2.spacing.sm,
+    },
+  }));
 
   const daysInMonth = useMemo(() => new Date(parts.y, parts.m + 1, 0).getDate(), [parts.y, parts.m]);
 
@@ -69,25 +92,13 @@ export function DatePicker({
   };
 
   return (
-    <View style={{marginBottom: theme.spacing.md}}>
+    <View style={styles.wrapper}>
       {label ? (
-        <AppText variant="label" color="textSecondary" style={{marginBottom: theme.spacing.xs}}>
+        <AppText variant="label" color="textSecondary" style={styles.label}>
           {label}
         </AppText>
       ) : null}
-      <Pressable
-        onPress={() => setOpen(true)}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          height: theme.components.input.height,
-          borderWidth: 1,
-          borderColor: theme.colors.border,
-          borderRadius: theme.components.input.radius,
-          paddingHorizontal: theme.spacing.md,
-          backgroundColor: theme.colors.inputBackground,
-        }}>
+      <Pressable onPress={() => setOpen(true)} style={styles.field}>
         <AppText color={value ? 'text' : 'textMuted'}>
           {value ? formatDate(value) : t('common_selectDate')}
         </AppText>
@@ -95,7 +106,7 @@ export function DatePicker({
       </Pressable>
 
       <CustomBottomSheet visible={open} onClose={() => setOpen(false)} title={label ?? t('common_selectDate')}>
-        <View style={{flexDirection: 'row', columnGap: theme.spacing.sm}}>
+        <View style={styles.pickerRow}>
           <ScrollPicker options={dayOptions} value={parts.d} onChange={d => setParts(p => ({...p, d}))} />
           <ScrollPicker options={monthOptions} value={parts.m} onChange={m => setParts(p => ({...p, m}))} />
           <ScrollPicker options={yearOptions} value={parts.y} onChange={y => setParts(p => ({...p, y}))} />

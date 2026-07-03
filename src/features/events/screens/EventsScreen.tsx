@@ -3,7 +3,7 @@ import React from 'react';
 import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme} from '../../../core/theme';
+import {useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -24,10 +24,20 @@ import type {SchoolEvent} from '../../../shared/types';
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
 export function EventsScreen(): React.JSX.Element {
-  const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
   const {t} = useLanguage();
   const {data, isLoading} = useEvents();
+  const styles = useThemedStyles(t2 => ({
+    scrollContent: {
+      padding: t2.spacing.lg,
+    },
+    card: {
+      paddingHorizontal: t2.spacing.lg,
+    },
+    descriptionBox: {
+      maxWidth: 120,
+    },
+  }));
 
   if (isLoading || !data) {
     return <Loader message={t('events_loading')} />;
@@ -55,9 +65,9 @@ export function EventsScreen(): React.JSX.Element {
     <Screen padded={false}>
       <CustomHeader title={t('events_title')} onBack={() => navigation.goBack()} />
       <ScrollView
-        contentContainerStyle={{padding: theme.spacing.lg}}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
-        <CustomCard padded={false} style={{paddingHorizontal: theme.spacing.lg}}>
+        <CustomCard padded={false} style={styles.card}>
           {data.map((event, i) => (
             <React.Fragment key={event.id}>
               {i > 0 ? <Divider /> : null}
@@ -67,7 +77,7 @@ export function EventsScreen(): React.JSX.Element {
                 subtitle={subtitleFor(event)}
                 right={
                   event.description ? (
-                    <View style={{maxWidth: 120}}>
+                    <View style={styles.descriptionBox}>
                       <AppText variant="label" color="textMuted" numberOfLines={2}>
                         {event.description}
                       </AppText>

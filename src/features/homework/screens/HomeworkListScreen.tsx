@@ -1,9 +1,9 @@
-/** Homework list — all assigned homework with status badges. */
+/** Homework list — homework assigned to a specific class/section with status badges. */
 import React from 'react';
 import {FlatList, View} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme} from '../../../core/theme';
+import {useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -16,15 +16,31 @@ import {
 import {formatDate} from '../../../core/utils/format';
 import {useHomework} from '../homework.service';
 import type {TeacherStackParamList} from '../../../navigation/types';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {Homework} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<TeacherStackParamList>;
 
 export function HomeworkListScreen(): React.JSX.Element {
-  const {theme} = useTheme();
   const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
-  const {data, isLoading} = useHomework();
+  const route = useRoute<RouteProp<TeacherStackParamList, 'HomeworkList'>>();
+  const {classId, className, sectionId, sectionName} = route.params;
+  const {data, isLoading} = useHomework({classId, sectionId});
+  const styles = useThemedStyles(theme => ({
+    listContent: {
+      padding: theme.spacing.lg,
+      flexGrow: 1,
+    },
+    separator: {
+      height: 1,
+      backgroundColor: theme.colors.divider,
+    },
+  }));
+
+  const headerTitle = sectionName
+    ? t('homeworkList_headerTitleWithSection', {className, sectionName})
+    : t('homeworkList_headerTitleNoSection', {className});
 
   const statusLabel = (status: Homework['status']) =>
     status === 'graded'
@@ -46,6 +62,7 @@ export function HomeworkListScreen(): React.JSX.Element {
         subjectName: item.subjectName,
         dueDate: formatDate(item.dueDate),
       })}
+      onPress={() => navigation.navigate(ScreenNames.HomeworkDetail, {id: item.id})}
       right={
         <Badge
           label={statusLabel(item.status)}
@@ -58,25 +75,24 @@ export function HomeworkListScreen(): React.JSX.Element {
   return (
     <Screen padded={false}>
       <CustomHeader
-        title={t('homeworkList_title')}
-        actions={[{icon: 'add', onPress: () => navigation.navigate('CreateHomework')}]}
+        title={headerTitle}
+        onBack={navigation.canGoBack() ? () => navigation.goBack() : undefined}
+        actions={[{icon: 'add', onPress: () => navigation.navigate(ScreenNames.CreateHomework)}]}
       />
       <FlatList
         data={data}
         keyExtractor={item => item.id}
         renderItem={renderItem}
-        contentContainerStyle={{padding: theme.spacing.lg, flexGrow: 1}}
+        contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        ItemSeparatorComponent={() => (
-          <View style={{height: 1, backgroundColor: theme.colors.divider}} />
-        )}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={
           <EmptyState
             icon="homework"
             title={t('homeworkList_noHomeworkYet')}
             message={t('homeworkList_noHomeworkMessage')}
             actionLabel={t('homeworkList_createHomeworkAction')}
-            onAction={() => navigation.navigate('CreateHomework')}
+            onAction={() => navigation.navigate(ScreenNames.CreateHomework)}
           />
         }
       />

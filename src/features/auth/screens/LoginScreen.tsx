@@ -3,10 +3,12 @@ import {ActivityIndicator, Pressable, ScrollView, StatusBar, StyleSheet, View} f
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Svg, {Defs, LinearGradient, Rect, Stop} from 'react-native-svg';
 import {lightTheme, ThemeContext, useTheme} from '../../../core/theme';
+import {useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {AppText, CustomCard, CustomInput, CustomButton, Icon, Spacer} from '../../../shared/components';
 import {useAuthStore} from '../authStore';
 import type {AuthScreenProps} from '../../../navigation/types';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 
 const LOGO_SIZE = 88;
 
@@ -15,6 +17,7 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
   const theme = lightTheme;
   const insets = useSafeAreaInsets();
   const {t} = useLanguage();
+
   const {role} = route.params;
   const {loginWithPassword, isLoading, error, clearError} = useAuthStore();
 

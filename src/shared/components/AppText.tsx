@@ -5,7 +5,7 @@
  * automatically follow the active theme and accessibility font scale.
  */
 import React, {useMemo} from 'react';
-import {Text, type TextProps, type TextStyle} from 'react-native';
+import {StyleSheet, Text, type TextProps, type TextStyle} from 'react-native';
 import {useTheme} from '../../core/theme';
 
 export type TextVariant =
@@ -72,9 +72,13 @@ export function AppText({
 
   return (
     <Text
-      style={[variantStyle, {color: theme.colors[color]}, center && {textAlign: 'center'}, style]}
+      style={[variantStyle, {color: theme.colors[color]}, center && styles.center, style]}
       {...rest}>
       {children}
     </Text>
   );
 }
+
+const styles = StyleSheet.create({
+  center: {textAlign: 'center'},
+});

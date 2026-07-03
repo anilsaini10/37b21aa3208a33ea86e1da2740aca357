@@ -67,7 +67,10 @@ export type TeacherStackParamList = {
   MarkAttendance: undefined;
   CreateHomework: undefined;
   Timetable: undefined;
-  ClassStudents: undefined;
+  ClassStudents: {classId: string; className: string; sectionId?: string; sectionName?: string};
+  HomeworkList: {classId: string; className: string; sectionId?: string; sectionName?: string};
+  HomeworkDetail: {id: string};
+  StudentDetail: {id: string};
   Leave: undefined;
   Chat: undefined;
   Announcements: undefined;
