@@ -4,6 +4,8 @@ import {FlatList, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
+import type {TranslationKey} from '../../../core/i18n';
 import {
   Screen,
   CustomHeader,
@@ -15,42 +17,50 @@ import {
   EmptyState,
   Loader,
 } from '../../../shared/components';
-import {feeStatusTone, capitalize} from '../../../shared/helpers';
+import {feeStatusTone} from '../../../shared/helpers';
 import {formatCurrency} from '../../../core/utils/format';
 import {useFees, useFeeSummary} from '../fees.service';
 import type {AdminStackParamList} from '../../../navigation/types';
-import type {FeeInvoice, StatCard} from '../../../shared/types';
+import type {FeeInvoice, FeeStatus, StatCard} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
+
+const FEE_STATUS_KEY: Record<FeeStatus, TranslationKey> = {
+  paid: 'fees_paid',
+  pending: 'fees_pending',
+  partial: 'fees_partial',
+  overdue: 'fees_overdue',
+};
 
 export function FeesListScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
+  const {t} = useLanguage();
   const {data: summary, isLoading: summaryLoading} = useFeeSummary();
   const {data: fees, isLoading: feesLoading} = useFees({pageSize: 50});
 
   if (summaryLoading || feesLoading || !summary || !fees) {
-    return <Loader message="Loading fees…" />;
+    return <Loader message={t('feesList_loadingFees')} />;
   }
 
   const tiles: StatCard[] = [
     {
       key: 'collected',
-      label: 'Collected',
+      label: t('feesList_collected'),
       value: formatCurrency(summary.totalCollected),
       icon: 'money',
       accent: 'success',
     },
     {
       key: 'pending',
-      label: 'Pending',
+      label: t('fees_pending'),
       value: formatCurrency(summary.totalPending),
       icon: 'warning',
       accent: 'error',
     },
     {
       key: 'rate',
-      label: 'Collection Rate',
+      label: t('feesList_collectionRate'),
       value: `${summary.collectionRate}%`,
       icon: 'reports',
       accent: 'primary',
@@ -59,7 +69,7 @@ export function FeesListScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Fee Management" />
+      <CustomHeader title={t('feesList_headerTitle')} />
       <FlatList
         data={fees.items}
         keyExtractor={(item: FeeInvoice) => item.id}
@@ -80,13 +90,16 @@ export function FeesListScreen(): React.JSX.Element {
         renderItem={({item}) => (
           <ListRow
             title={item.studentName}
-            subtitle={`${item.className} · Due ${formatCurrency(item.dueAmount)}`}
-            right={<Badge label={capitalize(item.status)} tone={feeStatusTone(item.status)} />}
+            subtitle={t('feesList_dueSubtitle', {
+              className: item.className,
+              amount: formatCurrency(item.dueAmount),
+            })}
+            right={<Badge label={t(FEE_STATUS_KEY[item.status])} tone={feeStatusTone(item.status)} />}
             onPress={() => navigation.navigate('FeeReceipt', {invoiceId: item.id})}
           />
         )}
         ListEmptyComponent={
-          <EmptyState icon="fee" title="No invoices" message="Fee invoices will appear here." />
+          <EmptyState icon="fee" title={t('feesList_noInvoices')} message={t('feesList_noInvoicesMessage')} />
         }
       />
     </Screen>

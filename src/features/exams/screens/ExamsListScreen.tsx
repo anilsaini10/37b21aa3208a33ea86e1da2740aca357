@@ -4,6 +4,7 @@ import {ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   CustomHeader,
@@ -26,19 +27,20 @@ export function ExamsListScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
   const {data, isLoading} = useExams();
+  const {t} = useLanguage();
 
   if (isLoading || !data) {
-    return <Loader message="Loading exams…" />;
+    return <Loader message={t('examsList_loadingExams')} />;
   }
 
   if (data.length === 0) {
     return (
       <Screen padded={false}>
-        <CustomHeader title="Exams" onBack={() => navigation.goBack()} />
+        <CustomHeader title={t('examsList_title')} onBack={() => navigation.goBack()} />
         <EmptyState
           icon="exam"
-          title="No exams"
-          message="Scheduled and completed exams will appear here."
+          title={t('examsList_noExams')}
+          message={t('examsList_noExamsMessage')}
         />
       </Screen>
     );
@@ -49,7 +51,7 @@ export function ExamsListScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Exams" onBack={() => navigation.goBack()} />
+      <CustomHeader title={t('examsList_title')} onBack={() => navigation.goBack()} />
       <ScrollView
         contentContainerStyle={{padding: theme.spacing.lg}}
         showsVerticalScrollIndicator={false}>

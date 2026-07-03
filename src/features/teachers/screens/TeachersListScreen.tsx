@@ -4,6 +4,7 @@ import {FlatList} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   CustomHeader,
@@ -21,17 +22,18 @@ type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
 export function TeachersListScreen(): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
   const {data, isLoading} = useTeachers({pageSize: 50});
 
   if (isLoading || !data) {
-    return <Loader message="Loading teachers…" />;
+    return <Loader message={t('teachersList_loadingTeachers')} />;
   }
 
   return (
     <Screen padded={false}>
       <CustomHeader
-        title="Teachers"
+        title={t('teachersList_headerTitle')}
         onBack={() => navigation.goBack()}
         actions={[{icon: 'add', onPress: () => navigation.navigate('TeacherForm')}]}
       />
@@ -45,16 +47,19 @@ export function TeachersListScreen(): React.JSX.Element {
             avatarName={item.name}
             avatarUri={item.avatarUrl}
             title={item.name}
-            subtitle={`${item.subjects.join(', ')} · ${item.employeeId}`}
+            subtitle={t('teachersList_rowSubtitle', {
+              subjects: item.subjects.join(', '),
+              employeeId: item.employeeId,
+            })}
             right={<Badge label={capitalize(item.status)} tone={statusTone(item.status)} />}
           />
         )}
         ListEmptyComponent={
           <EmptyState
             icon="teacher"
-            title="No teachers yet"
-            message="Add your first teacher to get started."
-            actionLabel="Add Teacher"
+            title={t('teachersList_emptyTitle')}
+            message={t('teachersList_emptyMessage')}
+            actionLabel={t('teachersList_addTeacher')}
             onAction={() => navigation.navigate('TeacherForm')}
           />
         }

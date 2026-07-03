@@ -3,6 +3,7 @@ import React from 'react';
 import {FlatList, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -42,12 +43,13 @@ function categoryTone(category: Announcement['category']): BadgeTone {
  */
 export function AnnouncementsScreen(): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const navigation = useNavigation<{navigate: (route: string) => void; goBack: () => void}>();
   const role = useAuthStore(s => s.user?.role);
   const {data, isLoading} = useAnnouncements(role);
 
   if (isLoading || !data) {
-    return <Loader message="Loading announcements…" />;
+    return <Loader message={t('announcements_loadingAnnouncements')} />;
   }
 
   const actions =
@@ -57,12 +59,12 @@ export function AnnouncementsScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Announcements" onBack={() => navigation.goBack()} actions={actions} />
+      <CustomHeader title={t('announcements_title')} onBack={() => navigation.goBack()} actions={actions} />
       <FlatList
         data={data}
         keyExtractor={a => a.id}
         contentContainerStyle={{padding: theme.spacing.lg, flexGrow: 1}}
-        ListEmptyComponent={<EmptyState title="No announcements" icon="announcement" />}
+        ListEmptyComponent={<EmptyState title={t('announcements_noAnnouncements')} icon="announcement" />}
         renderItem={({item}) => (
           <CustomCard style={{marginBottom: theme.spacing.md}}>
             <Row justify="space-between">
@@ -81,7 +83,7 @@ export function AnnouncementsScreen(): React.JSX.Element {
             </AppText>
             <View style={{height: theme.spacing.xs}} />
             <AppText variant="label" color="textMuted">
-              By {item.publishedBy}
+              {t('announcements_publishedBy', {name: item.publishedBy})}
             </AppText>
           </CustomCard>
         )}

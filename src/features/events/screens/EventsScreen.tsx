@@ -4,6 +4,7 @@ import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -25,20 +26,21 @@ type Nav = NativeStackNavigationProp<AdminStackParamList>;
 export function EventsScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
+  const {t} = useLanguage();
   const {data, isLoading} = useEvents();
 
   if (isLoading || !data) {
-    return <Loader message="Loading events…" />;
+    return <Loader message={t('events_loading')} />;
   }
 
   if (data.length === 0) {
     return (
       <Screen padded={false}>
-        <CustomHeader title="Events" onBack={() => navigation.goBack()} />
+        <CustomHeader title={t('events_title')} onBack={() => navigation.goBack()} />
         <EmptyState
           icon="event"
-          title="No events"
-          message="Upcoming school events will appear here."
+          title={t('events_noEvents')}
+          message={t('events_noEventsMessage')}
         />
       </Screen>
     );
@@ -51,7 +53,7 @@ export function EventsScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Events" onBack={() => navigation.goBack()} />
+      <CustomHeader title={t('events_title')} onBack={() => navigation.goBack()} />
       <ScrollView
         contentContainerStyle={{padding: theme.spacing.lg}}
         showsVerticalScrollIndicator={false}>

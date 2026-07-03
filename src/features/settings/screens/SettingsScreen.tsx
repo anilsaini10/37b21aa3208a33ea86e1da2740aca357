@@ -4,6 +4,7 @@ import {ScrollView, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme, ThemeService} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -26,27 +27,28 @@ export function SettingsScreen(): React.JSX.Element {
   const {theme, mode, fontScale, setThemeKey, setMode, setFontScale} = useTheme();
   const navigation = useNavigation<Nav>();
   const logout = useAuthStore(s => s.logout);
+  const {t} = useLanguage();
 
   const themes = ThemeService.available();
-  const modes: {label: string; value: ThemeMode}[] = [
-    {label: 'Light', value: 'light'},
-    {label: 'Dark', value: 'dark'},
-    {label: 'System', value: 'system'},
+  const modes: {labelKey: 'settingsScreen_light' | 'settingsScreen_dark' | 'settingsScreen_system'; value: ThemeMode}[] = [
+    {labelKey: 'settingsScreen_light', value: 'light'},
+    {labelKey: 'settingsScreen_dark', value: 'dark'},
+    {labelKey: 'settingsScreen_system', value: 'system'},
   ];
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Settings" onBack={() => navigation.goBack()} />
+      <CustomHeader title={t('settingsScreen_title')} onBack={() => navigation.goBack()} />
       <ScrollView
         contentContainerStyle={{padding: theme.spacing.lg}}
         showsVerticalScrollIndicator={false}>
-        <SectionTitle title="Theme" />
-        {themes.map(t => {
-          const active = t.name === theme.name;
+        <SectionTitle title={t('settingsScreen_theme')} />
+        {themes.map(themeItem => {
+          const active = themeItem.name === theme.name;
           return (
             <CustomCard
-              key={t.key}
-              onPress={() => setThemeKey(t.key)}
+              key={themeItem.key}
+              onPress={() => setThemeKey(themeItem.key)}
               style={{
                 marginBottom: theme.spacing.sm,
                 borderColor: active ? theme.colors.primary : theme.colors.border,
@@ -59,10 +61,10 @@ export function SettingsScreen(): React.JSX.Element {
                       width: 22,
                       height: 22,
                       borderRadius: 11,
-                      backgroundColor: t.colors.primary,
+                      backgroundColor: themeItem.colors.primary,
                     }}
                   />
-                  <AppText variant="body">{t.name}</AppText>
+                  <AppText variant="body">{themeItem.name}</AppText>
                 </Row>
                 {active ? <Icon name="check" size={20} color={theme.colors.primary} /> : null}
               </Row>
@@ -70,12 +72,12 @@ export function SettingsScreen(): React.JSX.Element {
           );
         })}
 
-        <SectionTitle title="Appearance" />
+        <SectionTitle title={t('settingsScreen_appearance')} />
         <Row gap={theme.spacing.md}>
           {modes.map(m => (
             <View key={m.value} style={{flex: 1}}>
               <CustomButton
-                title={m.label}
+                title={t(m.labelKey)}
                 size="sm"
                 variant={mode === m.value ? 'primary' : 'outline'}
                 onPress={() => setMode(m.value)}
@@ -84,7 +86,7 @@ export function SettingsScreen(): React.JSX.Element {
           ))}
         </Row>
 
-        <SectionTitle title="Font Size" />
+        <SectionTitle title={t('settingsScreen_fontSize')} />
         <CustomCard>
           <Row justify="space-between">
             <CustomButton
@@ -105,17 +107,17 @@ export function SettingsScreen(): React.JSX.Element {
           </Row>
         </CustomCard>
 
-        <SectionTitle title="School" />
+        <SectionTitle title={t('settingsScreen_school')} />
         <CustomCard>
           <Row justify="space-between" style={{paddingVertical: 4}}>
             <AppText variant="body" color="textSecondary">
-              App Name
+              {t('settingsScreen_appName')}
             </AppText>
             <AppText variant="body">{AppConfig.appName}</AppText>
           </Row>
           <Row justify="space-between" style={{paddingVertical: 4}}>
             <AppText variant="body" color="textSecondary">
-              Academic Year
+              {t('settingsScreen_academicYear')}
             </AppText>
             <AppText variant="body">{AppConfig.academicYear}</AppText>
           </Row>
@@ -123,7 +125,7 @@ export function SettingsScreen(): React.JSX.Element {
 
         <Spacer size={20} />
         <CustomButton
-          title="Logout"
+          title={t('common_logout')}
           variant="danger"
           iconLeft="logout"
           onPress={() => {

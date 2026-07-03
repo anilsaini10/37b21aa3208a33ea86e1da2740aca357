@@ -2,6 +2,7 @@
 import React, {useState} from 'react';
 import {Pressable, View} from 'react-native';
 import {useTheme} from '../../core/theme';
+import {useLanguage} from '../../core/i18n';
 import {AppText} from './AppText';
 import {Icon} from './Icon';
 import {CustomBottomSheet} from './CustomBottomSheet';
@@ -21,12 +22,13 @@ export function Select({
   label,
   value,
   options,
-  placeholder = 'Select…',
+  placeholder,
   error,
   onChange,
   required,
 }: SelectProps): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const [open, setOpen] = useState(false);
   const selected = options.find(o => o.value === value);
 
@@ -51,7 +53,9 @@ export function Select({
           paddingHorizontal: theme.spacing.md,
           backgroundColor: theme.colors.inputBackground,
         }}>
-        <AppText color={selected ? 'text' : 'textMuted'}>{selected?.label ?? placeholder}</AppText>
+        <AppText color={selected ? 'text' : 'textMuted'}>
+          {selected?.label ?? placeholder ?? t('common_select')}
+        </AppText>
         <Icon name="forward" size={18} color={theme.colors.textMuted} style={{transform: [{rotate: '90deg'}]}} />
       </Pressable>
       {error ? (
@@ -60,7 +64,7 @@ export function Select({
         </AppText>
       ) : null}
 
-      <CustomBottomSheet visible={open} onClose={() => setOpen(false)} title={label ?? 'Select'}>
+      <CustomBottomSheet visible={open} onClose={() => setOpen(false)} title={label ?? t('common_select')}>
         {options.map(opt => {
           const isSel = opt.value === value;
           return (

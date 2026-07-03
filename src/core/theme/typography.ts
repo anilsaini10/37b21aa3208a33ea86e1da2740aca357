@@ -5,10 +5,20 @@
  * runtime so users can enlarge text globally. `buildTypography` produces a
  * scaled typography object for a given base + scale factor.
  */
-import {Platform} from 'react-native';
 import type {ThemeTypography, FontSizeSet} from './types';
 
-const systemFont = Platform.select({ios: 'System', android: 'Roboto', default: 'System'});
+/**
+ * Inter (see `src/assets/fonts/Inter`), linked natively via
+ * `react-native.config.js` + `npx react-native-asset`. File names double as
+ * the PostScript names so `fontFamily` resolves identically on iOS and
+ * Android without relying on the `fontWeight` style prop.
+ */
+const interFont = {
+  regular: 'Inter-Regular',
+  medium: 'Inter-Medium',
+  semibold: 'Inter-SemiBold',
+  bold: 'Inter-Bold',
+};
 
 const baseFontSize: FontSizeSet = {
   xs: 11,
@@ -55,10 +65,10 @@ export function buildTypography(
   const clampedScale = Math.min(Math.max(scale, 0.75), 1.6);
   return {
     fontFamily: {
-      regular: fontFamily?.regular ?? systemFont,
-      medium: fontFamily?.medium ?? systemFont,
-      semibold: fontFamily?.semibold ?? systemFont,
-      bold: fontFamily?.bold ?? systemFont,
+      regular: fontFamily?.regular ?? interFont.regular,
+      medium: fontFamily?.medium ?? interFont.medium,
+      semibold: fontFamily?.semibold ?? interFont.semibold,
+      bold: fontFamily?.bold ?? interFont.bold,
     },
     fontSize: scaleSet(baseFontSize, clampedScale),
     lineHeight: scaleSet(baseLineHeight, clampedScale),

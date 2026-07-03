@@ -7,16 +7,19 @@
 import React, {useMemo, useState} from 'react';
 import {Pressable, View} from 'react-native';
 import {useTheme} from '../../core/theme';
+import {useLanguage} from '../../core/i18n';
 import {AppText} from './AppText';
 import {Icon} from './Icon';
 import {CustomBottomSheet} from './CustomBottomSheet';
 import {CustomButton} from './CustomButton';
 import {ScrollPicker} from './ScrollPicker';
 import {formatDate} from '../../core/utils/format';
+import type {TranslationKey} from '../../core/i18n';
 
-const MONTHS = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+const MONTH_KEYS: TranslationKey[] = [
+  'common_monthJan', 'common_monthFeb', 'common_monthMar', 'common_monthApr',
+  'common_monthMay', 'common_monthJun', 'common_monthJul', 'common_monthAug',
+  'common_monthSep', 'common_monthOct', 'common_monthNov', 'common_monthDec',
 ];
 
 export interface DatePickerProps {
@@ -42,6 +45,7 @@ export function DatePicker({
   maxYear = 2035,
 }: DatePickerProps): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const [open, setOpen] = useState(false);
   const [parts, setParts] = useState(() => toParts(value));
 
@@ -51,7 +55,7 @@ export function DatePicker({
     () => Array.from({length: daysInMonth}, (_, i) => ({label: String(i + 1), value: i + 1})),
     [daysInMonth],
   );
-  const monthOptions = MONTHS.map((label, value) => ({label, value}));
+  const monthOptions = MONTH_KEYS.map((key, index) => ({label: t(key), value: index}));
   const yearOptions = useMemo(
     () => Array.from({length: maxYear - minYear + 1}, (_, i) => ({label: String(minYear + i), value: minYear + i})),
     [minYear, maxYear],
@@ -85,18 +89,18 @@ export function DatePicker({
           backgroundColor: theme.colors.inputBackground,
         }}>
         <AppText color={value ? 'text' : 'textMuted'}>
-          {value ? formatDate(value) : 'Select date'}
+          {value ? formatDate(value) : t('common_selectDate')}
         </AppText>
         <Icon name="calendar" size={18} color={theme.colors.textMuted} />
       </Pressable>
 
-      <CustomBottomSheet visible={open} onClose={() => setOpen(false)} title={label ?? 'Select date'}>
+      <CustomBottomSheet visible={open} onClose={() => setOpen(false)} title={label ?? t('common_selectDate')}>
         <View style={{flexDirection: 'row', columnGap: theme.spacing.sm}}>
           <ScrollPicker options={dayOptions} value={parts.d} onChange={d => setParts(p => ({...p, d}))} />
           <ScrollPicker options={monthOptions} value={parts.m} onChange={m => setParts(p => ({...p, m}))} />
           <ScrollPicker options={yearOptions} value={parts.y} onChange={y => setParts(p => ({...p, y}))} />
         </View>
-        <CustomButton title="Confirm" onPress={confirm} />
+        <CustomButton title={t('common_confirm')} onPress={confirm} />
       </CustomBottomSheet>
     </View>
   );

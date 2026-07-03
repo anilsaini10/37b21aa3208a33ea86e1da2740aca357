@@ -4,6 +4,7 @@ import {ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage, type TranslationKey} from '../../../core/i18n';
 import {Screen, CustomHeader, CustomCard, ListRow, Spacer} from '../../../shared/components';
 import type {AdminStackParamList} from '../../../navigation/types';
 
@@ -24,32 +25,33 @@ type NoParamRoute =
   | 'Notifications';
 
 interface ModuleItem {
-  label: string;
+  labelKey: TranslationKey;
   icon: string;
   route: NoParamRoute;
 }
 
 const MODULES: ModuleItem[] = [
-  {label: 'Teachers', icon: 'teacher', route: 'Teachers'},
-  {label: 'Attendance', icon: 'attendance', route: 'Attendance'},
-  {label: 'Exams', icon: 'exam', route: 'Exams'},
-  {label: 'Announcements', icon: 'announcement', route: 'Announcements'},
-  {label: 'Events', icon: 'event', route: 'Events'},
-  {label: 'Transport', icon: 'transport', route: 'Transport'},
-  {label: 'Library', icon: 'library', route: 'Library'},
-  {label: 'Inventory', icon: 'inventory', route: 'Inventory'},
-  {label: 'Reports', icon: 'reports', route: 'Reports'},
-  {label: 'Settings', icon: 'settings', route: 'Settings'},
-  {label: 'Notifications', icon: 'notification', route: 'Notifications'},
+  {labelKey: 'moreScreen_teachers', icon: 'teacher', route: 'Teachers'},
+  {labelKey: 'moreScreen_attendance', icon: 'attendance', route: 'Attendance'},
+  {labelKey: 'moreScreen_exams', icon: 'exam', route: 'Exams'},
+  {labelKey: 'moreScreen_announcements', icon: 'announcement', route: 'Announcements'},
+  {labelKey: 'moreScreen_events', icon: 'event', route: 'Events'},
+  {labelKey: 'moreScreen_transport', icon: 'transport', route: 'Transport'},
+  {labelKey: 'moreScreen_library', icon: 'library', route: 'Library'},
+  {labelKey: 'moreScreen_inventory', icon: 'inventory', route: 'Inventory'},
+  {labelKey: 'moreScreen_reports', icon: 'reports', route: 'Reports'},
+  {labelKey: 'moreScreen_settings', icon: 'settings', route: 'Settings'},
+  {labelKey: 'moreScreen_notifications', icon: 'notification', route: 'Notifications'},
 ];
 
 export function MoreScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
+  const {t} = useLanguage();
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="More" />
+      <CustomHeader title={t('moreScreen_title')} />
       <ScrollView
         contentContainerStyle={{padding: theme.spacing.lg}}
         showsVerticalScrollIndicator={false}>
@@ -58,7 +60,7 @@ export function MoreScreen(): React.JSX.Element {
             <ListRow
               key={m.route}
               icon={m.icon}
-              title={m.label}
+              title={t(m.labelKey)}
               onPress={() => navigation.navigate(m.route)}
             />
           ))}

@@ -2,6 +2,7 @@
 import React, {useState} from 'react';
 import {View} from 'react-native';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -15,13 +16,14 @@ import type {AuthScreenProps} from '../../../navigation/types';
 
 export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const {role} = route.params;
   const {loginWithPassword, isLoading, error, clearError} = useAuthStore();
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
 
-  const title = role === 'admin' ? 'Admin Login' : 'Teacher Login';
+  const title = role === 'admin' ? t('loginScreen_adminTitle') : t('loginScreen_teacherTitle');
 
   const onSubmit = async () => {
     clearError();
@@ -34,20 +36,20 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
       <CustomHeader title={title} onBack={() => navigation.goBack()} />
       <View style={{flex: 1, padding: theme.spacing.lg}}>
         <Spacer size={12} />
-        <AppText variant="h2">Welcome back 👋</AppText>
+        <AppText variant="h2">{t('loginScreen_welcomeBack')}</AppText>
         <AppText variant="caption" color="textSecondary">
-          Sign in to continue to your dashboard.
+          {t('loginScreen_signInSubtitle')}
         </AppText>
         <Spacer size={24} />
 
         <CustomInput
-          label="Email or Mobile"
-          placeholder="you@school.edu"
+          label={t('loginScreen_emailOrMobileLabel')}
+          placeholder={t('loginScreen_emailPlaceholder')}
           iconLeft="email"
           autoCapitalize="none"
           value={identifier}
-          onChangeText={t => {
-            setIdentifier(t);
+          onChangeText={val => {
+            setIdentifier(val);
             if (error) {
               clearError();
             }
@@ -55,13 +57,13 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
           required
         />
         <CustomInput
-          label="Password"
+          label={t('loginScreen_passwordLabel')}
           placeholder="••••••••"
           iconLeft="lock"
           secure
           value={password}
-          onChangeText={t => {
-            setPassword(t);
+          onChangeText={val => {
+            setPassword(val);
             if (error) {
               clearError();
             }
@@ -76,17 +78,17 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
         ) : null}
 
         <Spacer size={8} />
-        <CustomButton title="Sign In" onPress={onSubmit} loading={isLoading} />
+        <CustomButton title={t('loginScreen_signIn')} onPress={onSubmit} loading={isLoading} />
         <Spacer size={12} />
         <CustomButton
-          title="Forgot Password?"
+          title={t('loginScreen_forgotPassword')}
           variant="ghost"
           onPress={() => navigation.navigate('ForgotPassword')}
         />
 
         <View style={{marginTop: 'auto', padding: theme.spacing.md, backgroundColor: theme.colors.surfaceVariant, borderRadius: theme.radius.md}}>
           <AppText variant="label" color="textSecondary" center>
-            Demo: any email + password of 6+ characters works.
+            {t('loginScreen_demoHint')}
           </AppText>
         </View>
       </View>

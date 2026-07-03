@@ -4,6 +4,7 @@ import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -26,15 +27,22 @@ import type {TeacherStackParamList} from '../../../navigation/types';
 type Nav = NativeStackNavigationProp<TeacherStackParamList>;
 type AttStatus = 'present' | 'absent' | 'late';
 
-const OPTIONS: {key: AttStatus; label: string}[] = [
-  {key: 'present', label: 'P'},
-  {key: 'absent', label: 'A'},
-  {key: 'late', label: 'L'},
-];
+const OPTION_KEYS: AttStatus[] = ['present', 'absent', 'late'];
 
 export function MarkAttendanceScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
+  const {t} = useLanguage();
+
+  const OPTIONS: {key: AttStatus; label: string}[] = OPTION_KEYS.map(key => ({
+    key,
+    label:
+      key === 'present'
+        ? t('markAttendance_presentAbbr')
+        : key === 'absent'
+        ? t('markAttendance_absentAbbr')
+        : t('markAttendance_lateAbbr'),
+  }));
 
   const [classId, setClassId] = useState(db.classes[0]?.id ?? '');
   const [sectionId, setSectionId] = useState(db.sections[0]?.id ?? '');
@@ -45,7 +53,10 @@ export function MarkAttendanceScreen(): React.JSX.Element {
   const markAttendance = useMarkAttendance();
 
   const classOptions = db.classes.map(c => ({label: c.name, value: c.id}));
-  const sectionOptions = db.sections.map(s => ({label: `Sec ${s.name}`, value: s.id}));
+  const sectionOptions = db.sections.map(s => ({
+    label: t('common_sectionOptionLabel', {name: s.name}),
+    value: s.id,
+  }));
 
   useEffect(() => {
     if (students) {
@@ -75,28 +86,33 @@ export function MarkAttendanceScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Mark Attendance" onBack={() => navigation.goBack()} />
+      <CustomHeader title={t('markAttendance_title')} onBack={() => navigation.goBack()} />
       <ScrollView
         contentContainerStyle={{padding: theme.spacing.lg}}
         showsVerticalScrollIndicator={false}>
         <Row gap={theme.spacing.md} align="flex-start">
           <View style={{flex: 1}}>
-            <Select label="Class" value={classId} options={classOptions} onChange={setClassId} />
+            <Select label={t('markAttendance_class')} value={classId} options={classOptions} onChange={setClassId} />
           </View>
           <View style={{flex: 1}}>
-            <Select label="Section" value={sectionId} options={sectionOptions} onChange={setSectionId} />
+            <Select
+              label={t('markAttendance_section')}
+              value={sectionId}
+              options={sectionOptions}
+              onChange={setSectionId}
+            />
           </View>
         </Row>
 
-        <SectionTitle title="Students" />
+        <SectionTitle title={t('markAttendance_students')} />
 
         {isLoading ? (
-          <Loader message="Loading students…" />
+          <Loader message={t('markAttendance_loadingStudents')} />
         ) : !students || students.length === 0 ? (
           <EmptyState
             icon="students"
-            title="No students"
-            message="No students found for this class and section."
+            title={t('markAttendance_noStudentsTitle')}
+            message={t('markAttendance_noStudentsMessage')}
           />
         ) : (
           <CustomCard>
@@ -109,7 +125,7 @@ export function MarkAttendanceScreen(): React.JSX.Element {
                       {student.name}
                     </AppText>
                     <AppText variant="caption" color="textSecondary">
-                      {`Roll ${student.rollNo}`}
+                      {t('markAttendance_rollNumber', {rollNo: String(student.rollNo)})}
                     </AppText>
                   </View>
                   <Row gap={theme.spacing.xs}>
@@ -136,12 +152,12 @@ export function MarkAttendanceScreen(): React.JSX.Element {
             <Spacer size={16} />
             {saved ? (
               <Row justify="center">
-                <Badge label="Saved ✓" tone="success" />
+                <Badge label={t('markAttendance_saved')} tone="success" />
               </Row>
             ) : null}
             <Spacer size={8} />
             <CustomButton
-              title="Save Attendance"
+              title={t('markAttendance_saveAttendance')}
               iconLeft="check"
               loading={markAttendance.isPending}
               onPress={onSave}

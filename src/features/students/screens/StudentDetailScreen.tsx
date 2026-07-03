@@ -4,6 +4,7 @@ import {ScrollView, View} from 'react-native';
 import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -39,6 +40,7 @@ function InfoRow({label, value}: {label: string; value: string}): React.JSX.Elem
 
 export function StudentDetailScreen(): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
   const route = useRoute<RouteProp<AdminStackParamList, 'StudentDetail'>>();
   const {id} = route.params;
@@ -49,7 +51,7 @@ export function StudentDetailScreen(): React.JSX.Element {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   if (isLoading || !student) {
-    return <Loader message="Loading student…" />;
+    return <Loader message={t('studentDetail_loadingStudent')} />;
   }
 
   const onDelete = (): void => {
@@ -64,7 +66,7 @@ export function StudentDetailScreen(): React.JSX.Element {
   return (
     <Screen padded={false}>
       <CustomHeader
-        title="Student"
+        title={t('studentDetail_headerTitle')}
         onBack={() => navigation.goBack()}
         actions={[{icon: 'edit', onPress: () => navigation.navigate('StudentForm', {id})}]}
       />
@@ -77,7 +79,7 @@ export function StudentDetailScreen(): React.JSX.Element {
             <View style={{flex: 1}}>
               <AppText variant="h2">{student.name}</AppText>
               <AppText variant="caption" color="textSecondary">
-                Admission No · {student.admissionNo}
+                {t('studentDetail_admissionNo')} · {student.admissionNo}
               </AppText>
               <Spacer size={6} />
               <Badge label={capitalize(student.status)} tone={statusTone(student.status)} />
@@ -85,36 +87,36 @@ export function StudentDetailScreen(): React.JSX.Element {
           </Row>
         </CustomCard>
 
-        <SectionTitle title="Personal" />
+        <SectionTitle title={t('studentDetail_personalSection')} />
         <CustomCard>
-          <InfoRow label="Gender" value={capitalize(student.gender)} />
-          <InfoRow label="Date of Birth" value={formatDate(student.dateOfBirth)} />
-          <InfoRow label="Blood Group" value={student.bloodGroup ?? '—'} />
-          <InfoRow label="Address" value={student.address ?? '—'} />
+          <InfoRow label={t('studentDetail_gender')} value={capitalize(student.gender)} />
+          <InfoRow label={t('studentDetail_dateOfBirth')} value={formatDate(student.dateOfBirth)} />
+          <InfoRow label={t('studentDetail_bloodGroup')} value={student.bloodGroup ?? '—'} />
+          <InfoRow label={t('common_address')} value={student.address ?? '—'} />
         </CustomCard>
 
-        <SectionTitle title="Parent / Guardian" />
+        <SectionTitle title={t('studentDetail_parentGuardianSection')} />
         <CustomCard>
-          <InfoRow label="Name" value={student.parentName} />
-          <InfoRow label="Phone" value={student.parentPhone} />
+          <InfoRow label={t('common_name')} value={student.parentName} />
+          <InfoRow label={t('common_phone')} value={student.parentPhone} />
         </CustomCard>
 
-        <SectionTitle title="Academic" />
+        <SectionTitle title={t('studentDetail_academicSection')} />
         <CustomCard>
-          <InfoRow label="Class" value={student.className} />
-          <InfoRow label="Section" value={student.sectionName} />
-          <InfoRow label="Roll No" value={String(student.rollNo)} />
-          <InfoRow label="Attendance" value={`${student.attendancePercentage}%`} />
+          <InfoRow label={t('studentDetail_class')} value={student.className} />
+          <InfoRow label={t('studentDetail_section')} value={student.sectionName} />
+          <InfoRow label={t('studentDetail_rollNo')} value={String(student.rollNo)} />
+          <InfoRow label={t('studentDetail_attendance')} value={`${student.attendancePercentage}%`} />
         </CustomCard>
 
         {fee ? (
           <>
-            <SectionTitle title="Fee" />
+            <SectionTitle title={t('studentDetail_feeSection')} />
             <CustomCard>
               <Row justify="space-between" align="center">
                 <View>
                   <AppText variant="caption" color="textSecondary">
-                    Due Amount
+                    {t('studentDetail_dueAmount')}
                   </AppText>
                   <AppText variant="h2" color="error">
                     {formatCurrency(fee.dueAmount)}
@@ -128,7 +130,7 @@ export function StudentDetailScreen(): React.JSX.Element {
 
         {student.documents.length > 0 ? (
           <>
-            <SectionTitle title="Documents" />
+            <SectionTitle title={t('studentDetail_documentsSection')} />
             <CustomCard>
               {student.documents.map(doc => (
                 <InfoRow key={doc.id} label={doc.title} value="" />
@@ -139,7 +141,7 @@ export function StudentDetailScreen(): React.JSX.Element {
 
         <Spacer size={16} />
         <CustomButton
-          title="Delete Student"
+          title={t('studentDetail_deleteStudent')}
           variant="danger"
           iconLeft="delete"
           onPress={() => setConfirmOpen(true)}
@@ -150,22 +152,22 @@ export function StudentDetailScreen(): React.JSX.Element {
       <CustomModal
         visible={confirmOpen}
         onClose={() => setConfirmOpen(false)}
-        title="Delete Student">
+        title={t('studentDetail_deleteStudent')}>
         <AppText variant="body" color="textSecondary">
-          Are you sure you want to delete {student.name}? This action cannot be undone.
+          {t('studentDetail_deleteConfirm', {name: student.name})}
         </AppText>
         <Spacer size={16} />
         <Row gap={theme.spacing.md}>
           <View style={{flex: 1}}>
             <CustomButton
-              title="Cancel"
+              title={t('common_cancel')}
               variant="outline"
               onPress={() => setConfirmOpen(false)}
             />
           </View>
           <View style={{flex: 1}}>
             <CustomButton
-              title="Delete"
+              title={t('common_delete')}
               variant="danger"
               loading={deleteMutation.isPending}
               onPress={onDelete}

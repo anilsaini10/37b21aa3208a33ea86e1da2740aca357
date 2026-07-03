@@ -3,6 +3,7 @@ import React, {useState} from 'react';
 import {ScrollView, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -16,7 +17,6 @@ import {
   Spacer,
 } from '../../../shared/components';
 import {formatDate} from '../../../core/utils/format';
-import {capitalize} from '../../../shared/helpers';
 import {generateId} from '../../../core/utils/misc';
 import {useAuthStore} from '../../auth/authStore';
 import type {LeaveApplication} from '../../../shared/types';
@@ -28,8 +28,12 @@ function leaveTone(status: LeaveApplication['status']): BadgeTone {
 
 export function LeaveScreen(): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const navigation = useNavigation();
   const user = useAuthStore(s => s.user);
+
+  const leaveStatusLabel = (status: LeaveApplication['status']) =>
+    status === 'approved' ? t('leave_approved') : status === 'rejected' ? t('leave_rejected') : t('leave_pending');
 
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
@@ -71,25 +75,32 @@ export function LeaveScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Leave Management" onBack={() => navigation.goBack()} />
+      <CustomHeader title={t('leave_title')} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={{padding: theme.spacing.lg}} showsVerticalScrollIndicator={false}>
         <CustomCard>
-          <AppText variant="h3">Apply for Leave</AppText>
+          <AppText variant="h3">{t('leave_applyForLeave')}</AppText>
           <Spacer size={12} />
-          <DatePicker label="From" value={fromDate} onChange={setFromDate} />
-          <DatePicker label="To" value={toDate} onChange={setToDate} />
-          <CustomInput label="Reason" placeholder="Reason for leave" multiline value={reason} onChangeText={setReason} required />
-          <CustomButton title="Submit Application" onPress={apply} />
+          <DatePicker label={t('leave_from')} value={fromDate} onChange={setFromDate} />
+          <DatePicker label={t('leave_to')} value={toDate} onChange={setToDate} />
+          <CustomInput
+            label={t('leave_reason')}
+            placeholder={t('leave_reasonPlaceholder')}
+            multiline
+            value={reason}
+            onChangeText={setReason}
+            required
+          />
+          <CustomButton title={t('leave_submitApplication')} onPress={apply} />
         </CustomCard>
 
-        <SectionTitle title="Leave History" />
+        <SectionTitle title={t('leave_history')} />
         {history.map(item => (
           <CustomCard key={item.id} style={{marginBottom: theme.spacing.md}}>
             <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
               <AppText variant="bodyBold">
                 {formatDate(item.fromDate)} – {formatDate(item.toDate)}
               </AppText>
-              <Badge label={capitalize(item.status)} tone={leaveTone(item.status)} />
+              <Badge label={leaveStatusLabel(item.status)} tone={leaveTone(item.status)} />
             </View>
             <AppText variant="caption" color="textSecondary">
               {item.reason}

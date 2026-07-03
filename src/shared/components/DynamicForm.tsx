@@ -9,6 +9,7 @@ import React from 'react';
 import {View} from 'react-native';
 import {useForm, Controller, type FieldValues, type DefaultValues} from 'react-hook-form';
 import {useTheme} from '../../core/theme';
+import {useLanguage} from '../../core/i18n';
 import {CustomInput} from './CustomInput';
 import {Select} from './Select';
 import {DatePicker} from './DatePicker';
@@ -49,11 +50,12 @@ export interface DynamicFormProps<T extends FieldValues> {
 export function DynamicForm<T extends FieldValues>({
   fields,
   defaultValues,
-  submitLabel = 'Submit',
+  submitLabel,
   onSubmit,
   loading,
 }: DynamicFormProps<T>): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const {control, handleSubmit} = useForm<T>({defaultValues, mode: 'onBlur'});
 
   return (
@@ -65,7 +67,7 @@ export function DynamicForm<T extends FieldValues>({
           control={control as any}
           name={field.name}
           rules={{
-            required: field.required ? `${field.label} is required` : false,
+            required: field.required ? t('common_fieldRequired', {field: field.label}) : false,
             validate: field.validate ? v => field.validate!(v) ?? true : undefined,
           }}
           render={({field: {onChange, onBlur, value}, fieldState: {error}}) => {
@@ -115,7 +117,7 @@ export function DynamicForm<T extends FieldValues>({
         />
       ))}
       <CustomButton
-        title={submitLabel}
+        title={submitLabel ?? t('common_submit')}
         onPress={handleSubmit(onSubmit)}
         loading={loading}
         style={{marginTop: theme.spacing.sm}}

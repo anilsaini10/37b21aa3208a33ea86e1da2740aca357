@@ -2,6 +2,7 @@
 import React from 'react';
 import {Pressable, View} from 'react-native';
 import {useTheme} from '../../core/theme';
+import {useLanguage} from '../../core/i18n';
 import {AppText} from './AppText';
 import {Icon} from './Icon';
 
@@ -13,6 +14,7 @@ export interface PaginationProps {
 
 export function Pagination({page, totalPages, onChange}: PaginationProps): React.JSX.Element | null {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   if (totalPages <= 1) {
     return null;
   }
@@ -40,7 +42,7 @@ export function Pagination({page, totalPages, onChange}: PaginationProps): React
         <Icon name="back" size={18} color={theme.colors.text} />
       </Pressable>
       <AppText variant="caption" color="textSecondary">
-        Page {page} of {totalPages}
+        {t('common_pageOfTotal', {page, totalPages})}
       </AppText>
       <Pressable disabled={!canNext} onPress={() => onChange(page + 1)} style={btn(canNext)}>
         <Icon name="forward" size={18} color={theme.colors.text} />

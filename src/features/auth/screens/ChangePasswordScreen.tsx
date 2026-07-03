@@ -2,6 +2,7 @@
 import React, {useState} from 'react';
 import {View} from 'react-native';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -14,6 +15,7 @@ import {authApi} from '../authApi';
 
 export function ChangePasswordScreen({navigation}: {navigation: {goBack: () => void}}): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -24,7 +26,7 @@ export function ChangePasswordScreen({navigation}: {navigation: {goBack: () => v
   const submit = async () => {
     setError('');
     if (next !== confirm) {
-      setError('New password and confirmation do not match.');
+      setError(t('changePasswordScreen_passwordMismatch'));
       return;
     }
     setLoading(true);
@@ -40,12 +42,12 @@ export function ChangePasswordScreen({navigation}: {navigation: {goBack: () => v
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Change Password" onBack={navigation.goBack} />
+      <CustomHeader title={t('changePasswordScreen_title')} onBack={navigation.goBack} />
       <View style={{flex: 1, padding: theme.spacing.lg}}>
         <Spacer size={12} />
-        <CustomInput label="Current Password" secure iconLeft="lock" value={current} onChangeText={setCurrent} required />
-        <CustomInput label="New Password" secure iconLeft="lock" value={next} onChangeText={setNext} required />
-        <CustomInput label="Confirm New Password" secure iconLeft="lock" value={confirm} onChangeText={setConfirm} required />
+        <CustomInput label={t('changePasswordScreen_currentPasswordLabel')} secure iconLeft="lock" value={current} onChangeText={setCurrent} required />
+        <CustomInput label={t('changePasswordScreen_newPasswordLabel')} secure iconLeft="lock" value={next} onChangeText={setNext} required />
+        <CustomInput label={t('changePasswordScreen_confirmNewPasswordLabel')} secure iconLeft="lock" value={confirm} onChangeText={setConfirm} required />
         {error ? (
           <AppText variant="caption" color="error">
             {error}
@@ -53,11 +55,11 @@ export function ChangePasswordScreen({navigation}: {navigation: {goBack: () => v
         ) : null}
         {success ? (
           <AppText variant="caption" color="success">
-            Password changed successfully.
+            {t('changePasswordScreen_successMessage')}
           </AppText>
         ) : null}
         <Spacer size={8} />
-        <CustomButton title="Update Password" onPress={submit} loading={loading} />
+        <CustomButton title={t('changePasswordScreen_updatePassword')} onPress={submit} loading={loading} />
       </View>
     </Screen>
   );

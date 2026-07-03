@@ -4,6 +4,7 @@ import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage, type TranslationKey} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -23,33 +24,34 @@ type Nav = NativeStackNavigationProp<ParentStackParamList>;
 
 type MenuRoute = 'ChildProfile' | 'Results' | 'Timetable' | 'Announcements' | 'Chat' | 'Leave' | 'ChangePassword';
 
-const MENU: {label: string; icon: string; route: MenuRoute}[] = [
-  {label: 'Child Profile', icon: 'student', route: 'ChildProfile'},
-  {label: 'Results', icon: 'grade', route: 'Results'},
-  {label: 'Timetable', icon: 'timetable', route: 'Timetable'},
-  {label: 'Announcements', icon: 'announcement', route: 'Announcements'},
-  {label: 'Chat with Teacher', icon: 'chat', route: 'Chat'},
-  {label: 'Leave Application', icon: 'calendar', route: 'Leave'},
-  {label: 'Change Password', icon: 'lock', route: 'ChangePassword'},
+const MENU: {labelKey: TranslationKey; icon: string; route: MenuRoute}[] = [
+  {labelKey: 'parentProfile_childProfile', icon: 'student', route: 'ChildProfile'},
+  {labelKey: 'parentProfile_results', icon: 'grade', route: 'Results'},
+  {labelKey: 'teacherProfile_timetable', icon: 'timetable', route: 'Timetable'},
+  {labelKey: 'teacherProfile_announcements', icon: 'announcement', route: 'Announcements'},
+  {labelKey: 'parentProfile_chatWithTeacher', icon: 'chat', route: 'Chat'},
+  {labelKey: 'parentProfile_leaveApplication', icon: 'calendar', route: 'Leave'},
+  {labelKey: 'teacherProfile_changePassword', icon: 'lock', route: 'ChangePassword'},
 ];
 
 export function ParentProfileScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
+  const {t} = useLanguage();
   const user = useAuthStore(s => s.user);
   const logout = useAuthStore(s => s.logout);
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Profile" />
+      <CustomHeader title={t('parentProfile_profile')} />
       <ScrollView
         contentContainerStyle={{padding: theme.spacing.lg}}
         showsVerticalScrollIndicator={false}>
         <CustomCard>
           <Row gap={theme.spacing.md}>
-            <Avatar name={user?.name ?? 'Parent'} size={64} />
+            <Avatar name={user?.name ?? t('parentProfile_parent')} size={64} />
             <View style={{flex: 1}}>
-              <AppText variant="h2">{user?.name ?? 'Parent'}</AppText>
+              <AppText variant="h2">{user?.name ?? t('parentProfile_parent')}</AppText>
               {user?.phone ? (
                 <AppText variant="caption" color="textSecondary">
                   {user.phone}
@@ -61,7 +63,7 @@ export function ParentProfileScreen(): React.JSX.Element {
                 </AppText>
               ) : null}
               <Spacer size={6} />
-              <Badge label="Parent" tone="primary" />
+              <Badge label={t('parentProfile_parent')} tone="primary" />
             </View>
           </Row>
         </CustomCard>
@@ -72,14 +74,14 @@ export function ParentProfileScreen(): React.JSX.Element {
             <ListRow
               key={item.route}
               icon={item.icon}
-              title={item.label}
+              title={t(item.labelKey)}
               onPress={() => navigation.navigate(item.route)}
             />
           ))}
         </CustomCard>
 
         <Spacer size={theme.spacing.lg} />
-        <CustomButton title="Logout" variant="danger" iconLeft="logout" onPress={() => logout()} />
+        <CustomButton title={t('common_logout')} variant="danger" iconLeft="logout" onPress={() => logout()} />
         <Spacer size={24} />
       </ScrollView>
     </Screen>

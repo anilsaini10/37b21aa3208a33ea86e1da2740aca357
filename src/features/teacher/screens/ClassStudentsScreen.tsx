@@ -4,6 +4,7 @@ import {FlatList, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   CustomHeader,
@@ -21,17 +22,22 @@ type Nav = NativeStackNavigationProp<TeacherStackParamList>;
 export function ClassStudentsScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
+  const {t} = useLanguage();
   const {data, isLoading} = useStudents({pageSize: 50});
 
   if (isLoading || !data) {
-    return <Loader message="Loading students…" />;
+    return <Loader message={t('classStudents_loadingStudents')} />;
   }
 
   const renderItem = ({item}: {item: Student}) => (
     <ListRow
       avatarName={item.name}
       title={item.name}
-      subtitle={`${item.className}-${item.sectionName} · Roll ${item.rollNo}`}
+      subtitle={t('studentsList_rowSubtitle', {
+        className: item.className,
+        sectionName: item.sectionName,
+        rollNo: item.rollNo,
+      })}
       right={
         <Badge
           label={`${item.attendancePercentage}%`}
@@ -50,7 +56,7 @@ export function ClassStudentsScreen(): React.JSX.Element {
   return (
     <Screen padded={false}>
       <CustomHeader
-        title="My Class"
+        title={t('classStudents_myClass')}
         onBack={navigation.canGoBack() ? () => navigation.goBack() : undefined}
       />
       <FlatList
@@ -63,7 +69,11 @@ export function ClassStudentsScreen(): React.JSX.Element {
           <View style={{height: 1, backgroundColor: theme.colors.divider}} />
         )}
         ListEmptyComponent={
-          <EmptyState icon="students" title="No students" message="No students in your class yet." />
+          <EmptyState
+            icon="students"
+            title={t('classStudents_noStudents')}
+            message={t('classStudents_noStudentsMessage')}
+          />
         }
       />
     </Screen>

@@ -4,6 +4,7 @@ import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -24,20 +25,21 @@ type Nav = NativeStackNavigationProp<AdminStackParamList>;
 export function TransportScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
+  const {t} = useLanguage();
   const {data, isLoading} = useBusRoutes();
 
   if (isLoading || !data) {
-    return <Loader message="Loading routes…" />;
+    return <Loader message={t('transport_loading')} />;
   }
 
   if (data.length === 0) {
     return (
       <Screen padded={false}>
-        <CustomHeader title="Transport" onBack={() => navigation.goBack()} />
+        <CustomHeader title={t('transport_title')} onBack={() => navigation.goBack()} />
         <EmptyState
           icon="bus"
-          title="No bus routes"
-          message="Configured transport routes will appear here."
+          title={t('transport_noRoutes')}
+          message={t('transport_noRoutesMessage')}
         />
       </Screen>
     );
@@ -45,7 +47,7 @@ export function TransportScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Transport" onBack={() => navigation.goBack()} />
+      <CustomHeader title={t('transport_title')} onBack={() => navigation.goBack()} />
       <ScrollView
         contentContainerStyle={{padding: theme.spacing.lg}}
         showsVerticalScrollIndicator={false}>
@@ -64,7 +66,7 @@ export function TransportScreen(): React.JSX.Element {
                 <Icon name="phone" size={18} color={theme.colors.textSecondary} />
                 <View style={{flex: 1}}>
                   <AppText variant="caption" color="textSecondary">
-                    Driver
+                    {t('transport_driver')}
                   </AppText>
                   <AppText variant="body">
                     {route.driverName} · {route.driverPhone}
@@ -77,7 +79,7 @@ export function TransportScreen(): React.JSX.Element {
                 <Icon name="transport" size={18} color={theme.colors.textSecondary} />
                 <View style={{flex: 1}}>
                   <AppText variant="caption" color="textSecondary">
-                    Stops
+                    {t('transport_stops')}
                   </AppText>
                   <AppText variant="body">{route.stops.join(' → ')}</AppText>
                 </View>
@@ -88,10 +90,10 @@ export function TransportScreen(): React.JSX.Element {
                 <Icon name="students" size={18} color={theme.colors.textSecondary} />
                 <View style={{flex: 1}}>
                   <AppText variant="caption" color="textSecondary">
-                    Capacity
+                    {t('transport_capacity')}
                   </AppText>
                   <AppText variant="body">
-                    {route.studentCount}/{route.capacity} students
+                    {t('transport_studentsCapacity', {count: route.studentCount, capacity: route.capacity})}
                   </AppText>
                 </View>
               </Row>
