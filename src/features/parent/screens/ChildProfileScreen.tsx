@@ -4,6 +4,7 @@ import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -41,11 +42,12 @@ function DetailRow({label, value}: {label: string; value: string}): React.JSX.El
 export function ChildProfileScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
+  const {t} = useLanguage();
   const child = db.students[0];
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Child Profile" onBack={() => navigation.goBack()} />
+      <CustomHeader title={t('childProfile_childProfile')} onBack={() => navigation.goBack()} />
       <ScrollView
         contentContainerStyle={{padding: theme.spacing.lg}}
         showsVerticalScrollIndicator={false}>
@@ -63,26 +65,26 @@ export function ChildProfileScreen(): React.JSX.Element {
           </Row>
         </CustomCard>
 
-        <SectionTitle title="Personal Details" />
+        <SectionTitle title={t('childProfile_personalDetails')} />
         <CustomCard>
-          <DetailRow label="Gender" value={capitalize(child.gender)} />
+          <DetailRow label={t('childProfile_gender')} value={capitalize(child.gender)} />
           <Divider />
-          <DetailRow label="Date of Birth" value={formatDate(child.dateOfBirth)} />
+          <DetailRow label={t('childProfile_dateOfBirth')} value={formatDate(child.dateOfBirth)} />
           <Divider />
-          <DetailRow label="Blood Group" value={child.bloodGroup ?? '—'} />
+          <DetailRow label={t('childProfile_bloodGroup')} value={child.bloodGroup ?? '—'} />
           <Divider />
-          <DetailRow label="Address" value={child.address ?? '—'} />
+          <DetailRow label={t('common_address')} value={child.address ?? '—'} />
         </CustomCard>
 
-        <SectionTitle title="Academic Details" />
+        <SectionTitle title={t('childProfile_academicDetails')} />
         <CustomCard>
-          <DetailRow label="Class" value={child.className} />
+          <DetailRow label={t('childProfile_class')} value={child.className} />
           <Divider />
-          <DetailRow label="Section" value={child.sectionName} />
+          <DetailRow label={t('childProfile_section')} value={child.sectionName} />
           <Divider />
-          <DetailRow label="Roll No" value={String(child.rollNo)} />
+          <DetailRow label={t('childProfile_rollNo')} value={String(child.rollNo)} />
           <Divider />
-          <DetailRow label="Attendance" value={`${child.attendancePercentage}%`} />
+          <DetailRow label={t('childProfile_attendance')} value={`${child.attendancePercentage}%`} />
         </CustomCard>
         <Spacer size={24} />
       </ScrollView>

@@ -4,6 +4,7 @@ import {FlatList, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   CustomHeader,
@@ -23,6 +24,7 @@ type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
 export function StudentsListScreen(): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -36,18 +38,18 @@ export function StudentsListScreen(): React.JSX.Element {
   return (
     <Screen padded={false}>
       <CustomHeader
-        title="Students"
+        title={t('studentsList_headerTitle')}
         actions={[{icon: 'add', onPress: () => navigation.navigate('StudentForm', {})}]}
       />
       <View style={{paddingHorizontal: theme.spacing.lg, paddingTop: theme.spacing.md}}>
         <SearchBar
           value={search}
           onChangeText={onSearch}
-          placeholder="Search by name, admission no…"
+          placeholder={t('studentsList_searchPlaceholder')}
         />
       </View>
       {isLoading || !data ? (
-        <Loader message="Loading students…" />
+        <Loader message={t('studentsList_loadingStudents')} />
       ) : (
         <FlatList
           data={data.items}
@@ -62,7 +64,11 @@ export function StudentsListScreen(): React.JSX.Element {
             <ListRow
               avatarName={item.name}
               title={item.name}
-              subtitle={`${item.className}-${item.sectionName} · Roll ${item.rollNo}`}
+              subtitle={t('studentsList_rowSubtitle', {
+                className: item.className,
+                sectionName: item.sectionName,
+                rollNo: String(item.rollNo),
+              })}
               right={<Badge label={`${item.attendancePercentage}%`} tone="info" />}
               onPress={() => navigation.navigate('StudentDetail', {id: item.id})}
             />
@@ -70,9 +76,9 @@ export function StudentsListScreen(): React.JSX.Element {
           ListEmptyComponent={
             <EmptyState
               icon="students"
-              title="No students found"
-              message="Try a different search or add a new student."
-              actionLabel="Add Student"
+              title={t('studentsList_emptyTitle')}
+              message={t('studentsList_emptyMessage')}
+              actionLabel={t('studentsList_addStudent')}
               onAction={() => navigation.navigate('StudentForm', {})}
             />
           }

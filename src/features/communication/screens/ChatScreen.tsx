@@ -3,6 +3,7 @@ import React, {useState} from 'react';
 import {FlatList, View, TextInput, Pressable} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -19,6 +20,7 @@ import {useChatThreads, useChatMessages, useSendMessage} from '../communication.
 
 export function ChatScreen(): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const navigation = useNavigation();
   const {data: threads, isLoading} = useChatThreads();
   const [activeThread, setActiveThread] = useState<string | null>(null);
@@ -28,10 +30,10 @@ export function ChatScreen(): React.JSX.Element {
   const sendMessage = useSendMessage(activeThread ?? '');
 
   if (isLoading || !threads) {
-    return <Loader message="Loading chats…" />;
+    return <Loader message={t('chat_loadingChats')} />;
   }
 
-  const active = threads.find(t => t.id === activeThread);
+  const active = threads.find(thread => thread.id === activeThread);
 
   const send = () => {
     if (draft.trim()) {
@@ -85,7 +87,7 @@ export function ChatScreen(): React.JSX.Element {
           <TextInput
             value={draft}
             onChangeText={setDraft}
-            placeholder="Type a message…"
+            placeholder={t('chat_typeMessage')}
             placeholderTextColor={theme.colors.placeholder}
             style={{
               flex: 1,
@@ -116,12 +118,12 @@ export function ChatScreen(): React.JSX.Element {
   // ---- Thread list --------------------------------------------------------
   return (
     <Screen padded={false}>
-      <CustomHeader title="Messages" onBack={() => navigation.goBack()} />
+      <CustomHeader title={t('chat_title')} onBack={() => navigation.goBack()} />
       <FlatList
         data={threads}
-        keyExtractor={t => t.id}
+        keyExtractor={thread => thread.id}
         contentContainerStyle={{padding: theme.spacing.lg, flexGrow: 1}}
-        ListEmptyComponent={<EmptyState title="No conversations" icon="chat" />}
+        ListEmptyComponent={<EmptyState title={t('chat_noConversations')} icon="chat" />}
         renderItem={({item}) => (
           <ListRow
             avatarName={item.participantName}

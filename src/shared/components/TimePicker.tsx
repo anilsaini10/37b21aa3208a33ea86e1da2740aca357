@@ -4,6 +4,7 @@
 import React, {useState} from 'react';
 import {Pressable, View} from 'react-native';
 import {useTheme} from '../../core/theme';
+import {useLanguage} from '../../core/i18n';
 import {AppText} from './AppText';
 import {Icon} from './Icon';
 import {CustomBottomSheet} from './CustomBottomSheet';
@@ -26,6 +27,7 @@ function parse(value?: string): {h: number; m: number} {
 
 export function TimePicker({label, value, onChange}: TimePickerProps): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const [open, setOpen] = useState(false);
   const [time, setTime] = useState(() => parse(value));
 
@@ -60,16 +62,16 @@ export function TimePicker({label, value, onChange}: TimePickerProps): React.JSX
           paddingHorizontal: theme.spacing.md,
           backgroundColor: theme.colors.inputBackground,
         }}>
-        <AppText color={value ? 'text' : 'textMuted'}>{value ?? 'Select time'}</AppText>
+        <AppText color={value ? 'text' : 'textMuted'}>{value ?? t('common_selectTime')}</AppText>
         <Icon name="clock" size={18} color={theme.colors.textMuted} />
       </Pressable>
 
-      <CustomBottomSheet visible={open} onClose={() => setOpen(false)} title={label ?? 'Select time'}>
+      <CustomBottomSheet visible={open} onClose={() => setOpen(false)} title={label ?? t('common_selectTime')}>
         <View style={{flexDirection: 'row', columnGap: theme.spacing.md}}>
-          <ScrollPicker options={hourOptions} value={time.h} onChange={h => setTime(t => ({...t, h}))} />
-          <ScrollPicker options={minuteOptions} value={time.m} onChange={m => setTime(t => ({...t, m}))} />
+          <ScrollPicker options={hourOptions} value={time.h} onChange={h => setTime(prev => ({...prev, h}))} />
+          <ScrollPicker options={minuteOptions} value={time.m} onChange={m => setTime(prev => ({...prev, m}))} />
         </View>
-        <CustomButton title="Confirm" onPress={confirm} />
+        <CustomButton title={t('common_confirm')} onPress={confirm} />
       </CustomBottomSheet>
     </View>
   );

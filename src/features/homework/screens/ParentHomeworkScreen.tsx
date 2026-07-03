@@ -4,6 +4,7 @@ import {ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   CustomHeader,
@@ -16,7 +17,6 @@ import {
 } from '../../../shared/components';
 import type {BadgeTone} from '../../../shared/components';
 import {formatDate} from '../../../core/utils/format';
-import {capitalize} from '../../../shared/helpers';
 import {useHomework} from '../homework.service';
 import type {ParentStackParamList} from '../../../navigation/types';
 import type {Homework} from '../../../shared/types';
@@ -29,20 +29,28 @@ function statusTone(status: Homework['status']): BadgeTone {
 
 export function ParentHomeworkScreen(): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
   const {data, isLoading} = useHomework();
 
+  const statusLabel = (status: Homework['status']) =>
+    status === 'graded'
+      ? t('homework_graded')
+      : status === 'submitted'
+        ? t('homework_submitted')
+        : t('homework_pending');
+
   if (isLoading || !data) {
-    return <Loader message="Loading homework…" />;
+    return <Loader message={t('parentHomework_loadingHomework')} />;
   }
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Homework" onBack={() => navigation.goBack()} />
+      <CustomHeader title={t('parentHomework_title')} onBack={() => navigation.goBack()} />
       {data.length === 0 ? (
         <EmptyState
-          title="No homework"
-          message="There are no assignments right now."
+          title={t('parentHomework_noHomework')}
+          message={t('parentHomework_noAssignments')}
           icon="homework"
         />
       ) : (
@@ -55,8 +63,11 @@ export function ParentHomeworkScreen(): React.JSX.Element {
                 key={hw.id}
                 icon="homework"
                 title={hw.title}
-                subtitle={`${hw.subjectName} · Due ${formatDate(hw.dueDate)}`}
-                right={<Badge label={capitalize(hw.status)} tone={statusTone(hw.status)} />}
+                subtitle={t('parentHomework_itemSubtitle', {
+                  subjectName: hw.subjectName,
+                  dueDate: formatDate(hw.dueDate),
+                })}
+                right={<Badge label={statusLabel(hw.status)} tone={statusTone(hw.status)} />}
               />
             ))}
           </CustomCard>

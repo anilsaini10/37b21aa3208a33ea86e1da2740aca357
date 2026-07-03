@@ -4,6 +4,7 @@ import {ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {Screen, CustomHeader, DynamicForm} from '../../../shared/components';
 import type {FormField} from '../../../shared/components';
 import {db} from '../../../core/mock/db';
@@ -15,21 +16,37 @@ type Nav = NativeStackNavigationProp<TeacherStackParamList>;
 
 export function CreateHomeworkScreen(): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
   const user = useAuthStore(s => s.user);
   const mutation = useCreateHomework(user?.name ?? 'Teacher');
 
   const classOptions = db.classes.map(c => ({label: c.name, value: c.id}));
-  const sectionOptions = db.sections.map(s => ({label: `Sec ${s.name}`, value: s.id}));
+  const sectionOptions = db.sections.map(s => ({
+    label: t('createHomework_sectionOptionLabel', {name: s.name}),
+    value: s.id,
+  }));
   const subjectOptions = db.subjects.map(s => ({label: s.name, value: s.name}));
 
   const fields: FormField[] = [
-    {name: 'title', label: 'Title', type: 'text', placeholder: 'e.g. Chapter 4 exercises', required: true},
-    {name: 'description', label: 'Description', type: 'textarea', placeholder: 'Instructions for students', required: true},
-    {name: 'subjectName', label: 'Subject', type: 'select', options: subjectOptions, required: true},
-    {name: 'classId', label: 'Class', type: 'select', options: classOptions, required: true},
-    {name: 'sectionId', label: 'Section', type: 'select', options: sectionOptions, required: true},
-    {name: 'dueDate', label: 'Due Date', type: 'date', required: true},
+    {
+      name: 'title',
+      label: t('common_title'),
+      type: 'text',
+      placeholder: t('createHomework_titlePlaceholder'),
+      required: true,
+    },
+    {
+      name: 'description',
+      label: t('common_description'),
+      type: 'textarea',
+      placeholder: t('createHomework_descriptionPlaceholder'),
+      required: true,
+    },
+    {name: 'subjectName', label: t('createHomework_subject'), type: 'select', options: subjectOptions, required: true},
+    {name: 'classId', label: t('createHomework_class'), type: 'select', options: classOptions, required: true},
+    {name: 'sectionId', label: t('createHomework_section'), type: 'select', options: sectionOptions, required: true},
+    {name: 'dueDate', label: t('createHomework_dueDate'), type: 'date', required: true},
   ];
 
   const onSubmit = (values: HomeworkInput) => {
@@ -38,14 +55,14 @@ export function CreateHomeworkScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Create Homework" onBack={() => navigation.goBack()} />
+      <CustomHeader title={t('createHomework_title')} onBack={() => navigation.goBack()} />
       <ScrollView
         contentContainerStyle={{padding: theme.spacing.lg}}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
         <DynamicForm
           fields={fields}
-          submitLabel="Assign Homework"
+          submitLabel={t('createHomework_assignHomework')}
           loading={mutation.isPending}
           onSubmit={values => onSubmit(values as HomeworkInput)}
         />

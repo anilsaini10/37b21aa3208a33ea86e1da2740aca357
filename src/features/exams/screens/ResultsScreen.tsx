@@ -4,9 +4,9 @@ import {ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
-  AppText,
   CustomHeader,
   CustomCard,
   BarChart,
@@ -29,23 +29,24 @@ export function ResultsScreen(): React.JSX.Element {
   const child = db.students[0];
   const {data: cards, isLoading} = useStudentReportCards(child.id);
   const {data: dashboard, isLoading: dashLoading} = useParentDashboard();
+  const {t} = useLanguage();
 
   if (isLoading || dashLoading || !dashboard) {
-    return <Loader message="Loading results…" />;
+    return <Loader message={t('results_loading')} />;
   }
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Results" onBack={() => navigation.goBack()} />
+      <CustomHeader title={t('results_title')} onBack={() => navigation.goBack()} />
       <ScrollView
         contentContainerStyle={{padding: theme.spacing.lg}}
         showsVerticalScrollIndicator={false}>
-        <SectionTitle title="Subject Performance" />
+        <SectionTitle title={t('results_subjectPerformance')} />
         <CustomCard>
           <BarChart series={dashboard.performanceTrend} height={150} valueFormatter={v => `${v}%`} />
         </CustomCard>
 
-        <SectionTitle title="Report Cards" />
+        <SectionTitle title={t('results_reportCards')} />
         {cards && cards.length > 0 ? (
           <CustomCard padded={false} style={{paddingHorizontal: theme.spacing.lg}}>
             {cards.map(card => (
@@ -53,15 +54,18 @@ export function ResultsScreen(): React.JSX.Element {
                 key={card.id}
                 icon="grade"
                 title={card.examName}
-                subtitle={`${card.percentage}% · Grade ${card.overallGrade}`}
+                subtitle={t('results_percentageGrade', {
+                  percentage: card.percentage,
+                  grade: card.overallGrade,
+                })}
                 onPress={() => navigation.navigate('ReportCard', {examId: card.examId})}
               />
             ))}
           </CustomCard>
         ) : (
           <EmptyState
-            title="No report cards"
-            message="Report cards will appear once exams are graded."
+            title={t('results_noReportCards')}
+            message={t('results_noReportCardsMessage')}
             icon="grade"
           />
         )}

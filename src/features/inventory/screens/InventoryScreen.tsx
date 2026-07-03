@@ -4,6 +4,7 @@ import {ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -28,41 +29,46 @@ type Nav = NativeStackNavigationProp<AdminStackParamList>;
 export function InventoryScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
+  const {t} = useLanguage();
   const {data, isLoading} = useInventory();
 
   if (isLoading || !data) {
-    return <Loader message="Loading inventory…" />;
+    return <Loader message={t('inventory_loading')} />;
   }
 
   const totalValue = data.reduce((sum, item) => sum + item.value, 0);
 
   const conditionLabel = (condition: InventoryItem['condition']) =>
-    condition === 'good' ? 'Good' : condition === 'needs_repair' ? 'Repair' : 'Damaged';
+    condition === 'good'
+      ? t('inventory_conditionGood')
+      : condition === 'needs_repair'
+      ? t('inventory_conditionRepair')
+      : t('inventory_conditionDamaged');
 
   const conditionTone = (condition: InventoryItem['condition']): BadgeTone =>
     condition === 'good' ? 'success' : condition === 'needs_repair' ? 'warning' : 'error';
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Inventory" onBack={() => navigation.goBack()} />
+      <CustomHeader title={t('inventory_title')} onBack={() => navigation.goBack()} />
       <ScrollView
         contentContainerStyle={{padding: theme.spacing.lg}}
         showsVerticalScrollIndicator={false}>
         <CustomCard>
           <AppText variant="caption" color="textSecondary">
-            Total asset value
+            {t('inventory_totalAssetValue')}
           </AppText>
           <AppText variant="h1" color="primary">
             {formatCurrency(totalValue)}
           </AppText>
           <AppText variant="caption" color="textSecondary">
-            {data.length} items
+            {t('inventory_itemsCount', {count: data.length})}
           </AppText>
         </CustomCard>
 
         <Spacer size={theme.spacing.md} />
         {data.length === 0 ? (
-          <EmptyState icon="inventory" title="No items" message="Inventory is empty." />
+          <EmptyState icon="inventory" title={t('inventory_noItems')} message={t('inventory_noItemsMessage')} />
         ) : (
           <CustomCard padded={false} style={{paddingHorizontal: theme.spacing.lg}}>
             {data.map((item, i) => (
@@ -71,7 +77,11 @@ export function InventoryScreen(): React.JSX.Element {
                 <ListRow
                   icon="inventory"
                   title={item.name}
-                  subtitle={`${capitalize(item.category)} · Qty ${item.quantity} · ${item.location}`}
+                  subtitle={t('inventory_itemSubtitle', {
+                    category: capitalize(item.category),
+                    qty: item.quantity,
+                    location: item.location,
+                  })}
                   right={
                     <Badge
                       label={conditionLabel(item.condition)}

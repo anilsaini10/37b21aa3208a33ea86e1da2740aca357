@@ -4,6 +4,7 @@ import {ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {Screen, CustomHeader, DynamicForm} from '../../../shared/components';
 import type {FormField} from '../../../shared/components';
 import {db} from '../../../core/mock/db';
@@ -16,27 +17,28 @@ type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
 export function TeacherFormScreen(): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
   const createMutation = useCreateTeacher();
 
   const subjectOptions = db.subjects.map(s => ({label: s.name, value: s.name}));
 
   const fields: FormField[] = [
-    {name: 'name', label: 'Full Name', type: 'text', required: true},
-    {name: 'email', label: 'Email', type: 'email', required: true},
-    {name: 'phone', label: 'Phone', type: 'phone', required: true},
+    {name: 'name', label: t('teacherForm_fullNameLabel'), type: 'text', required: true},
+    {name: 'email', label: t('common_email'), type: 'email', required: true},
+    {name: 'phone', label: t('common_phone'), type: 'phone', required: true},
     {
       name: 'gender',
-      label: 'Gender',
+      label: t('teacherForm_genderLabel'),
       type: 'select',
       options: [
-        {label: 'Male', value: 'male'},
-        {label: 'Female', value: 'female'},
+        {label: t('teacherForm_genderMale'), value: 'male'},
+        {label: t('teacherForm_genderFemale'), value: 'female'},
       ],
     },
-    {name: 'subject', label: 'Subject', type: 'select', options: subjectOptions, required: true},
-    {name: 'salary', label: 'Monthly Salary', type: 'number', required: true},
-    {name: 'joiningDate', label: 'Joining Date', type: 'date', required: true},
+    {name: 'subject', label: t('teacherForm_subjectLabel'), type: 'select', options: subjectOptions, required: true},
+    {name: 'salary', label: t('teacherForm_salaryLabel'), type: 'number', required: true},
+    {name: 'joiningDate', label: t('teacherForm_joiningDateLabel'), type: 'date', required: true},
   ];
 
   const onSubmit = (values: Record<string, unknown>): void => {
@@ -54,14 +56,14 @@ export function TeacherFormScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Add Teacher" onBack={() => navigation.goBack()} />
+      <CustomHeader title={t('teacherForm_addTitle')} onBack={() => navigation.goBack()} />
       <ScrollView
         contentContainerStyle={{padding: theme.spacing.lg}}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled">
         <DynamicForm
           fields={fields}
-          submitLabel="Add Teacher"
+          submitLabel={t('teacherForm_addTitle')}
           onSubmit={onSubmit}
           loading={createMutation.isPending}
         />

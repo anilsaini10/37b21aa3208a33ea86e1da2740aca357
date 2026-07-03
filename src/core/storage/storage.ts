@@ -53,6 +53,7 @@ export const StorageKeys = {
   THEME_KEY: 'theme.key',
   THEME_MODE: 'theme.mode',
   FONT_SCALE: 'theme.fontScale',
+  LANGUAGE: 'app.language',
   ONBOARDING_DONE: 'app.onboardingDone',
   SYNC_QUEUE: 'offline.syncQueue',
   CACHE_PREFIX: 'cache.',

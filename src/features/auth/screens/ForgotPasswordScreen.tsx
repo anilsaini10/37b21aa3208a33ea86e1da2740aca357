@@ -2,6 +2,7 @@
 import React, {useState} from 'react';
 import {View} from 'react-native';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -18,6 +19,7 @@ export function ForgotPasswordScreen({
   navigation,
 }: AuthScreenProps<'ForgotPassword'>): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const [identifier, setIdentifier] = useState('');
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
@@ -38,30 +40,30 @@ export function ForgotPasswordScreen({
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Forgot Password" onBack={() => navigation.goBack()} />
+      <CustomHeader title={t('forgotPasswordScreen_title')} onBack={() => navigation.goBack()} />
       <View style={{flex: 1, padding: theme.spacing.lg}}>
         {sent ? (
           <View style={{alignItems: 'center', marginTop: theme.spacing.xxl, rowGap: theme.spacing.sm}}>
             <Icon name="success" size={56} />
             <AppText variant="h3" center>
-              Reset link sent
+              {t('forgotPasswordScreen_resetLinkSent')}
             </AppText>
             <AppText variant="caption" color="textSecondary" center>
-              Check your email / SMS for instructions to reset your password.
+              {t('forgotPasswordScreen_resetInstructions')}
             </AppText>
             <Spacer size={16} />
-            <CustomButton title="Back to Login" onPress={() => navigation.goBack()} fullWidth={false} />
+            <CustomButton title={t('forgotPasswordScreen_backToLogin')} onPress={() => navigation.goBack()} fullWidth={false} />
           </View>
         ) : (
           <>
             <Spacer size={12} />
             <AppText variant="caption" color="textSecondary">
-              Enter your registered email or mobile number and we'll send you reset instructions.
+              {t('forgotPasswordScreen_enterIdentifier')}
             </AppText>
             <Spacer size={20} />
             <CustomInput
-              label="Email or Mobile"
-              placeholder="you@school.edu"
+              label={t('forgotPasswordScreen_emailOrMobileLabel')}
+              placeholder={t('forgotPasswordScreen_emailPlaceholder')}
               iconLeft="email"
               autoCapitalize="none"
               value={identifier}
@@ -74,7 +76,7 @@ export function ForgotPasswordScreen({
               </AppText>
             ) : null}
             <Spacer size={8} />
-            <CustomButton title="Send Reset Link" onPress={submit} loading={loading} />
+            <CustomButton title={t('forgotPasswordScreen_sendResetLink')} onPress={submit} loading={loading} />
           </>
         )}
       </View>

@@ -3,6 +3,8 @@ import React, {useState} from 'react';
 import {ScrollView, View, Pressable} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
+import type {TranslationKey} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -13,14 +15,23 @@ import {
   Loader,
   EmptyState,
 } from '../../../shared/components';
-import {capitalize} from '../../../shared/helpers';
 import {db} from '../../../core/mock/db';
 import {useTimetable, DAYS} from '../timetable.service';
 import type {WeekDay} from '../../../shared/types';
 
+const DAY_LABEL_KEYS: Record<WeekDay, TranslationKey> = {
+  monday: 'common_dayMon',
+  tuesday: 'common_dayTue',
+  wednesday: 'common_dayWed',
+  thursday: 'common_dayThu',
+  friday: 'common_dayFri',
+  saturday: 'common_daySat',
+};
+
 export function TimetableScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation();
+  const {t} = useLanguage();
   // Default to a representative class/section for the demo.
   const defaultClass = db.classes[5] ?? db.classes[0];
   const defaultSection = defaultClass.sections[0];
@@ -29,7 +40,7 @@ export function TimetableScreen(): React.JSX.Element {
   const {data, isLoading} = useTimetable(defaultClass.id, defaultSection.id);
 
   if (isLoading || !data) {
-    return <Loader message="Loading timetable…" />;
+    return <Loader message={t('timetable_loading')} />;
   }
 
   const periods = data.periods.filter(p => p.day === day);
@@ -37,7 +48,7 @@ export function TimetableScreen(): React.JSX.Element {
   return (
     <Screen padded={false}>
       <CustomHeader
-        title="Timetable"
+        title={t('timetable_title')}
         subtitle={`${defaultClass.name} - ${defaultSection.name}`}
         onBack={() => navigation.goBack()}
       />
@@ -61,7 +72,7 @@ export function TimetableScreen(): React.JSX.Element {
               <AppText
                 variant="label"
                 style={{color: active ? theme.colors.onPrimary : theme.colors.textSecondary}}>
-                {capitalize(d).slice(0, 3)}
+                {t(DAY_LABEL_KEYS[d])}
               </AppText>
             </Pressable>
           );
@@ -70,7 +81,7 @@ export function TimetableScreen(): React.JSX.Element {
 
       <ScrollView contentContainerStyle={{padding: theme.spacing.lg, flexGrow: 1}}>
         {periods.length === 0 ? (
-          <EmptyState title="No classes" message="It's a free day!" icon="timetable" />
+          <EmptyState title={t('timetable_noClasses')} message={t('timetable_noClassesMessage')} icon="timetable" />
         ) : (
           periods.map(period => (
             <CustomCard key={period.id} style={{marginBottom: theme.spacing.md}}>
@@ -87,7 +98,7 @@ export function TimetableScreen(): React.JSX.Element {
                     {period.periodNo}
                   </AppText>
                   <AppText variant="label" color="textMuted">
-                    Period
+                    {t('timetable_period')}
                   </AppText>
                 </View>
                 <View style={{flex: 1}}>
@@ -99,7 +110,7 @@ export function TimetableScreen(): React.JSX.Element {
                     </AppText>
                   </Row>
                   <AppText variant="label" color="textMuted">
-                    {period.teacherName} · Room {period.room}
+                    {t('timetable_teacherRoom', {teacher: period.teacherName, room: period.room ?? ''})}
                   </AppText>
                 </View>
               </Row>

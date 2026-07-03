@@ -462,4 +462,11 @@ export const ICONS: Record<string, IconRenderer> = {
       <Circle cx={12} cy={12} r={1.5} fill={p.color} stroke="none" />
     </Frame>
   ),
+  globe: p => (
+    <Frame {...p}>
+      <Circle cx={12} cy={12} r={9} />
+      <Line x1={3} y1={12} x2={21} y2={12} />
+      <Path d="M12 3c2.5 2.5 4 5.8 4 9s-1.5 6.5-4 9c-2.5-2.5-4-5.8-4-9s1.5-6.5 4-9Z" />
+    </Frame>
+  ),
 };

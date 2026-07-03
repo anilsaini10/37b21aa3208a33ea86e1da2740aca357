@@ -2,6 +2,7 @@
 import React from 'react';
 import {View, ScrollView} from 'react-native';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -17,11 +18,12 @@ import {useParentDashboard} from '../../dashboard/dashboard.service';
 
 export function ParentAttendanceScreen(): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const child = db.students[0];
   const {data, isLoading} = useParentDashboard();
 
   if (isLoading || !data) {
-    return <Loader message="Loading attendance…" />;
+    return <Loader message={t('parentAttendance_loadingAttendance')} />;
   }
 
   const totalDays = 200;
@@ -30,7 +32,7 @@ export function ParentAttendanceScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Attendance" />
+      <CustomHeader title={t('parentAttendance_title')} />
       <ScrollView
         contentContainerStyle={{padding: theme.spacing.lg}}
         showsVerticalScrollIndicator={false}>
@@ -40,7 +42,7 @@ export function ParentAttendanceScreen(): React.JSX.Element {
               {child.attendancePercentage}%
             </AppText>
             <AppText variant="caption" color="textSecondary">
-              Overall attendance
+              {t('parentAttendance_overallAttendance')}
             </AppText>
           </View>
           <Spacer size={theme.spacing.md} />
@@ -50,7 +52,7 @@ export function ParentAttendanceScreen(): React.JSX.Element {
                 {presentDays}
               </AppText>
               <AppText variant="label" color="textMuted">
-                Present
+                {t('attendance_present')}
               </AppText>
             </View>
             <View style={{alignItems: 'center'}}>
@@ -58,7 +60,7 @@ export function ParentAttendanceScreen(): React.JSX.Element {
                 {absentDays}
               </AppText>
               <AppText variant="label" color="textMuted">
-                Absent
+                {t('attendance_absent')}
               </AppText>
             </View>
           </Row>
@@ -66,7 +68,7 @@ export function ParentAttendanceScreen(): React.JSX.Element {
 
         <Spacer size={theme.spacing.md} />
         <CustomCard>
-          <AppText variant="bodyBold">Monthly Trend</AppText>
+          <AppText variant="bodyBold">{t('parentAttendance_monthlyTrend')}</AppText>
           <Spacer size={theme.spacing.sm} />
           <BarChart
             series={data.attendanceTrend}

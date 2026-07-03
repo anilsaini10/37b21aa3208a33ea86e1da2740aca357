@@ -4,6 +4,8 @@ import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
+import type {TranslationKey} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -21,43 +23,51 @@ import {
   Divider,
 } from '../../../shared/components';
 import {formatCurrency} from '../../../core/utils/format';
-import {feeStatusTone, capitalize} from '../../../shared/helpers';
+import {feeStatusTone} from '../../../shared/helpers';
 import {db} from '../../../core/mock/db';
 import {useStudentFee, usePayFee} from '../fees.service';
 import type {ParentStackParamList} from '../../../navigation/types';
-import type {FeePayment} from '../../../shared/types';
+import type {FeePayment, FeeStatus} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<ParentStackParamList>;
 type PayMethod = FeePayment['method'];
 
-const METHODS: {key: Extract<PayMethod, 'upi' | 'card' | 'netbanking'>; label: string}[] = [
-  {key: 'upi', label: 'UPI'},
-  {key: 'card', label: 'Card'},
-  {key: 'netbanking', label: 'Net Banking'},
-];
+const FEE_STATUS_KEY: Record<FeeStatus, TranslationKey> = {
+  paid: 'fees_paid',
+  pending: 'fees_pending',
+  partial: 'fees_partial',
+  overdue: 'fees_overdue',
+};
 
 export function ParentFeesScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
+  const {t} = useLanguage();
   const child = db.students[0];
   const {data: invoice, isLoading} = useStudentFee(child.id);
   const payMutation = usePayFee();
+
+  const METHODS: {key: Extract<PayMethod, 'upi' | 'card' | 'netbanking'>; label: string}[] = [
+    {key: 'upi', label: t('parentFees_methodUpi')},
+    {key: 'card', label: t('parentFees_methodCard')},
+    {key: 'netbanking', label: t('parentFees_methodNetBanking')},
+  ];
 
   const [modalVisible, setModalVisible] = useState(false);
   const [amount, setAmount] = useState('');
   const [method, setMethod] = useState<PayMethod>('upi');
 
   if (isLoading) {
-    return <Loader message="Loading fees…" />;
+    return <Loader message={t('parentFees_loadingFees')} />;
   }
 
   if (!invoice) {
     return (
       <Screen padded={false}>
-        <CustomHeader title="Fees" />
+        <CustomHeader title={t('parentFees_headerTitle')} />
         <EmptyState
-          title="No fee record"
-          message="There is no fee invoice for your child yet."
+          title={t('parentFees_noFeeRecord')}
+          message={t('parentFees_noFeeRecordMessage')}
           icon="fee"
         />
       </Screen>
@@ -77,7 +87,7 @@ export function ParentFeesScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Fees" />
+      <CustomHeader title={t('parentFees_headerTitle')} />
       <ScrollView
         contentContainerStyle={{padding: theme.spacing.lg}}
         showsVerticalScrollIndicator={false}>
@@ -85,17 +95,17 @@ export function ParentFeesScreen(): React.JSX.Element {
           <Row justify="space-between" align="flex-start">
             <View>
               <AppText variant="caption" color="textSecondary">
-                Total
+                {t('feeReceipt_total')}
               </AppText>
               <AppText variant="h2">{formatCurrency(invoice.totalAmount)}</AppText>
             </View>
-            <Badge label={capitalize(invoice.status)} tone={feeStatusTone(invoice.status)} />
+            <Badge label={t(FEE_STATUS_KEY[invoice.status])} tone={feeStatusTone(invoice.status)} />
           </Row>
           <Divider />
           <Row justify="space-between">
             <View>
               <AppText variant="caption" color="textSecondary">
-                Paid
+                {t('fees_paid')}
               </AppText>
               <AppText variant="bodyBold" color="success">
                 {formatCurrency(invoice.paidAmount)}
@@ -103,7 +113,7 @@ export function ParentFeesScreen(): React.JSX.Element {
             </View>
             <View style={{alignItems: 'flex-end'}}>
               <AppText variant="caption" color="textSecondary">
-                Due
+                {t('parentFees_due')}
               </AppText>
               <AppText variant="bodyBold" color="error">
                 {formatCurrency(invoice.dueAmount)}
@@ -112,7 +122,7 @@ export function ParentFeesScreen(): React.JSX.Element {
           </Row>
         </CustomCard>
 
-        <SectionTitle title="Fee Structure" />
+        <SectionTitle title={t('parentFees_feeStructure')} />
         <CustomCard>
           {invoice.categories.map((cat, i) => (
             <View key={cat.id}>
@@ -127,30 +137,33 @@ export function ParentFeesScreen(): React.JSX.Element {
 
         <Spacer size={theme.spacing.md} />
         <CustomButton
-          title="Pay Now"
+          title={t('parentFees_payNow')}
           disabled={invoice.dueAmount === 0}
           loading={payMutation.isPending}
           onPress={openPay}
         />
         <Spacer size={theme.spacing.sm} />
         <CustomButton
-          title="Download Receipt"
+          title={t('parentFees_downloadReceipt')}
           variant="outline"
           onPress={() => navigation.navigate('FeeReceipt', {invoiceId: invoice.id})}
         />
         <Spacer size={24} />
       </ScrollView>
 
-      <CustomModal visible={modalVisible} onClose={() => setModalVisible(false)} title="Pay Fees">
+      <CustomModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        title={t('parentFees_payFeesModalTitle')}>
         <CustomInput
-          label="Amount"
+          label={t('common_amount')}
           keyboardType="numeric"
           value={amount}
           onChangeText={setAmount}
           iconLeft="money"
         />
         <AppText variant="label" color="textSecondary">
-          Payment Method
+          {t('parentFees_paymentMethod')}
         </AppText>
         <Row gap={theme.spacing.sm}>
           {METHODS.map(m => (
@@ -164,7 +177,7 @@ export function ParentFeesScreen(): React.JSX.Element {
             </View>
           ))}
         </Row>
-        <CustomButton title="Confirm Payment" onPress={confirmPay} />
+        <CustomButton title={t('parentFees_confirmPayment')} onPress={confirmPay} />
       </CustomModal>
     </Screen>
   );

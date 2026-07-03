@@ -4,6 +4,7 @@ import {FlatList, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   CustomHeader,
@@ -12,7 +13,6 @@ import {
   Loader,
   EmptyState,
 } from '../../../shared/components';
-import {capitalize} from '../../../shared/helpers';
 import {formatDate} from '../../../core/utils/format';
 import {useHomework} from '../homework.service';
 import type {TeacherStackParamList} from '../../../navigation/types';
@@ -22,21 +22,33 @@ type Nav = NativeStackNavigationProp<TeacherStackParamList>;
 
 export function HomeworkListScreen(): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
   const {data, isLoading} = useHomework();
 
+  const statusLabel = (status: Homework['status']) =>
+    status === 'graded'
+      ? t('homework_graded')
+      : status === 'submitted'
+        ? t('homework_submitted')
+        : t('homework_pending');
+
   if (isLoading || !data) {
-    return <Loader message="Loading homework…" />;
+    return <Loader message={t('homeworkList_loadingHomework')} />;
   }
 
   const renderItem = ({item}: {item: Homework}) => (
     <ListRow
       icon="homework"
       title={item.title}
-      subtitle={`${item.className} · ${item.subjectName} · Due ${formatDate(item.dueDate)}`}
+      subtitle={t('homeworkList_itemSubtitle', {
+        className: item.className,
+        subjectName: item.subjectName,
+        dueDate: formatDate(item.dueDate),
+      })}
       right={
         <Badge
-          label={capitalize(item.status)}
+          label={statusLabel(item.status)}
           tone={item.status === 'graded' ? 'success' : item.status === 'submitted' ? 'info' : 'warning'}
         />
       }
@@ -46,7 +58,7 @@ export function HomeworkListScreen(): React.JSX.Element {
   return (
     <Screen padded={false}>
       <CustomHeader
-        title="Homework"
+        title={t('homeworkList_title')}
         actions={[{icon: 'add', onPress: () => navigation.navigate('CreateHomework')}]}
       />
       <FlatList
@@ -61,9 +73,9 @@ export function HomeworkListScreen(): React.JSX.Element {
         ListEmptyComponent={
           <EmptyState
             icon="homework"
-            title="No homework yet"
-            message="Create homework to assign it to your classes."
-            actionLabel="Create Homework"
+            title={t('homeworkList_noHomeworkYet')}
+            message={t('homeworkList_noHomeworkMessage')}
+            actionLabel={t('homeworkList_createHomeworkAction')}
             onAction={() => navigation.navigate('CreateHomework')}
           />
         }

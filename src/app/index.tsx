@@ -8,6 +8,7 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {QueryClientProvider} from '@tanstack/react-query';
 import {PaperProvider, MD3DarkTheme, MD3LightTheme} from 'react-native-paper';
 import {ThemeProvider, useTheme} from '../core/theme';
+import {LanguageProvider} from '../core/i18n';
 import {queryClient} from '../core/query/queryClient';
 import {RootNavigator} from '../navigation/RootNavigator';
 import {bootstrap} from './bootstrap';
@@ -40,11 +41,13 @@ export default function RootApp(): React.JSX.Element {
     <GestureHandlerRootView style={{flex: 1}}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <ThemeProvider>
-            <PaperBridge>
-              <RootNavigator />
-            </PaperBridge>
-          </ThemeProvider>
+          <LanguageProvider>
+            <ThemeProvider>
+              <PaperBridge>
+                <RootNavigator />
+              </PaperBridge>
+            </ThemeProvider>
+          </LanguageProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

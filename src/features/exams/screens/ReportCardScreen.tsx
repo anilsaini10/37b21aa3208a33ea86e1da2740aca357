@@ -4,6 +4,7 @@ import {View, ScrollView} from 'react-native';
 import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -43,18 +44,19 @@ export function ReportCardScreen(): React.JSX.Element {
   const {examId} = route.params;
   const child = db.students[0];
   const {data: card, isLoading} = useReportCard(examId, child.id);
+  const {t} = useLanguage();
 
   if (isLoading) {
-    return <Loader message="Loading report card…" />;
+    return <Loader message={t('reportCard_loading')} />;
   }
 
   if (!card) {
     return (
       <Screen padded={false}>
-        <CustomHeader title="Report Card" onBack={() => navigation.goBack()} />
+        <CustomHeader title={t('reportCard_title')} onBack={() => navigation.goBack()} />
         <EmptyState
-          title="No report card"
-          message="Marks for this exam are not available yet."
+          title={t('reportCard_noReportCard')}
+          message={t('reportCard_noReportCardMessage')}
           icon="grade"
         />
       </Screen>
@@ -62,10 +64,10 @@ export function ReportCardScreen(): React.JSX.Element {
   }
 
   const columns: TableColumn<SubjectRow>[] = [
-    {key: 'subject', title: 'Subject', flex: 2, accessor: r => r.subjectName},
+    {key: 'subject', title: t('reportCard_subject'), flex: 2, accessor: r => r.subjectName},
     {
       key: 'marks',
-      title: 'Marks',
+      title: t('reportCard_marks'),
       align: 'center',
       render: r => (
         <AppText variant="caption">
@@ -75,7 +77,7 @@ export function ReportCardScreen(): React.JSX.Element {
     },
     {
       key: 'grade',
-      title: 'Grade',
+      title: t('reportCard_grade'),
       align: 'center',
       render: r => <Badge label={r.grade} tone="primary" />,
     },
@@ -83,7 +85,7 @@ export function ReportCardScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Report Card" onBack={() => navigation.goBack()} />
+      <CustomHeader title={t('reportCard_title')} onBack={() => navigation.goBack()} />
       <ScrollView
         contentContainerStyle={{padding: theme.spacing.lg}}
         showsVerticalScrollIndicator={false}>
@@ -109,13 +111,13 @@ export function ReportCardScreen(): React.JSX.Element {
         <Spacer size={theme.spacing.md} />
         <CustomCard>
           <Row justify="space-around">
-            <SummaryItem label="Total" value={`${card.totalMarks}/${card.totalMaxMarks}`} />
-            <SummaryItem label="Percentage" value={`${card.percentage}%`} />
+            <SummaryItem label={t('reportCard_total')} value={`${card.totalMarks}/${card.totalMaxMarks}`} />
+            <SummaryItem label={t('reportCard_percentage')} value={`${card.percentage}%`} />
           </Row>
           <Divider />
           <Row justify="space-around">
-            <SummaryItem label="Grade" value={card.overallGrade} />
-            <SummaryItem label="Rank" value={card.rank !== undefined ? `#${card.rank}` : '—'} />
+            <SummaryItem label={t('reportCard_grade')} value={card.overallGrade} />
+            <SummaryItem label={t('reportCard_rank')} value={card.rank !== undefined ? `#${card.rank}` : '—'} />
           </Row>
         </CustomCard>
         <Spacer size={24} />

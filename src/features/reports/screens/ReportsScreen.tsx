@@ -4,6 +4,7 @@ import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   CustomHeader,
@@ -27,31 +28,32 @@ type Nav = NativeStackNavigationProp<AdminStackParamList>;
 export function ReportsScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
+  const {t} = useLanguage();
   const {data: dashboard, isLoading: dashboardLoading} = useAdminDashboard();
   const {data: feeSummary, isLoading: feeLoading} = useFeeSummary();
 
   if (dashboardLoading || feeLoading || !dashboard || !feeSummary) {
-    return <Loader message="Loading reports…" />;
+    return <Loader message={t('reports_loading')} />;
   }
 
   const stats: StatCard[] = [
     {
       key: 'collected',
-      label: 'Collected',
+      label: t('reports_collected'),
       value: formatCurrency(feeSummary.totalCollected),
       icon: 'money',
       accent: 'success',
     },
     {
       key: 'pending',
-      label: 'Pending',
+      label: t('reports_pending'),
       value: formatCurrency(feeSummary.totalPending),
       icon: 'fee',
       accent: 'error',
     },
     {
       key: 'rate',
-      label: 'Collection Rate',
+      label: t('reports_collectionRate'),
       value: `${feeSummary.collectionRate}%`,
       icon: 'reports',
       accent: 'primary',
@@ -60,26 +62,26 @@ export function ReportsScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Reports" onBack={() => navigation.goBack()} />
+      <CustomHeader title={t('reports_title')} onBack={() => navigation.goBack()} />
       <ScrollView
         contentContainerStyle={{padding: theme.spacing.lg}}
         showsVerticalScrollIndicator={false}>
-        <SectionTitle title="Attendance Trend" />
+        <SectionTitle title={t('reports_attendanceTrend')} />
         <CustomCard>
           <LineChart series={dashboard.attendanceTrend} />
         </CustomCard>
 
-        <SectionTitle title="Fee Collection" />
+        <SectionTitle title={t('reports_feeCollection')} />
         <CustomCard>
           <BarChart series={dashboard.feeCollectionTrend} color={theme.colors.success} />
         </CustomCard>
 
-        <SectionTitle title="Student Performance" />
+        <SectionTitle title={t('reports_studentPerformance')} />
         <CustomCard>
           <BarChart series={dashboard.performanceTrend} valueFormatter={v => `${v}%`} />
         </CustomCard>
 
-        <SectionTitle title="Fee Summary" />
+        <SectionTitle title={t('reports_feeSummary')} />
         <Row gap={theme.spacing.sm} wrap style={{rowGap: theme.spacing.sm}}>
           {stats.map(s => (
             <View key={s.key} style={{flexBasis: '31%', flexGrow: 1}}>

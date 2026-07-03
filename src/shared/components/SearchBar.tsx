@@ -2,6 +2,7 @@
 import React from 'react';
 import {View, TextInput, Pressable} from 'react-native';
 import {useTheme} from '../../core/theme';
+import {useLanguage} from '../../core/i18n';
 import {Icon} from './Icon';
 
 export interface SearchBarProps {
@@ -14,10 +15,11 @@ export interface SearchBarProps {
 export function SearchBar({
   value,
   onChangeText,
-  placeholder = 'Search…',
+  placeholder,
   onClear,
 }: SearchBarProps): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   return (
     <View
       style={{
@@ -35,7 +37,7 @@ export function SearchBar({
       <TextInput
         value={value}
         onChangeText={onChangeText}
-        placeholder={placeholder}
+        placeholder={placeholder ?? t('common_search')}
         placeholderTextColor={theme.colors.placeholder}
         style={{flex: 1, color: theme.colors.text, fontSize: 15, paddingVertical: 0}}
       />

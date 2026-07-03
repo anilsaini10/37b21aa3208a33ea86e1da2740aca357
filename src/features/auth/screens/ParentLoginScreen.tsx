@@ -2,6 +2,7 @@
 import React, {useState} from 'react';
 import {View} from 'react-native';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -16,6 +17,7 @@ import type {AuthScreenProps} from '../../../navigation/types';
 
 export function ParentLoginScreen({navigation}: AuthScreenProps<'ParentLogin'>): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const {verifyOtp, isLoading, error, clearError} = useAuthStore();
 
   const [phone, setPhone] = useState('');
@@ -42,30 +44,30 @@ export function ParentLoginScreen({navigation}: AuthScreenProps<'ParentLogin'>):
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Parent Login" onBack={() => navigation.goBack()} />
+      <CustomHeader title={t('parentLoginScreen_title')} onBack={() => navigation.goBack()} />
       <View style={{flex: 1, padding: theme.spacing.lg}}>
         <Spacer size={12} />
         <AppText variant="h2">
-          {step === 'phone' ? 'Enter your mobile' : 'Verify OTP'}
+          {step === 'phone' ? t('parentLoginScreen_enterMobile') : t('parentLoginScreen_verifyOtp')}
         </AppText>
         <AppText variant="caption" color="textSecondary">
           {step === 'phone'
-            ? "We'll send a one-time password to your registered number."
-            : `Enter the 4-digit code sent to ${phone}.`}
+            ? t('parentLoginScreen_otpSubtitle')
+            : t('parentLoginScreen_otpSentTo', {phone})}
         </AppText>
         <Spacer size={24} />
 
         {step === 'phone' ? (
           <>
             <CustomInput
-              label="Mobile Number"
-              placeholder="10-digit number"
+              label={t('parentLoginScreen_mobileNumberLabel')}
+              placeholder={t('parentLoginScreen_mobileNumberPlaceholder')}
               iconLeft="phone"
               keyboardType="phone-pad"
               maxLength={10}
               value={phone}
-              onChangeText={t => {
-                setPhone(t.replace(/[^0-9]/g, ''));
+              onChangeText={val => {
+                setPhone(val.replace(/[^0-9]/g, ''));
                 setLocalError('');
               }}
               required
@@ -76,19 +78,19 @@ export function ParentLoginScreen({navigation}: AuthScreenProps<'ParentLogin'>):
               </AppText>
             ) : null}
             <Spacer size={8} />
-            <CustomButton title="Send OTP" onPress={requestOtp} />
+            <CustomButton title={t('parentLoginScreen_sendOtp')} onPress={requestOtp} />
           </>
         ) : (
           <>
             <CustomInput
-              label="OTP"
-              placeholder="4-digit code"
+              label={t('parentLoginScreen_otpLabel')}
+              placeholder={t('parentLoginScreen_otpPlaceholder')}
               iconLeft="lock"
               keyboardType="number-pad"
               maxLength={4}
               value={otp}
-              onChangeText={t => {
-                setOtp(t.replace(/[^0-9]/g, ''));
+              onChangeText={val => {
+                setOtp(val.replace(/[^0-9]/g, ''));
                 if (error) {
                   clearError();
                 }
@@ -106,9 +108,9 @@ export function ParentLoginScreen({navigation}: AuthScreenProps<'ParentLogin'>):
               </AppText>
             ) : null}
             <Spacer size={8} />
-            <CustomButton title="Verify & Continue" onPress={submitOtp} loading={isLoading} />
+            <CustomButton title={t('parentLoginScreen_verifyAndContinue')} onPress={submitOtp} loading={isLoading} />
             <Spacer size={12} />
-            <CustomButton title="Change Number" variant="ghost" onPress={() => setStep('phone')} />
+            <CustomButton title={t('parentLoginScreen_changeNumber')} variant="ghost" onPress={() => setStep('phone')} />
           </>
         )}
       </View>

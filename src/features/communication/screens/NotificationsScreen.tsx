@@ -3,6 +3,7 @@ import React from 'react';
 import {FlatList, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -26,22 +27,23 @@ const TYPE_ICON: Record<string, string> = {
 
 export function NotificationsScreen(): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const navigation = useNavigation();
   const {data, isLoading} = useNotifications();
   const markRead = useMarkNotificationRead();
 
   if (isLoading || !data) {
-    return <Loader message="Loading notifications…" />;
+    return <Loader message={t('notifications_loadingNotifications')} />;
   }
 
   return (
     <Screen padded={false}>
-      <CustomHeader title="Notifications" onBack={() => navigation.goBack()} />
+      <CustomHeader title={t('notifications_title')} onBack={() => navigation.goBack()} />
       <FlatList
         data={data}
         keyExtractor={n => n.id}
         contentContainerStyle={{padding: theme.spacing.lg, flexGrow: 1}}
-        ListEmptyComponent={<EmptyState title="No notifications" icon="notification" />}
+        ListEmptyComponent={<EmptyState title={t('notifications_noNotifications')} icon="notification" />}
         renderItem={({item}) => (
           <View
             style={{
@@ -59,7 +61,7 @@ export function NotificationsScreen(): React.JSX.Element {
                   <AppText variant="label" color="textMuted">
                     {timeAgo(item.createdAt)}
                   </AppText>
-                  {!item.read ? <Badge label="New" tone="primary" /> : null}
+                  {!item.read ? <Badge label={t('notifications_new')} tone="primary" /> : null}
                 </View>
               }
               onPress={() => !item.read && markRead.mutate(item.id)}

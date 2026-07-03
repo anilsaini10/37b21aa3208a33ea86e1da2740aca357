@@ -4,6 +4,7 @@ import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
@@ -32,22 +33,23 @@ export function AdminDashboardScreen(): React.JSX.Element {
   const navigation = useNavigation<Nav>();
   const user = useAuthStore(s => s.user);
   const {data, isLoading} = useAdminDashboard();
+  const {t} = useLanguage();
 
   if (isLoading || !data) {
-    return <Loader message="Loading dashboard…" />;
+    return <Loader message={t('adminDashboard_loadingDashboard')} />;
   }
 
   const stats: StatCard[] = [
-    {key: 'students', label: 'Students', value: data.totalStudents, icon: 'students', accent: 'primary', delta: 4},
-    {key: 'teachers', label: 'Teachers', value: data.totalTeachers, icon: 'teacher', accent: 'info'},
-    {key: 'staff', label: 'Staff', value: data.totalStaff, icon: 'staff', accent: 'success'},
-    {key: 'classes', label: 'Classes', value: data.totalClasses, icon: 'class', accent: 'warning'},
+    {key: 'students', label: t('adminDashboard_students'), value: data.totalStudents, icon: 'students', accent: 'primary', delta: 4},
+    {key: 'teachers', label: t('adminDashboard_teachers'), value: data.totalTeachers, icon: 'teacher', accent: 'info'},
+    {key: 'staff', label: t('adminDashboard_staff'), value: data.totalStaff, icon: 'staff', accent: 'success'},
+    {key: 'classes', label: t('adminDashboard_classes'), value: data.totalClasses, icon: 'class', accent: 'warning'},
   ];
 
   return (
     <Screen padded={false}>
       <CustomHeader
-        title={`Hello, ${user?.name?.split(' ')[0] ?? 'Admin'}`}
+        title={t('adminDashboard_greeting', {name: user?.name?.split(' ')[0] ?? 'Admin'})}
         subtitle={user?.schoolName}
         actions={[{icon: 'notification', onPress: () => navigation.navigate('Notifications'), badgeCount: 3}]}
       />
@@ -56,7 +58,7 @@ export function AdminDashboardScreen(): React.JSX.Element {
         showsVerticalScrollIndicator={false}>
         <StatGrid stats={stats} />
 
-        <SectionTitle title="Today's Attendance" />
+        <SectionTitle title={t('adminDashboard_todaysAttendance')} />
         <CustomCard>
           <Row justify="space-between">
             <View>
@@ -64,7 +66,7 @@ export function AdminDashboardScreen(): React.JSX.Element {
                 {data.todayAttendancePercentage}%
               </AppText>
               <AppText variant="caption" color="textSecondary">
-                Present today across school
+                {t('adminDashboard_presentTodayAcrossSchool')}
               </AppText>
             </View>
             <Icon name="attendance" size={40} />
@@ -73,26 +75,26 @@ export function AdminDashboardScreen(): React.JSX.Element {
           <BarChart series={data.attendanceTrend} height={130} valueFormatter={v => `${v}%`} />
         </CustomCard>
 
-        <SectionTitle title="Fee Collection" actionLabel="Details" onAction={() => navigation.navigate('Reports')} />
+        <SectionTitle title={t('adminDashboard_feeCollection')} actionLabel={t('common_details')} onAction={() => navigation.navigate('Reports')} />
         <CustomCard>
           <Row justify="space-between">
             <View>
-              <AppText variant="caption" color="textSecondary">Collected</AppText>
+              <AppText variant="caption" color="textSecondary">{t('adminDashboard_collected')}</AppText>
               <AppText variant="h2" color="success">{formatCurrency(data.feeCollected)}</AppText>
             </View>
             <View>
-              <AppText variant="caption" color="textSecondary">Pending</AppText>
+              <AppText variant="caption" color="textSecondary">{t('adminDashboard_pending')}</AppText>
               <AppText variant="h2" color="error">{formatCurrency(data.feePending)}</AppText>
             </View>
           </Row>
           <Spacer size={12} />
           <LineChart series={data.feeCollectionTrend} color={theme.colors.success} />
           <AppText variant="label" color="textMuted" center>
-            Monthly collection (₹ thousands) · latest {formatCompact(data.feeCollected)}
+            {t('adminDashboard_monthlyCollectionLatest', {amount: formatCompact(data.feeCollected)})}
           </AppText>
         </CustomCard>
 
-        <SectionTitle title="Upcoming Events" actionLabel="See all" onAction={() => navigation.navigate('Events')} />
+        <SectionTitle title={t('adminDashboard_upcomingEvents')} actionLabel={t('common_seeAll')} onAction={() => navigation.navigate('Events')} />
         <CustomCard padded={false} style={{paddingHorizontal: theme.spacing.lg}}>
           {data.upcomingEvents.map(ev => (
             <ListRow

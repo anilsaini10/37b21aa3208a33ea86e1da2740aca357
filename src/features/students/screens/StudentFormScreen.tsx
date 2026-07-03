@@ -4,6 +4,7 @@ import {ScrollView} from 'react-native';
 import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
+import {useLanguage} from '../../../core/i18n';
 import {Screen, CustomHeader, DynamicForm, Loader} from '../../../shared/components';
 import type {FormField} from '../../../shared/components';
 import {db} from '../../../core/mock/db';
@@ -16,6 +17,7 @@ type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
 export function StudentFormScreen(): React.JSX.Element {
   const {theme} = useTheme();
+  const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
   const route = useRoute<RouteProp<AdminStackParamList, 'StudentForm'>>();
   const id = route.params?.id;
@@ -25,27 +27,36 @@ export function StudentFormScreen(): React.JSX.Element {
   const updateMutation = useUpdateStudent();
 
   const classOptions = db.classes.map(c => ({label: c.name, value: c.id}));
-  const sectionOptions = db.sections.map(s => ({label: 'Section ' + s.name, value: s.id}));
+  const sectionOptions = db.sections.map(s => ({
+    label: t('studentForm_sectionOptionLabel', {section: s.name}),
+    value: s.id,
+  }));
 
   const fields: FormField[] = [
-    {name: 'name', label: 'Full Name', type: 'text', required: true},
+    {name: 'name', label: t('studentForm_fullNameLabel'), type: 'text', required: true},
     {
       name: 'gender',
-      label: 'Gender',
+      label: t('studentForm_genderLabel'),
       type: 'select',
       options: [
-        {label: 'Male', value: 'male'},
-        {label: 'Female', value: 'female'},
+        {label: t('studentForm_genderMale'), value: 'male'},
+        {label: t('studentForm_genderFemale'), value: 'female'},
       ],
     },
-    {name: 'dateOfBirth', label: 'Date of Birth', type: 'date', required: true},
-    {name: 'classId', label: 'Class', type: 'select', options: classOptions, required: true},
-    {name: 'sectionId', label: 'Section', type: 'select', options: sectionOptions, required: true},
-    {name: 'rollNo', label: 'Roll No', type: 'number', required: true},
-    {name: 'parentName', label: 'Parent / Guardian Name', type: 'text', required: true},
-    {name: 'parentPhone', label: 'Parent Phone', type: 'phone', required: true},
-    {name: 'bloodGroup', label: 'Blood Group', type: 'text'},
-    {name: 'address', label: 'Address', type: 'textarea'},
+    {name: 'dateOfBirth', label: t('studentForm_dateOfBirthLabel'), type: 'date', required: true},
+    {name: 'classId', label: t('studentForm_classLabel'), type: 'select', options: classOptions, required: true},
+    {
+      name: 'sectionId',
+      label: t('studentForm_sectionLabel'),
+      type: 'select',
+      options: sectionOptions,
+      required: true,
+    },
+    {name: 'rollNo', label: t('studentForm_rollNoLabel'), type: 'number', required: true},
+    {name: 'parentName', label: t('studentForm_parentNameLabel'), type: 'text', required: true},
+    {name: 'parentPhone', label: t('studentForm_parentPhoneLabel'), type: 'phone', required: true},
+    {name: 'bloodGroup', label: t('studentForm_bloodGroupLabel'), type: 'text'},
+    {name: 'address', label: t('common_address'), type: 'textarea'},
   ];
 
   const defaultValues: Partial<Record<keyof StudentInput, unknown>> | undefined = student
@@ -84,13 +95,13 @@ export function StudentFormScreen(): React.JSX.Element {
   };
 
   if (id && (isLoading || !student)) {
-    return <Loader message="Loading student…" />;
+    return <Loader message={t('studentForm_loadingStudent')} />;
   }
 
   return (
     <Screen padded={false}>
       <CustomHeader
-        title={id ? 'Edit Student' : 'Add Student'}
+        title={id ? t('studentForm_editTitle') : t('studentForm_addTitle')}
         onBack={() => navigation.goBack()}
       />
       <ScrollView
@@ -100,7 +111,7 @@ export function StudentFormScreen(): React.JSX.Element {
         <DynamicForm
           fields={fields}
           defaultValues={defaultValues}
-          submitLabel={id ? 'Save Changes' : 'Add Student'}
+          submitLabel={id ? t('studentForm_saveChanges') : t('studentForm_addTitle')}
           onSubmit={onSubmit}
           loading={createMutation.isPending || updateMutation.isPending}
         />
