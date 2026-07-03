@@ -9,6 +9,7 @@ import type {AdminStackParamList, AdminTabParamList} from './types';
 import {ScreenNames} from './ScreenNames';
 
 import {AdminDashboardScreen} from '../features/dashboard/screens/AdminDashboardScreen';
+import {StudentsWiseClassListScreen} from '../features/students/screens/StudentsWiseClassList';
 import {StudentsListScreen} from '../features/students/screens/StudentsListScreen';
 import {StudentDetailScreen} from '../features/students/screens/StudentDetailScreen';
 import {StudentFormScreen} from '../features/students/screens/StudentFormScreen';
@@ -59,7 +60,7 @@ function AdminTabs(): React.JSX.Element {
         tabBarIcon: ({color}) => <Icon name={TAB_ICON[route.name]} size={22} color={color} />,
       })}>
       <Tab.Screen name={ScreenNames.Dashboard} component={AdminDashboardScreen} />
-      <Tab.Screen name={ScreenNames.Students} component={StudentsListScreen} />
+      <Tab.Screen name={ScreenNames.Students} component={StudentsWiseClassListScreen} />
       <Tab.Screen name={ScreenNames.Fees} component={FeesListScreen} />
       <Tab.Screen name={ScreenNames.More} component={MoreScreen} />
     </Tab.Navigator>
@@ -70,6 +71,7 @@ export function AdminNavigator(): React.JSX.Element {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen name={ScreenNames.Tabs} component={AdminTabs} />
+      <Stack.Screen name={ScreenNames.StudentsList} component={StudentsListScreen} />
       <Stack.Screen name={ScreenNames.StudentDetail} component={StudentDetailScreen} />
       <Stack.Screen name={ScreenNames.StudentForm} component={StudentFormScreen} />
       <Stack.Screen name={ScreenNames.Teachers} component={TeachersListScreen} />
