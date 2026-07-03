@@ -10,7 +10,7 @@ import {
   CustomHeader,
   CustomCard,
   CustomButton,
-  StatTile,
+  StatGrid,
   SectionTitle,
   BarChart,
   Loader,
@@ -58,13 +58,7 @@ export function TeacherDashboardScreen(): React.JSX.Element {
       <ScrollView
         contentContainerStyle={{padding: theme.spacing.lg}}
         showsVerticalScrollIndicator={false}>
-        <Row gap={theme.spacing.md} wrap style={{rowGap: theme.spacing.md}}>
-          {stats.map(s => (
-            <View key={s.key} style={{width: '47%'}}>
-              <StatTile stat={s} />
-            </View>
-          ))}
-        </Row>
+        <StatGrid stats={stats} />
 
         <SectionTitle title="Quick Actions" />
         <Row gap={theme.spacing.md}>
