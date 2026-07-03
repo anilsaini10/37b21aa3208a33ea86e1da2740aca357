@@ -2,7 +2,7 @@
 import React, {useState} from 'react';
 import {ScrollView, View, Pressable} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {useTheme} from '../../../core/theme';
+import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import type {TranslationKey} from '../../../core/i18n';
 import {
@@ -38,6 +38,32 @@ export function TimetableScreen(): React.JSX.Element {
 
   const [day, setDay] = useState<WeekDay>('monday');
   const {data, isLoading} = useTimetable(defaultClass.id, defaultSection.id);
+  const styles = useThemedStyles(t2 => ({
+    daySelectorWrap: {
+      alignItems: 'center',
+      marginTop: 10,
+    },
+    dayScrollContent: {
+      columnGap: t2.spacing.lg,
+    },
+    periodsScrollContent: {
+      padding: t2.spacing.lg,
+      flexGrow: 1,
+    },
+    periodCard: {
+      marginBottom: t2.spacing.md,
+    },
+    periodNoBlock: {
+      width: 52,
+      alignItems: 'center',
+      borderRightWidth: 1,
+      borderRightColor: t2.colors.divider,
+      paddingRight: t2.spacing.sm,
+    },
+    periodInfo: {
+      flex: 1,
+    },
+  }));
 
   if (isLoading || !data) {
     return <Loader message={t('timetable_loading')} />;
@@ -53,47 +79,42 @@ export function TimetableScreen(): React.JSX.Element {
         onBack={() => navigation.goBack()}
       />
       {/* Day selector */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md, columnGap: theme.spacing.sm}}>
-        {DAYS.map(d => {
-          const active = d === day;
-          return (
-            <Pressable
-              key={d}
-              onPress={() => setDay(d)}
-              style={{
-                paddingHorizontal: theme.spacing.lg,
-                paddingVertical: theme.spacing.sm,
-                borderRadius: theme.radius.pill,
-                backgroundColor: active ? theme.colors.primary : theme.colors.surfaceVariant,
-              }}>
-              <AppText
-                variant="label"
-                style={{color: active ? theme.colors.onPrimary : theme.colors.textSecondary}}>
-                {t(DAY_LABEL_KEYS[d])}
-              </AppText>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+      <View style={styles.daySelectorWrap}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.dayScrollContent}>
+          {DAYS.map(d => {
+            const active = d === day;
+            return (
+              <Pressable
+                key={d}
+                onPress={() => setDay(d)}
+                style={{
+                  paddingHorizontal: theme.spacing.lg,
+                  paddingVertical: theme.spacing.sm,
+                  borderRadius: theme.radius.pill,
+                  backgroundColor: active ? theme.colors.primary : theme.colors.surfaceVariant,
+                }}>
+                <AppText
+                  variant="label"
+                  style={{ color: active ? theme.colors.onPrimary : theme.colors.textSecondary }}>
+                  {t(DAY_LABEL_KEYS[d])}
+                </AppText>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      </View>
 
-      <ScrollView contentContainerStyle={{padding: theme.spacing.lg, flexGrow: 1}}>
+      <ScrollView contentContainerStyle={styles.periodsScrollContent}>
         {periods.length === 0 ? (
           <EmptyState title={t('timetable_noClasses')} message={t('timetable_noClassesMessage')} icon="timetable" />
         ) : (
           periods.map(period => (
-            <CustomCard key={period.id} style={{marginBottom: theme.spacing.md}}>
+            <CustomCard key={period.id} style={styles.periodCard}>
               <Row gap={theme.spacing.md}>
-                <View
-                  style={{
-                    width: 52,
-                    alignItems: 'center',
-                    borderRightWidth: 1,
-                    borderRightColor: theme.colors.divider,
-                    paddingRight: theme.spacing.sm,
-                  }}>
+                <View style={styles.periodNoBlock}>
                   <AppText variant="h3" color="primary">
                     {period.periodNo}
                   </AppText>
@@ -101,7 +122,7 @@ export function TimetableScreen(): React.JSX.Element {
                     {t('timetable_period')}
                   </AppText>
                 </View>
-                <View style={{flex: 1}}>
+                <View style={styles.periodInfo}>
                   <AppText variant="bodyBold">{period.subjectName}</AppText>
                   <Row gap={theme.spacing.xs}>
                     <Icon name="clock" size={13} color={theme.colors.textMuted} />

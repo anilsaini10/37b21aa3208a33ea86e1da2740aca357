@@ -1,7 +1,7 @@
 /** Parent attendance — child's overall attendance + monthly trend. */
 import React from 'react';
 import {View, ScrollView} from 'react-native';
-import {useTheme} from '../../../core/theme';
+import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -19,6 +19,14 @@ import {useParentDashboard} from '../../dashboard/dashboard.service';
 export function ParentAttendanceScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
+  const styles = useThemedStyles(t2 => ({
+    scrollContent: {
+      padding: t2.spacing.lg,
+    },
+    centeredBlock: {
+      alignItems: 'center',
+    },
+  }));
   const child = db.students[0];
   const {data, isLoading} = useParentDashboard();
 
@@ -34,10 +42,10 @@ export function ParentAttendanceScreen(): React.JSX.Element {
     <Screen padded={false}>
       <CustomHeader title={t('parentAttendance_title')} />
       <ScrollView
-        contentContainerStyle={{padding: theme.spacing.lg}}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <CustomCard>
-          <View style={{alignItems: 'center'}}>
+          <View style={styles.centeredBlock}>
             <AppText variant="display" color="success">
               {child.attendancePercentage}%
             </AppText>
@@ -47,7 +55,7 @@ export function ParentAttendanceScreen(): React.JSX.Element {
           </View>
           <Spacer size={theme.spacing.md} />
           <Row justify="space-around">
-            <View style={{alignItems: 'center'}}>
+            <View style={styles.centeredBlock}>
               <AppText variant="h3" color="success">
                 {presentDays}
               </AppText>
@@ -55,7 +63,7 @@ export function ParentAttendanceScreen(): React.JSX.Element {
                 {t('attendance_present')}
               </AppText>
             </View>
-            <View style={{alignItems: 'center'}}>
+            <View style={styles.centeredBlock}>
               <AppText variant="h3" color="error">
                 {absentDays}
               </AppText>

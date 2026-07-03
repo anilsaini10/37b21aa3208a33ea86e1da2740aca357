@@ -2,7 +2,7 @@
 import React, {useState} from 'react';
 import {ScrollView, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {useTheme} from '../../../core/theme';
+import {useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -27,10 +27,22 @@ function leaveTone(status: LeaveApplication['status']): BadgeTone {
 }
 
 export function LeaveScreen(): React.JSX.Element {
-  const {theme} = useTheme();
   const {t} = useLanguage();
   const navigation = useNavigation();
   const user = useAuthStore(s => s.user);
+  const styles = useThemedStyles(theme => ({
+    scrollContent: {
+      padding: theme.spacing.lg,
+    },
+    historyCard: {
+      marginBottom: theme.spacing.md,
+    },
+    historyRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+  }));
 
   const leaveStatusLabel = (status: LeaveApplication['status']) =>
     status === 'approved' ? t('leave_approved') : status === 'rejected' ? t('leave_rejected') : t('leave_pending');
@@ -76,7 +88,7 @@ export function LeaveScreen(): React.JSX.Element {
   return (
     <Screen padded={false}>
       <CustomHeader title={t('leave_title')} onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={{padding: theme.spacing.lg}} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <CustomCard>
           <AppText variant="h3">{t('leave_applyForLeave')}</AppText>
           <Spacer size={12} />
@@ -95,8 +107,8 @@ export function LeaveScreen(): React.JSX.Element {
 
         <SectionTitle title={t('leave_history')} />
         {history.map(item => (
-          <CustomCard key={item.id} style={{marginBottom: theme.spacing.md}}>
-            <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+          <CustomCard key={item.id} style={styles.historyCard}>
+            <View style={styles.historyRow}>
               <AppText variant="bodyBold">
                 {formatDate(item.fromDate)} – {formatDate(item.toDate)}
               </AppText>

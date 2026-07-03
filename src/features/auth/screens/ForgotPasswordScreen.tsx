@@ -1,7 +1,7 @@
 /** Forgot password — request a reset link/OTP. */
 import React, {useState} from 'react';
 import {View} from 'react-native';
-import {useTheme} from '../../../core/theme';
+import {useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -18,8 +18,18 @@ import type {AuthScreenProps} from '../../../navigation/types';
 export function ForgotPasswordScreen({
   navigation,
 }: AuthScreenProps<'ForgotPassword'>): React.JSX.Element {
-  const {theme} = useTheme();
   const {t} = useLanguage();
+  const styles = useThemedStyles(theme => ({
+    container: {
+      flex: 1,
+      padding: theme.spacing.lg,
+    },
+    sentBlock: {
+      alignItems: 'center',
+      marginTop: theme.spacing.xxl,
+      rowGap: theme.spacing.sm,
+    },
+  }));
   const [identifier, setIdentifier] = useState('');
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
@@ -41,9 +51,9 @@ export function ForgotPasswordScreen({
   return (
     <Screen padded={false}>
       <CustomHeader title={t('forgotPasswordScreen_title')} onBack={() => navigation.goBack()} />
-      <View style={{flex: 1, padding: theme.spacing.lg}}>
+      <View style={styles.container}>
         {sent ? (
-          <View style={{alignItems: 'center', marginTop: theme.spacing.xxl, rowGap: theme.spacing.sm}}>
+          <View style={styles.sentBlock}>
             <Icon name="success" size={56} />
             <AppText variant="h3" center>
               {t('forgotPasswordScreen_resetLinkSent')}

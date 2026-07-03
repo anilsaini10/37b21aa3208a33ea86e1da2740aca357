@@ -1,4 +1,5 @@
 export * from './types';
+export * from './ScreenNames';
 export * from './RootNavigator';
 export * from './AuthNavigator';
 export * from './AdminNavigator';

@@ -2,7 +2,7 @@
 import React from 'react';
 import {FlatList, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {useTheme} from '../../../core/theme';
+import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -31,6 +31,15 @@ export function NotificationsScreen(): React.JSX.Element {
   const navigation = useNavigation();
   const {data, isLoading} = useNotifications();
   const markRead = useMarkNotificationRead();
+  const styles = useThemedStyles(t2 => ({
+    listContent: {
+      padding: t2.spacing.lg,
+      flexGrow: 1,
+    },
+    metaBlock: {
+      alignItems: 'flex-end',
+    },
+  }));
 
   if (isLoading || !data) {
     return <Loader message={t('notifications_loadingNotifications')} />;
@@ -42,7 +51,7 @@ export function NotificationsScreen(): React.JSX.Element {
       <FlatList
         data={data}
         keyExtractor={n => n.id}
-        contentContainerStyle={{padding: theme.spacing.lg, flexGrow: 1}}
+        contentContainerStyle={styles.listContent}
         ListEmptyComponent={<EmptyState title={t('notifications_noNotifications')} icon="notification" />}
         renderItem={({item}) => (
           <View
@@ -57,7 +66,7 @@ export function NotificationsScreen(): React.JSX.Element {
               title={item.title}
               subtitle={item.body}
               right={
-                <View style={{alignItems: 'flex-end'}}>
+                <View style={styles.metaBlock}>
                   <AppText variant="label" color="textMuted">
                     {timeAgo(item.createdAt)}
                   </AppText>

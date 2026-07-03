@@ -3,7 +3,7 @@
  */
 import React, {useState} from 'react';
 import {Pressable, View} from 'react-native';
-import {useTheme} from '../../core/theme';
+import {useTheme, useThemedStyles} from '../../core/theme';
 import {useLanguage} from '../../core/i18n';
 import {AppText} from './AppText';
 import {Icon} from './Icon';
@@ -30,6 +30,29 @@ export function TimePicker({label, value, onChange}: TimePickerProps): React.JSX
   const {t} = useLanguage();
   const [open, setOpen] = useState(false);
   const [time, setTime] = useState(() => parse(value));
+  const styles = useThemedStyles(t2 => ({
+    wrapper: {
+      marginBottom: t2.spacing.md,
+    },
+    label: {
+      marginBottom: t2.spacing.xs,
+    },
+    field: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      height: t2.components.input.height,
+      borderWidth: 1,
+      borderColor: t2.colors.border,
+      borderRadius: t2.components.input.radius,
+      paddingHorizontal: t2.spacing.md,
+      backgroundColor: t2.colors.inputBackground,
+    },
+    pickerRow: {
+      flexDirection: 'row',
+      columnGap: t2.spacing.md,
+    },
+  }));
 
   const hourOptions = Array.from({length: 24}, (_, i) => ({label: String(i).padStart(2, '0'), value: i}));
   const minuteOptions = Array.from({length: 12}, (_, i) => ({
@@ -43,31 +66,19 @@ export function TimePicker({label, value, onChange}: TimePickerProps): React.JSX
   };
 
   return (
-    <View style={{marginBottom: theme.spacing.md}}>
+    <View style={styles.wrapper}>
       {label ? (
-        <AppText variant="label" color="textSecondary" style={{marginBottom: theme.spacing.xs}}>
+        <AppText variant="label" color="textSecondary" style={styles.label}>
           {label}
         </AppText>
       ) : null}
-      <Pressable
-        onPress={() => setOpen(true)}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          height: theme.components.input.height,
-          borderWidth: 1,
-          borderColor: theme.colors.border,
-          borderRadius: theme.components.input.radius,
-          paddingHorizontal: theme.spacing.md,
-          backgroundColor: theme.colors.inputBackground,
-        }}>
+      <Pressable onPress={() => setOpen(true)} style={styles.field}>
         <AppText color={value ? 'text' : 'textMuted'}>{value ?? t('common_selectTime')}</AppText>
         <Icon name="clock" size={18} color={theme.colors.textMuted} />
       </Pressable>
 
       <CustomBottomSheet visible={open} onClose={() => setOpen(false)} title={label ?? t('common_selectTime')}>
-        <View style={{flexDirection: 'row', columnGap: theme.spacing.md}}>
+        <View style={styles.pickerRow}>
           <ScrollPicker options={hourOptions} value={time.h} onChange={h => setTime(prev => ({...prev, h}))} />
           <ScrollPicker options={minuteOptions} value={time.m} onChange={m => setTime(prev => ({...prev, m}))} />
         </View>

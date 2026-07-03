@@ -3,7 +3,7 @@ import React from 'react';
 import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme} from '../../../core/theme';
+import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage, type TranslationKey} from '../../../core/i18n';
 import {
   Screen,
@@ -21,19 +21,35 @@ import {
 import {capitalize} from '../../../shared/helpers';
 import {useAuthStore} from '../../auth/authStore';
 import type {TeacherStackParamList} from '../../../navigation/types';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 
 type Nav = NativeStackNavigationProp<TeacherStackParamList>;
 
-const MENU: {icon: string; titleKey: TranslationKey; route: keyof TeacherStackParamList}[] = [
-  {icon: 'timetable', titleKey: 'teacherProfile_timetable', route: 'Timetable'},
-  {icon: 'announcement', titleKey: 'teacherProfile_announcements', route: 'Announcements'},
-  {icon: 'chat', titleKey: 'teacherProfile_chat', route: 'Chat'},
-  {icon: 'calendar', titleKey: 'teacherProfile_leaveManagement', route: 'Leave'},
-  {icon: 'lock', titleKey: 'teacherProfile_changePassword', route: 'ChangePassword'},
+const MENU: {
+  icon: string;
+  titleKey: TranslationKey;
+  route: 'Timetable' | 'Announcements' | 'Chat' | 'Leave' | 'ChangePassword';
+}[] = [
+  {icon: 'timetable', titleKey: 'teacherProfile_timetable', route: ScreenNames.Timetable},
+  {icon: 'announcement', titleKey: 'teacherProfile_announcements', route: ScreenNames.Announcements},
+  {icon: 'chat', titleKey: 'teacherProfile_chat', route: ScreenNames.Chat},
+  {icon: 'calendar', titleKey: 'teacherProfile_leaveManagement', route: ScreenNames.Leave},
+  {icon: 'lock', titleKey: 'teacherProfile_changePassword', route: ScreenNames.ChangePassword},
 ];
 
 export function TeacherProfileScreen(): React.JSX.Element {
   const {theme} = useTheme();
+  const styles = useThemedStyles(t2 => ({
+    scrollContent: {
+      padding: t2.spacing.lg,
+    },
+    nameBlock: {
+      flex: 1,
+    },
+    menuCard: {
+      paddingHorizontal: t2.spacing.lg,
+    },
+  }));
   const navigation = useNavigation<Nav>();
   const {t} = useLanguage();
   const user = useAuthStore(s => s.user);
@@ -43,12 +59,12 @@ export function TeacherProfileScreen(): React.JSX.Element {
     <Screen padded={false}>
       <CustomHeader title={t('teacherProfile_profile')} />
       <ScrollView
-        contentContainerStyle={{padding: theme.spacing.lg}}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <CustomCard>
           <Row gap={theme.spacing.md}>
             <Avatar name={user?.name ?? t('teacherProfile_teacher')} size={64} />
-            <View style={{flex: 1}}>
+            <View style={styles.nameBlock}>
               <AppText variant="h2" numberOfLines={1}>
                 {user?.name ?? t('teacherProfile_teacher')}
               </AppText>
@@ -69,7 +85,7 @@ export function TeacherProfileScreen(): React.JSX.Element {
         </CustomCard>
 
         <SectionTitle title={t('teacherProfile_manage')} />
-        <CustomCard padded={false} style={{paddingHorizontal: theme.spacing.lg}}>
+        <CustomCard padded={false} style={styles.menuCard}>
           {MENU.map(item => (
             <ListRow
               key={item.route}

@@ -7,6 +7,7 @@ import {lightTheme, ThemeContext, useTheme} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {AppText, CustomCard, Icon, LanguageSwitcher, Spacer, Row} from '../../../shared/components';
 import type {AuthScreenProps} from '../../../navigation/types';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {UserRole} from '../../../shared/types';
 import { Constants } from '../util/constants';
 
@@ -18,9 +19,9 @@ export function RoleSelectScreen({navigation}: AuthScreenProps<'RoleSelect'>): R
 
   const onSelect = (role: UserRole) => {
     if (role === 'parent') {
-      navigation.navigate('ParentLogin');
+      navigation.navigate(ScreenNames.ParentLogin);
     } else {
-      navigation.navigate('Login', {role});
+      navigation.navigate(ScreenNames.Login, {role});
     }
   };
 
@@ -31,11 +32,14 @@ export function RoleSelectScreen({navigation}: AuthScreenProps<'RoleSelect'>): R
 
         <LanguageSwitcher
           iconColor="#fff"
-          style={{position: 'absolute', top: insets.top + theme.spacing.sm, right: theme.spacing.lg, zIndex: 10}}
+          style={[
+            styles.languageSwitcher,
+            {top: insets.top + theme.spacing.sm, right: theme.spacing.lg},
+          ]}
         />
 
         <ScrollView
-          style={{flex: 1}}
+          style={styles.scroll}
           contentContainerStyle={{paddingBottom: insets.bottom + theme.spacing.xl}}
           showsVerticalScrollIndicator={false}>
           <View style={styles.hero}>
@@ -88,7 +92,7 @@ export function RoleSelectScreen({navigation}: AuthScreenProps<'RoleSelect'>): R
                     ]}>
                     <Icon name={item.icon} size={24} />
                   </View>
-                  <View style={{flex: 1}}>
+                  <View style={styles.roleTextBlock}>
                     <AppText variant="bodyBold">{t(item.titleKey)}</AppText>
                     <AppText variant="caption" color="textSecondary">
                       {t(item.descKey)}
@@ -137,5 +141,15 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  languageSwitcher: {
+    position: 'absolute',
+    zIndex: 10,
+  },
+  scroll: {
+    flex: 1,
+  },
+  roleTextBlock: {
+    flex: 1,
   },
 });

@@ -1,9 +1,9 @@
 /** Report card — per-subject marks table + overall result summary. */
 import React from 'react';
-import {View, ScrollView} from 'react-native';
+import {StyleSheet, View, ScrollView} from 'react-native';
 import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme} from '../../../core/theme';
+import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -26,9 +26,15 @@ import type {ParentStackParamList} from '../../../navigation/types';
 type Nav = NativeStackNavigationProp<ParentStackParamList>;
 type SubjectRow = {subjectName: string; marks: number; maxMarks: number; grade: string};
 
+const summaryStyles = StyleSheet.create({
+  item: {
+    alignItems: 'center',
+  },
+});
+
 function SummaryItem({label, value}: {label: string; value: string}): React.JSX.Element {
   return (
-    <View style={{alignItems: 'center'}}>
+    <View style={summaryStyles.item}>
       <AppText variant="h3">{value}</AppText>
       <AppText variant="label" color="textMuted">
         {label}
@@ -45,6 +51,14 @@ export function ReportCardScreen(): React.JSX.Element {
   const child = db.students[0];
   const {data: card, isLoading} = useReportCard(examId, child.id);
   const {t} = useLanguage();
+  const styles = useThemedStyles(t2 => ({
+    scrollContent: {
+      padding: t2.spacing.lg,
+    },
+    tableCard: {
+      overflow: 'hidden',
+    },
+  }));
 
   if (isLoading) {
     return <Loader message={t('reportCard_loading')} />;
@@ -87,7 +101,7 @@ export function ReportCardScreen(): React.JSX.Element {
     <Screen padded={false}>
       <CustomHeader title={t('reportCard_title')} onBack={() => navigation.goBack()} />
       <ScrollView
-        contentContainerStyle={{padding: theme.spacing.lg}}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <CustomCard>
           <AppText variant="h3">{card.examName}</AppText>
@@ -100,7 +114,7 @@ export function ReportCardScreen(): React.JSX.Element {
         </CustomCard>
 
         <Spacer size={theme.spacing.md} />
-        <CustomCard padded={false} style={{overflow: 'hidden'}}>
+        <CustomCard padded={false} style={styles.tableCard}>
           <CustomTable<SubjectRow>
             columns={columns}
             data={card.subjects}

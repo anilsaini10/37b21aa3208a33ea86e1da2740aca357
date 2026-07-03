@@ -1,7 +1,7 @@
 /** Parent login — mobile number + OTP verification. */
 import React, {useState} from 'react';
 import {View} from 'react-native';
-import {useTheme} from '../../../core/theme';
+import {useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -16,8 +16,13 @@ import {authApi} from '../authApi';
 import type {AuthScreenProps} from '../../../navigation/types';
 
 export function ParentLoginScreen({navigation}: AuthScreenProps<'ParentLogin'>): React.JSX.Element {
-  const {theme} = useTheme();
   const {t} = useLanguage();
+  const styles = useThemedStyles(theme => ({
+    container: {
+      flex: 1,
+      padding: theme.spacing.lg,
+    },
+  }));
   const {verifyOtp, isLoading, error, clearError} = useAuthStore();
 
   const [phone, setPhone] = useState('');
@@ -45,7 +50,7 @@ export function ParentLoginScreen({navigation}: AuthScreenProps<'ParentLogin'>):
   return (
     <Screen padded={false}>
       <CustomHeader title={t('parentLoginScreen_title')} onBack={() => navigation.goBack()} />
-      <View style={{flex: 1, padding: theme.spacing.lg}}>
+      <View style={styles.container}>
         <Spacer size={12} />
         <AppText variant="h2">
           {step === 'phone' ? t('parentLoginScreen_enterMobile') : t('parentLoginScreen_verifyOtp')}

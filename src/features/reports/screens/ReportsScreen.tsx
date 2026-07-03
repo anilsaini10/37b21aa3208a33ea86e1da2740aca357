@@ -3,7 +3,7 @@ import React from 'react';
 import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme} from '../../../core/theme';
+import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -31,6 +31,18 @@ export function ReportsScreen(): React.JSX.Element {
   const {t} = useLanguage();
   const {data: dashboard, isLoading: dashboardLoading} = useAdminDashboard();
   const {data: feeSummary, isLoading: feeLoading} = useFeeSummary();
+  const styles = useThemedStyles(t2 => ({
+    scrollContent: {
+      padding: t2.spacing.lg,
+    },
+    statsRow: {
+      rowGap: t2.spacing.sm,
+    },
+    statTileWrapper: {
+      flexBasis: '31%',
+      flexGrow: 1,
+    },
+  }));
 
   if (dashboardLoading || feeLoading || !dashboard || !feeSummary) {
     return <Loader message={t('reports_loading')} />;
@@ -64,7 +76,7 @@ export function ReportsScreen(): React.JSX.Element {
     <Screen padded={false}>
       <CustomHeader title={t('reports_title')} onBack={() => navigation.goBack()} />
       <ScrollView
-        contentContainerStyle={{padding: theme.spacing.lg}}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <SectionTitle title={t('reports_attendanceTrend')} />
         <CustomCard>
@@ -82,9 +94,9 @@ export function ReportsScreen(): React.JSX.Element {
         </CustomCard>
 
         <SectionTitle title={t('reports_feeSummary')} />
-        <Row gap={theme.spacing.sm} wrap style={{rowGap: theme.spacing.sm}}>
+        <Row gap={theme.spacing.sm} wrap style={styles.statsRow}>
           {stats.map(s => (
-            <View key={s.key} style={{flexBasis: '31%', flexGrow: 1}}>
+            <View key={s.key} style={styles.statTileWrapper}>
               <StatTile stat={s} />
             </View>
           ))}

@@ -1,7 +1,7 @@
 /** Reusable list item row: leading avatar/icon, title/subtitle, trailing slot. */
 import React from 'react';
 import {Pressable, View} from 'react-native';
-import {useTheme} from '../../core/theme';
+import {useTheme, useThemedStyles} from '../../core/theme';
 import {AppText} from './AppText';
 import {Icon} from './Icon';
 import {Avatar} from './Avatar';
@@ -26,30 +26,36 @@ export function ListRow({
   onPress,
 }: ListRowProps): React.JSX.Element {
   const {theme} = useTheme();
+  const styles = useThemedStyles(t => ({
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      columnGap: t.spacing.md,
+      paddingVertical: t.spacing.md,
+    },
+    iconCircle: {
+      width: 42,
+      height: 42,
+      borderRadius: t.radius.md,
+      backgroundColor: t.colors.surfaceVariant,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    textBlock: {
+      flex: 1,
+    },
+  }));
+
   const content = (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        columnGap: theme.spacing.md,
-        paddingVertical: theme.spacing.md,
-      }}>
+    <View style={styles.row}>
       {avatarName !== undefined ? (
         <Avatar name={avatarName} uri={avatarUri} size={42} />
       ) : icon ? (
-        <View
-          style={{
-            width: 42,
-            height: 42,
-            borderRadius: theme.radius.md,
-            backgroundColor: theme.colors.surfaceVariant,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
+        <View style={styles.iconCircle}>
           <Icon name={icon} size={20} />
         </View>
       ) : null}
-      <View style={{flex: 1}}>
+      <View style={styles.textBlock}>
         <AppText variant="bodyBold" numberOfLines={1}>
           {title}
         </AppText>

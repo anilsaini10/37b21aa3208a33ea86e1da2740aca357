@@ -1,7 +1,7 @@
 /** Placeholder shown when a list / screen has no data. */
 import React from 'react';
 import {View} from 'react-native';
-import {useTheme} from '../../core/theme';
+import {useThemedStyles} from '../../core/theme';
 import {AppText} from './AppText';
 import {Icon} from './Icon';
 import {CustomButton} from './CustomButton';
@@ -21,16 +21,20 @@ export function EmptyState({
   actionLabel,
   onAction,
 }: EmptyStateProps): React.JSX.Element {
-  const {theme} = useTheme();
+  const styles = useThemedStyles(theme => ({
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: theme.spacing.xl,
+      rowGap: theme.spacing.sm,
+    },
+    actionButton: {
+      marginTop: theme.spacing.sm,
+    },
+  }));
   return (
-    <View
-      style={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: theme.spacing.xl,
-        rowGap: theme.spacing.sm,
-      }}>
+    <View style={styles.container}>
       <Icon name={icon} size={56} />
       <AppText variant="h3" center>
         {title}
@@ -41,7 +45,7 @@ export function EmptyState({
         </AppText>
       ) : null}
       {actionLabel && onAction ? (
-        <CustomButton title={actionLabel} onPress={onAction} fullWidth={false} size="sm" style={{marginTop: theme.spacing.sm}} />
+        <CustomButton title={actionLabel} onPress={onAction} fullWidth={false} size="sm" style={styles.actionButton} />
       ) : null}
     </View>
   );

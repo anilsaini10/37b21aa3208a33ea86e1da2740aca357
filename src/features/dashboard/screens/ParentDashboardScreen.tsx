@@ -3,7 +3,7 @@ import React from 'react';
 import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme} from '../../../core/theme';
+import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -24,6 +24,7 @@ import {formatCurrency} from '../../../core/utils/format';
 import {useAuthStore} from '../../auth/authStore';
 import {useParentDashboard} from '../dashboard.service';
 import type {ParentStackParamList} from '../../../navigation/types';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {StatCard} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<ParentStackParamList>;
@@ -34,6 +35,14 @@ export function ParentDashboardScreen(): React.JSX.Element {
   const user = useAuthStore(s => s.user);
   const {data, isLoading} = useParentDashboard();
   const {t} = useLanguage();
+  const styles = useThemedStyles(t2 => ({
+    scrollContent: {
+      padding: t2.spacing.lg,
+    },
+    flexOne: {
+      flex: 1,
+    },
+  }));
 
   if (isLoading || !data) {
     return <Loader message={t('parentDashboard_loadingDashboard')} />;
@@ -50,15 +59,15 @@ export function ParentDashboardScreen(): React.JSX.Element {
     <Screen padded={false}>
       <CustomHeader
         title={t('parentDashboard_greeting', {name: user?.name?.split(' ')[0] ?? 'Parent'})}
-        actions={[{icon: 'notification', onPress: () => navigation.navigate('Notifications'), badgeCount: 2}]}
+        actions={[{icon: 'notification', onPress: () => navigation.navigate(ScreenNames.Notifications), badgeCount: 2}]}
       />
       <ScrollView
-        contentContainerStyle={{padding: theme.spacing.lg}}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <CustomCard>
           <Row gap={theme.spacing.md}>
             <Avatar name={data.childName} size={52} />
-            <View style={{flex: 1}}>
+            <View style={styles.flexOne}>
               <AppText variant="h3">{data.childName}</AppText>
               <AppText variant="caption" color="textSecondary">
                 {data.className}
@@ -72,11 +81,11 @@ export function ParentDashboardScreen(): React.JSX.Element {
 
         <SectionTitle title={t('parentDashboard_quickLinks')} />
         <Row gap={theme.spacing.md}>
-          <View style={{flex: 1}}>
-            <CustomButton title={t('parentDashboard_results')} variant="outline" onPress={() => navigation.navigate('Results')} />
+          <View style={styles.flexOne}>
+            <CustomButton title={t('parentDashboard_results')} variant="outline" onPress={() => navigation.navigate(ScreenNames.Results)} />
           </View>
-          <View style={{flex: 1}}>
-            <CustomButton title={t('parentDashboard_timetable')} variant="outline" onPress={() => navigation.navigate('Timetable')} />
+          <View style={styles.flexOne}>
+            <CustomButton title={t('parentDashboard_timetable')} variant="outline" onPress={() => navigation.navigate(ScreenNames.Timetable)} />
           </View>
         </Row>
 

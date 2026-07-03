@@ -19,6 +19,7 @@ import {formatDate} from '../../../core/utils/format';
 import {capitalize} from '../../../shared/helpers';
 import {useExams} from '../exams.service';
 import type {AdminStackParamList} from '../../../navigation/types';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {Exam} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
@@ -64,7 +65,7 @@ export function ExamsListScreen(): React.JSX.Element {
                 title={exam.name}
                 subtitle={`${exam.className} · ${formatDate(exam.startDate)} – ${formatDate(exam.endDate)}`}
                 right={<Badge label={capitalize(exam.status)} tone={toneFor(exam.status)} />}
-                onPress={() => navigation.navigate('ExamReport', {examId: exam.id})}
+                onPress={() => navigation.navigate(ScreenNames.ExamReport, {examId: exam.id})}
               />
             </React.Fragment>
           ))}
