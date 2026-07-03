@@ -1,7 +1,7 @@
 /** Change password — reused from Teacher & Parent profile stacks. */
 import React, {useState} from 'react';
 import {View} from 'react-native';
-import {useTheme} from '../../../core/theme';
+import {useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -14,8 +14,13 @@ import {
 import {authApi} from '../authApi';
 
 export function ChangePasswordScreen({navigation}: {navigation: {goBack: () => void}}): React.JSX.Element {
-  const {theme} = useTheme();
   const {t} = useLanguage();
+  const styles = useThemedStyles(theme => ({
+    container: {
+      flex: 1,
+      padding: theme.spacing.lg,
+    },
+  }));
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -43,7 +48,7 @@ export function ChangePasswordScreen({navigation}: {navigation: {goBack: () => v
   return (
     <Screen padded={false}>
       <CustomHeader title={t('changePasswordScreen_title')} onBack={navigation.goBack} />
-      <View style={{flex: 1, padding: theme.spacing.lg}}>
+      <View style={styles.container}>
         <Spacer size={12} />
         <CustomInput label={t('changePasswordScreen_currentPasswordLabel')} secure iconLeft="lock" value={current} onChangeText={setCurrent} required />
         <CustomInput label={t('changePasswordScreen_newPasswordLabel')} secure iconLeft="lock" value={next} onChangeText={setNext} required />

@@ -18,6 +18,16 @@ export interface Homework {
   attachmentUrl?: string;
 }
 
+export interface HomeworkSubmission {
+  id: ID;
+  homeworkId: ID;
+  studentId: ID;
+  studentName: string;
+  rollNo: number;
+  status: 'completed' | 'pending';
+  completedAt?: string;
+}
+
 export interface Announcement {
   id: ID;
   title: string;

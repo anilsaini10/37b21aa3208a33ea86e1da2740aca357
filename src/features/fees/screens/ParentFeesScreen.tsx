@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme} from '../../../core/theme';
+import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import type {TranslationKey} from '../../../core/i18n';
 import {
@@ -27,6 +27,7 @@ import {feeStatusTone} from '../../../shared/helpers';
 import {db} from '../../../core/mock/db';
 import {useStudentFee, usePayFee} from '../fees.service';
 import type {ParentStackParamList} from '../../../navigation/types';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {FeePayment, FeeStatus} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<ParentStackParamList>;
@@ -46,6 +47,17 @@ export function ParentFeesScreen(): React.JSX.Element {
   const child = db.students[0];
   const {data: invoice, isLoading} = useStudentFee(child.id);
   const payMutation = usePayFee();
+  const styles = useThemedStyles(t2 => ({
+    scrollContent: {
+      padding: t2.spacing.lg,
+    },
+    dueBlock: {
+      alignItems: 'flex-end',
+    },
+    methodWrapper: {
+      flex: 1,
+    },
+  }));
 
   const METHODS: {key: Extract<PayMethod, 'upi' | 'card' | 'netbanking'>; label: string}[] = [
     {key: 'upi', label: t('parentFees_methodUpi')},
@@ -89,7 +101,7 @@ export function ParentFeesScreen(): React.JSX.Element {
     <Screen padded={false}>
       <CustomHeader title={t('parentFees_headerTitle')} />
       <ScrollView
-        contentContainerStyle={{padding: theme.spacing.lg}}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <CustomCard>
           <Row justify="space-between" align="flex-start">
@@ -111,7 +123,7 @@ export function ParentFeesScreen(): React.JSX.Element {
                 {formatCurrency(invoice.paidAmount)}
               </AppText>
             </View>
-            <View style={{alignItems: 'flex-end'}}>
+            <View style={styles.dueBlock}>
               <AppText variant="caption" color="textSecondary">
                 {t('parentFees_due')}
               </AppText>
@@ -146,7 +158,7 @@ export function ParentFeesScreen(): React.JSX.Element {
         <CustomButton
           title={t('parentFees_downloadReceipt')}
           variant="outline"
-          onPress={() => navigation.navigate('FeeReceipt', {invoiceId: invoice.id})}
+          onPress={() => navigation.navigate(ScreenNames.FeeReceipt, {invoiceId: invoice.id})}
         />
         <Spacer size={24} />
       </ScrollView>
@@ -167,7 +179,7 @@ export function ParentFeesScreen(): React.JSX.Element {
         </AppText>
         <Row gap={theme.spacing.sm}>
           {METHODS.map(m => (
-            <View key={m.key} style={{flex: 1}}>
+            <View key={m.key} style={styles.methodWrapper}>
               <CustomButton
                 title={m.label}
                 size="sm"

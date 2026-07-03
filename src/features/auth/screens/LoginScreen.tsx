@@ -1,7 +1,7 @@
 /** Admin / Teacher login (email or mobile + password). */
 import React, {useState} from 'react';
 import {View} from 'react-native';
-import {useTheme} from '../../../core/theme';
+import {useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -13,10 +13,22 @@ import {
 } from '../../../shared/components';
 import {useAuthStore} from '../authStore';
 import type {AuthScreenProps} from '../../../navigation/types';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 
 export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): React.JSX.Element {
-  const {theme} = useTheme();
   const {t} = useLanguage();
+  const styles = useThemedStyles(theme => ({
+    container: {
+      flex: 1,
+      padding: theme.spacing.lg,
+    },
+    demoHint: {
+      marginTop: 'auto',
+      padding: theme.spacing.md,
+      backgroundColor: theme.colors.surfaceVariant,
+      borderRadius: theme.radius.md,
+    },
+  }));
   const {role} = route.params;
   const {loginWithPassword, isLoading, error, clearError} = useAuthStore();
 
@@ -34,7 +46,7 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
   return (
     <Screen padded={false}>
       <CustomHeader title={title} onBack={() => navigation.goBack()} />
-      <View style={{flex: 1, padding: theme.spacing.lg}}>
+      <View style={styles.container}>
         <Spacer size={12} />
         <AppText variant="h2">{t('loginScreen_welcomeBack')}</AppText>
         <AppText variant="caption" color="textSecondary">
@@ -83,10 +95,10 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
         <CustomButton
           title={t('loginScreen_forgotPassword')}
           variant="ghost"
-          onPress={() => navigation.navigate('ForgotPassword')}
+          onPress={() => navigation.navigate(ScreenNames.ForgotPassword)}
         />
 
-        <View style={{marginTop: 'auto', padding: theme.spacing.md, backgroundColor: theme.colors.surfaceVariant, borderRadius: theme.radius.md}}>
+        <View style={styles.demoHint}>
           <AppText variant="label" color="textSecondary" center>
             {t('loginScreen_demoHint')}
           </AppText>

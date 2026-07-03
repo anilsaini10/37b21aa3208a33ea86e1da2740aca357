@@ -1,9 +1,9 @@
 /** Student detail — profile, academic, parent, fee & documents + delete. */
 import React, {useState} from 'react';
-import {ScrollView, View} from 'react-native';
+import {ScrollView, View, StyleSheet} from 'react-native';
 import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme} from '../../../core/theme';
+import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -24,12 +24,19 @@ import {formatDate, formatCurrency} from '../../../core/utils/format';
 import {useStudent, useDeleteStudent} from '../students.service';
 import {useStudentFee} from '../../fees/fees.service';
 import type {AdminStackParamList} from '../../../navigation/types';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
+const infoRowStyles = StyleSheet.create({
+  row: {
+    paddingVertical: 4,
+  },
+});
+
 function InfoRow({label, value}: {label: string; value: string}): React.JSX.Element {
   return (
-    <Row justify="space-between" style={{paddingVertical: 4}}>
+    <Row justify="space-between" style={infoRowStyles.row}>
       <AppText variant="body" color="textSecondary">
         {label}
       </AppText>
@@ -49,6 +56,17 @@ export function StudentDetailScreen(): React.JSX.Element {
   const {data: fee} = useStudentFee(id);
   const deleteMutation = useDeleteStudent();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const styles = useThemedStyles(t2 => ({
+    scrollContent: {
+      padding: t2.spacing.lg,
+    },
+    avatarBlock: {
+      flex: 1,
+    },
+    modalButtonWrap: {
+      flex: 1,
+    },
+  }));
 
   if (isLoading || !student) {
     return <Loader message={t('studentDetail_loadingStudent')} />;
@@ -68,15 +86,15 @@ export function StudentDetailScreen(): React.JSX.Element {
       <CustomHeader
         title={t('studentDetail_headerTitle')}
         onBack={() => navigation.goBack()}
-        actions={[{icon: 'edit', onPress: () => navigation.navigate('StudentForm', {id})}]}
+        actions={[{icon: 'edit', onPress: () => navigation.navigate(ScreenNames.StudentForm, {id})}]}
       />
       <ScrollView
-        contentContainerStyle={{padding: theme.spacing.lg}}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <CustomCard>
           <Row gap={theme.spacing.md}>
             <Avatar name={student.name} uri={student.avatarUrl} size={72} />
-            <View style={{flex: 1}}>
+            <View style={styles.avatarBlock}>
               <AppText variant="h2">{student.name}</AppText>
               <AppText variant="caption" color="textSecondary">
                 {t('studentDetail_admissionNo')} · {student.admissionNo}
@@ -158,14 +176,14 @@ export function StudentDetailScreen(): React.JSX.Element {
         </AppText>
         <Spacer size={16} />
         <Row gap={theme.spacing.md}>
-          <View style={{flex: 1}}>
+          <View style={styles.modalButtonWrap}>
             <CustomButton
               title={t('common_cancel')}
               variant="outline"
               onPress={() => setConfirmOpen(false)}
             />
           </View>
-          <View style={{flex: 1}}>
+          <View style={styles.modalButtonWrap}>
             <CustomButton
               title={t('common_delete')}
               variant="danger"

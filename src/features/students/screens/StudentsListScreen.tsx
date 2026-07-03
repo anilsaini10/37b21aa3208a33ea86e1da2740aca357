@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import {FlatList, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme} from '../../../core/theme';
+import {useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -18,17 +18,28 @@ import {
 } from '../../../shared/components';
 import {useStudents} from '../students.service';
 import type {AdminStackParamList} from '../../../navigation/types';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {Student} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
 export function StudentsListScreen(): React.JSX.Element {
-  const {theme} = useTheme();
   const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const {data, isLoading} = useStudents({page, search, pageSize: 15});
+  const styles = useThemedStyles(t2 => ({
+    searchBarWrap: {
+      paddingHorizontal: t2.spacing.lg,
+      paddingTop: t2.spacing.md,
+    },
+    listContent: {
+      padding: t2.spacing.lg,
+      paddingTop: t2.spacing.sm,
+      flexGrow: 1,
+    },
+  }));
 
   const onSearch = (text: string): void => {
     setSearch(text);
@@ -39,9 +50,9 @@ export function StudentsListScreen(): React.JSX.Element {
     <Screen padded={false}>
       <CustomHeader
         title={t('studentsList_headerTitle')}
-        actions={[{icon: 'add', onPress: () => navigation.navigate('StudentForm', {})}]}
+        actions={[{icon: 'add', onPress: () => navigation.navigate(ScreenNames.StudentForm, {})}]}
       />
-      <View style={{paddingHorizontal: theme.spacing.lg, paddingTop: theme.spacing.md}}>
+      <View style={styles.searchBarWrap}>
         <SearchBar
           value={search}
           onChangeText={onSearch}
@@ -54,11 +65,7 @@ export function StudentsListScreen(): React.JSX.Element {
         <FlatList
           data={data.items}
           keyExtractor={(item: Student) => item.id}
-          contentContainerStyle={{
-            padding: theme.spacing.lg,
-            paddingTop: theme.spacing.sm,
-            flexGrow: 1,
-          }}
+          contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           renderItem={({item}) => (
             <ListRow
@@ -70,7 +77,7 @@ export function StudentsListScreen(): React.JSX.Element {
                 rollNo: String(item.rollNo),
               })}
               right={<Badge label={`${item.attendancePercentage}%`} tone="info" />}
-              onPress={() => navigation.navigate('StudentDetail', {id: item.id})}
+              onPress={() => navigation.navigate(ScreenNames.StudentDetail, {id: item.id})}
             />
           )}
           ListEmptyComponent={
@@ -79,7 +86,7 @@ export function StudentsListScreen(): React.JSX.Element {
               title={t('studentsList_emptyTitle')}
               message={t('studentsList_emptyMessage')}
               actionLabel={t('studentsList_addStudent')}
-              onAction={() => navigation.navigate('StudentForm', {})}
+              onAction={() => navigation.navigate(ScreenNames.StudentForm, {})}
             />
           }
           ListFooterComponent={

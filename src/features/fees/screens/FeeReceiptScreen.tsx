@@ -2,7 +2,7 @@
 import React from 'react';
 import {ScrollView, View} from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import {useTheme} from '../../../core/theme';
+import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import type {TranslationKey} from '../../../core/i18n';
 import {
@@ -36,6 +36,24 @@ export function FeeReceiptScreen(): React.JSX.Element {
   const route = useRoute();
   const {invoiceId} = (route.params ?? {}) as {invoiceId: string};
   const {t} = useLanguage();
+  const styles = useThemedStyles(t2 => ({
+    scrollContent: {
+      padding: t2.spacing.lg,
+    },
+    lineItemRow: {
+      marginVertical: t2.spacing.xs,
+    },
+    header: {
+      alignItems: 'center',
+      marginBottom: t2.spacing.md,
+    },
+    statusBadgeWrapper: {
+      marginTop: t2.spacing.xs,
+    },
+    spacer: {
+      height: t2.spacing.lg,
+    },
+  }));
 
   // Reuse the (already-cached) invoice list to find this receipt.
   const {data, isLoading} = useFees({pageSize: 200});
@@ -54,7 +72,7 @@ export function FeeReceiptScreen(): React.JSX.Element {
   }
 
   const LineItem = ({label, value, bold}: {label: string; value: string; bold?: boolean}) => (
-    <Row justify="space-between" style={{marginVertical: theme.spacing.xs}}>
+    <Row justify="space-between" style={styles.lineItemRow}>
       <AppText variant={bold ? 'bodyBold' : 'caption'} color={bold ? 'text' : 'textSecondary'}>
         {label}
       </AppText>
@@ -65,15 +83,15 @@ export function FeeReceiptScreen(): React.JSX.Element {
   return (
     <Screen padded={false}>
       <CustomHeader title={t('feeReceipt_headerTitle')} onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={{padding: theme.spacing.lg}}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <CustomCard>
-          <View style={{alignItems: 'center', marginBottom: theme.spacing.md}}>
+          <View style={styles.header}>
             <Icon name="class" size={36} color={theme.colors.primary} />
             <AppText variant="h3">Greenwood School</AppText>
             <AppText variant="label" color="textMuted">
               {t('feeReceipt_receiptNumber', {id: invoice.id.toUpperCase()})}
             </AppText>
-            <View style={{marginTop: theme.spacing.xs}}>
+            <View style={styles.statusBadgeWrapper}>
               <Badge label={t(FEE_STATUS_KEY[invoice.status])} tone={feeStatusTone(invoice.status)} />
             </View>
           </View>
@@ -91,7 +109,7 @@ export function FeeReceiptScreen(): React.JSX.Element {
           <LineItem label={t('feeReceipt_balanceDue')} value={formatCurrency(invoice.dueAmount)} bold />
         </CustomCard>
 
-        <View style={{height: theme.spacing.lg}} />
+        <View style={styles.spacer} />
         <CustomButton title={t('feeReceipt_downloadPdf')} iconLeft="download" onPress={() => undefined} />
       </ScrollView>
     </Screen>

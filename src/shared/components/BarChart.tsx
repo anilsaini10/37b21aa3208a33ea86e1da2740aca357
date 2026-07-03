@@ -1,7 +1,7 @@
 /** Lightweight bar chart built from plain Views (no chart library needed). */
 import React from 'react';
 import {View} from 'react-native';
-import {useTheme} from '../../core/theme';
+import {useTheme, useThemedStyles} from '../../core/theme';
 import {AppText} from './AppText';
 import type {ChartSeries} from '../types';
 
@@ -22,29 +22,37 @@ export function BarChart({
   const max = Math.max(1, ...series.values);
   const barColor = color ?? theme.colors.primary;
 
+  const styles = useThemedStyles(t => ({
+    chartRow: {flexDirection: 'row', alignItems: 'flex-end', columnGap: t.spacing.sm},
+    barColumn: {flex: 1, alignItems: 'center', rowGap: 4},
+    bar: {width: '70%', borderTopLeftRadius: t.radius.sm, borderTopRightRadius: t.radius.sm},
+    labelsRow: {flexDirection: 'row', marginTop: t.spacing.xs, columnGap: t.spacing.sm},
+    labelText: {flex: 1},
+  }));
+
   return (
     <View>
-      <View style={{flexDirection: 'row', alignItems: 'flex-end', height, columnGap: theme.spacing.sm}}>
+      <View style={[styles.chartRow, {height}]}>
         {series.values.map((v, i) => (
-          <View key={i} style={{flex: 1, alignItems: 'center', rowGap: 4}}>
+          <View key={i} style={styles.barColumn}>
             <AppText variant="label" color="textMuted">
               {valueFormatter ? valueFormatter(v) : v}
             </AppText>
             <View
-              style={{
-                width: '70%',
-                height: Math.max(4, (v / max) * (height - 28)),
-                backgroundColor: barColor,
-                borderTopLeftRadius: theme.radius.sm,
-                borderTopRightRadius: theme.radius.sm,
-              }}
+              style={[
+                styles.bar,
+                {
+                  height: Math.max(4, (v / max) * (height - 28)),
+                  backgroundColor: barColor,
+                },
+              ]}
             />
           </View>
         ))}
       </View>
-      <View style={{flexDirection: 'row', marginTop: theme.spacing.xs, columnGap: theme.spacing.sm}}>
+      <View style={styles.labelsRow}>
         {series.labels.map((label, i) => (
-          <AppText key={i} variant="label" color="textMuted" center style={{flex: 1}}>
+          <AppText key={i} variant="label" color="textMuted" center style={styles.labelText}>
             {label}
           </AppText>
         ))}

@@ -3,7 +3,7 @@ import React from 'react';
 import {ScrollView, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme, ThemeService} from '../../../core/theme';
+import {useTheme, useThemedStyles, ThemeService} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -28,6 +28,25 @@ export function SettingsScreen(): React.JSX.Element {
   const navigation = useNavigation<Nav>();
   const logout = useAuthStore(s => s.logout);
   const {t} = useLanguage();
+  const styles = useThemedStyles(t2 => ({
+    scrollContent: {
+      padding: t2.spacing.lg,
+    },
+    modeButtonWrap: {
+      flex: 1,
+    },
+    schoolRow: {
+      paddingVertical: 4,
+    },
+    themeCardBase: {
+      marginBottom: t2.spacing.sm,
+    },
+    themeSwatch: {
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+    },
+  }));
 
   const themes = ThemeService.available();
   const modes: {labelKey: 'settingsScreen_light' | 'settingsScreen_dark' | 'settingsScreen_system'; value: ThemeMode}[] = [
@@ -40,7 +59,7 @@ export function SettingsScreen(): React.JSX.Element {
     <Screen padded={false}>
       <CustomHeader title={t('settingsScreen_title')} onBack={() => navigation.goBack()} />
       <ScrollView
-        contentContainerStyle={{padding: theme.spacing.lg}}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <SectionTitle title={t('settingsScreen_theme')} />
         {themes.map(themeItem => {
@@ -49,20 +68,17 @@ export function SettingsScreen(): React.JSX.Element {
             <CustomCard
               key={themeItem.key}
               onPress={() => setThemeKey(themeItem.key)}
-              style={{
-                marginBottom: theme.spacing.sm,
-                borderColor: active ? theme.colors.primary : theme.colors.border,
-                borderWidth: active ? 2 : 1,
-              }}>
+              style={[
+                styles.themeCardBase,
+                {
+                  borderColor: active ? theme.colors.primary : theme.colors.border,
+                  borderWidth: active ? 2 : 1,
+                },
+              ]}>
               <Row justify="space-between">
                 <Row gap={theme.spacing.md}>
                   <View
-                    style={{
-                      width: 22,
-                      height: 22,
-                      borderRadius: 11,
-                      backgroundColor: themeItem.colors.primary,
-                    }}
+                    style={[styles.themeSwatch, {backgroundColor: themeItem.colors.primary}]}
                   />
                   <AppText variant="body">{themeItem.name}</AppText>
                 </Row>
@@ -75,7 +91,7 @@ export function SettingsScreen(): React.JSX.Element {
         <SectionTitle title={t('settingsScreen_appearance')} />
         <Row gap={theme.spacing.md}>
           {modes.map(m => (
-            <View key={m.value} style={{flex: 1}}>
+            <View key={m.value} style={styles.modeButtonWrap}>
               <CustomButton
                 title={t(m.labelKey)}
                 size="sm"
@@ -109,13 +125,13 @@ export function SettingsScreen(): React.JSX.Element {
 
         <SectionTitle title={t('settingsScreen_school')} />
         <CustomCard>
-          <Row justify="space-between" style={{paddingVertical: 4}}>
+          <Row justify="space-between" style={styles.schoolRow}>
             <AppText variant="body" color="textSecondary">
               {t('settingsScreen_appName')}
             </AppText>
             <AppText variant="body">{AppConfig.appName}</AppText>
           </Row>
-          <Row justify="space-between" style={{paddingVertical: 4}}>
+          <Row justify="space-between" style={styles.schoolRow}>
             <AppText variant="body" color="textSecondary">
               {t('settingsScreen_academicYear')}
             </AppText>

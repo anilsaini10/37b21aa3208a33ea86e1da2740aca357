@@ -1,7 +1,7 @@
 /** Screen header with optional back button + right-side actions. */
 import React from 'react';
 import {Pressable, View} from 'react-native';
-import {useTheme} from '../../core/theme';
+import {useTheme, useThemedStyles} from '../../core/theme';
 import {AppText} from './AppText';
 import {Icon} from './Icon';
 
@@ -25,25 +25,43 @@ export function CustomHeader({
   actions = [],
 }: CustomHeaderProps): React.JSX.Element {
   const {theme} = useTheme();
+  const styles = useThemedStyles(t => ({
+    header: {
+      minHeight: t.components.header.height,
+      backgroundColor: t.colors.headerBackground,
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: t.spacing.lg,
+      borderBottomWidth: 1,
+      borderBottomColor: t.colors.divider,
+      columnGap: t.spacing.sm,
+    },
+    backButton: {paddingRight: t.spacing.xs},
+    titleBlock: {flex: 1},
+    actionButton: {padding: t.spacing.xs},
+    actionBadge: {
+      position: 'absolute',
+      top: -2,
+      right: -2,
+      minWidth: 16,
+      height: 16,
+      paddingHorizontal: 3,
+      borderRadius: 8,
+      backgroundColor: t.colors.error,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    actionBadgeText: {color: '#fff', fontSize: 9, fontWeight: '700'},
+  }));
   return (
-    <View
-      style={{
-        minHeight: theme.components.header.height,
-        backgroundColor: theme.colors.headerBackground,
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: theme.spacing.lg,
-        borderBottomWidth: 1,
-        borderBottomColor: theme.colors.divider,
-        columnGap: theme.spacing.sm,
-      }}>
+    <View style={styles.header}>
       {onBack ? (
-        <Pressable onPress={onBack} hitSlop={10} style={{paddingRight: theme.spacing.xs}}>
+        <Pressable onPress={onBack} hitSlop={10} style={styles.backButton}>
           <Icon name="back" size={26} color={theme.colors.text} />
         </Pressable>
       ) : null}
 
-      <View style={{flex: 1}}>
+      <View style={styles.titleBlock}>
         <AppText variant="h3" numberOfLines={1}>
           {title}
         </AppText>
@@ -55,23 +73,11 @@ export function CustomHeader({
       </View>
 
       {actions.map((action, i) => (
-        <Pressable key={i} onPress={action.onPress} hitSlop={10} style={{padding: theme.spacing.xs}}>
+        <Pressable key={i} onPress={action.onPress} hitSlop={10} style={styles.actionButton}>
           <Icon name={action.icon} size={22} color={theme.colors.text} />
           {action.badgeCount && action.badgeCount > 0 ? (
-            <View
-              style={{
-                position: 'absolute',
-                top: -2,
-                right: -2,
-                minWidth: 16,
-                height: 16,
-                paddingHorizontal: 3,
-                borderRadius: 8,
-                backgroundColor: theme.colors.error,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-              <AppText style={{color: '#fff', fontSize: 9, fontWeight: '700'}}>
+            <View style={styles.actionBadge}>
+              <AppText style={styles.actionBadgeText}>
                 {action.badgeCount > 9 ? '9+' : action.badgeCount}
               </AppText>
             </View>

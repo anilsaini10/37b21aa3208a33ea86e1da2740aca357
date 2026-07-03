@@ -2,7 +2,7 @@
 import React from 'react';
 import {View} from 'react-native';
 import Svg, {Polyline, Circle, Line} from 'react-native-svg';
-import {useTheme} from '../../core/theme';
+import {useTheme, useThemedStyles} from '../../core/theme';
 import {AppText} from './AppText';
 import type {ChartSeries} from '../types';
 
@@ -21,6 +21,15 @@ export function LineChart({
 }: LineChartProps): React.JSX.Element {
   const {theme} = useTheme();
   const stroke = color ?? theme.colors.primary;
+  const styles = useThemedStyles(t => ({
+    labelsRow: {
+      flexDirection: 'row',
+      columnGap: t.spacing.xs,
+    },
+    labelText: {
+      flex: 1,
+    },
+  }));
 
   const padding = 24;
   const chartW = width - padding * 2;
@@ -55,9 +64,9 @@ export function LineChart({
           <Circle key={i} cx={p.x} cy={p.y} r={3.5} fill={stroke} />
         ))}
       </Svg>
-      <View style={{flexDirection: 'row', columnGap: theme.spacing.xs}}>
+      <View style={styles.labelsRow}>
         {series.labels.map((label, i) => (
-          <AppText key={i} variant="label" color="textMuted" center style={{flex: 1}}>
+          <AppText key={i} variant="label" color="textMuted" center style={styles.labelText}>
             {label}
           </AppText>
         ))}

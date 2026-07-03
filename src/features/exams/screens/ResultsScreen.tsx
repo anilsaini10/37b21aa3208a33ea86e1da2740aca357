@@ -20,6 +20,7 @@ import {db} from '../../../core/mock/db';
 import {useStudentReportCards} from '../exams.service';
 import {useParentDashboard} from '../../dashboard/dashboard.service';
 import type {ParentStackParamList} from '../../../navigation/types';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 
 type Nav = NativeStackNavigationProp<ParentStackParamList>;
 
@@ -58,7 +59,7 @@ export function ResultsScreen(): React.JSX.Element {
                   percentage: card.percentage,
                   grade: card.overallGrade,
                 })}
-                onPress={() => navigation.navigate('ReportCard', {examId: card.examId})}
+                onPress={() => navigation.navigate(ScreenNames.ReportCard, {examId: card.examId})}
               />
             ))}
           </CustomCard>

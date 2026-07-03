@@ -1,7 +1,7 @@
 /** Debounce-friendly search input row. */
 import React from 'react';
 import {View, TextInput, Pressable} from 'react-native';
-import {useTheme} from '../../core/theme';
+import {useTheme, useThemedStyles} from '../../core/theme';
 import {useLanguage} from '../../core/i18n';
 import {Icon} from './Icon';
 
@@ -20,26 +20,34 @@ export function SearchBar({
 }: SearchBarProps): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
+  const styles = useThemedStyles(t2 => ({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      columnGap: t2.spacing.sm,
+      height: 44,
+      paddingHorizontal: t2.spacing.md,
+      borderRadius: t2.radius.md,
+      backgroundColor: t2.colors.surfaceVariant,
+      borderWidth: 1,
+      borderColor: t2.colors.border,
+    },
+    input: {
+      flex: 1,
+      color: t2.colors.text,
+      fontSize: 15,
+      paddingVertical: 0,
+    },
+  }));
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        columnGap: theme.spacing.sm,
-        height: 44,
-        paddingHorizontal: theme.spacing.md,
-        borderRadius: theme.radius.md,
-        backgroundColor: theme.colors.surfaceVariant,
-        borderWidth: 1,
-        borderColor: theme.colors.border,
-      }}>
+    <View style={styles.container}>
       <Icon name="search" size={16} color={theme.colors.textMuted} />
       <TextInput
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder ?? t('common_search')}
         placeholderTextColor={theme.colors.placeholder}
-        style={{flex: 1, color: theme.colors.text, fontSize: 15, paddingVertical: 0}}
+        style={styles.input}
       />
       {value.length > 0 ? (
         <Pressable onPress={() => (onClear ? onClear() : onChangeText(''))} hitSlop={8}>

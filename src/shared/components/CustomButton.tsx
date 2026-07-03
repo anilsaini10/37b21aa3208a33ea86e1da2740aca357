@@ -7,7 +7,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import {useTheme} from '../../core/theme';
+import {useTheme, useThemedStyles} from '../../core/theme';
 import {AppText} from './AppText';
 import {Icon} from './Icon';
 
@@ -65,6 +65,10 @@ export function CustomButton({
   const border =
     variant === 'outline' ? {borderWidth: 1.5, borderColor: theme.colors.primary} : undefined;
 
+  const styles = useThemedStyles(t => ({
+    content: {flexDirection: 'row', alignItems: 'center', columnGap: t.spacing.sm},
+  }));
+
   return (
     <Pressable
       testID={testID}
@@ -89,7 +93,7 @@ export function CustomButton({
       {loading ? (
         <ActivityIndicator color={fg[variant]} />
       ) : (
-        <View style={{flexDirection: 'row', alignItems: 'center', columnGap: theme.spacing.sm}}>
+        <View style={styles.content}>
           {iconLeft ? <Icon name={iconLeft} size={18} color={fg[variant]} /> : null}
           <AppText variant="button" style={{color: fg[variant]}}>
             {title}

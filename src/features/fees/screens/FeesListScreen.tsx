@@ -3,7 +3,7 @@ import React from 'react';
 import {FlatList, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme} from '../../../core/theme';
+import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import type {TranslationKey} from '../../../core/i18n';
 import {
@@ -21,6 +21,7 @@ import {feeStatusTone} from '../../../shared/helpers';
 import {formatCurrency} from '../../../core/utils/format';
 import {useFees, useFeeSummary} from '../fees.service';
 import type {AdminStackParamList} from '../../../navigation/types';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {FeeInvoice, FeeStatus, StatCard} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
@@ -38,6 +39,15 @@ export function FeesListScreen(): React.JSX.Element {
   const {t} = useLanguage();
   const {data: summary, isLoading: summaryLoading} = useFeeSummary();
   const {data: fees, isLoading: feesLoading} = useFees({pageSize: 50});
+  const styles = useThemedStyles(t2 => ({
+    listContent: {
+      padding: t2.spacing.lg,
+      flexGrow: 1,
+    },
+    tileWrapper: {
+      flex: 1,
+    },
+  }));
 
   if (summaryLoading || feesLoading || !summary || !fees) {
     return <Loader message={t('feesList_loadingFees')} />;
@@ -73,13 +83,13 @@ export function FeesListScreen(): React.JSX.Element {
       <FlatList
         data={fees.items}
         keyExtractor={(item: FeeInvoice) => item.id}
-        contentContainerStyle={{padding: theme.spacing.lg, flexGrow: 1}}
+        contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <>
             <Row gap={theme.spacing.md} align="stretch">
               {tiles.map(tile => (
-                <View key={tile.key} style={{flex: 1}}>
+                <View key={tile.key} style={styles.tileWrapper}>
                   <StatTile stat={tile} />
                 </View>
               ))}
@@ -95,7 +105,7 @@ export function FeesListScreen(): React.JSX.Element {
               amount: formatCurrency(item.dueAmount),
             })}
             right={<Badge label={t(FEE_STATUS_KEY[item.status])} tone={feeStatusTone(item.status)} />}
-            onPress={() => navigation.navigate('FeeReceipt', {invoiceId: item.id})}
+            onPress={() => navigation.navigate(ScreenNames.FeeReceipt, {invoiceId: item.id})}
           />
         )}
         ListEmptyComponent={
