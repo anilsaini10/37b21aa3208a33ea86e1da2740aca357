@@ -9,7 +9,7 @@ import {
   AppText,
   CustomHeader,
   CustomCard,
-  StatTile,
+  StatGrid,
   SectionTitle,
   BarChart,
   LineChart,
@@ -54,13 +54,7 @@ export function AdminDashboardScreen(): React.JSX.Element {
       <ScrollView
         contentContainerStyle={{padding: theme.spacing.lg}}
         showsVerticalScrollIndicator={false}>
-        <Row gap={theme.spacing.md} wrap style={{rowGap: theme.spacing.md}}>
-          {stats.map(s => (
-            <View key={s.key} style={{width: '47%'}}>
-              <StatTile stat={s} />
-            </View>
-          ))}
-        </Row>
+        <StatGrid stats={stats} />
 
         <SectionTitle title="Today's Attendance" />
         <CustomCard>

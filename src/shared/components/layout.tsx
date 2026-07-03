@@ -3,12 +3,12 @@ import React from 'react';
 import {
   View,
   ScrollView,
-  SafeAreaView,
   StatusBar,
   type ViewStyle,
   type StyleProp,
   type ScrollViewProps,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '../../core/theme';
 
 interface ScreenProps {

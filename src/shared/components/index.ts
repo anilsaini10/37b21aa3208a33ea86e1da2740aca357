@@ -22,5 +22,6 @@ export * from './DynamicForm';
 export * from './BarChart';
 export * from './LineChart';
 export * from './StatTile';
+export * from './StatGrid';
 export * from './SectionTitle';
 export * from './ListRow';

@@ -10,7 +10,7 @@ import {
   CustomHeader,
   CustomCard,
   CustomButton,
-  StatTile,
+  StatGrid,
   SectionTitle,
   BarChart,
   LineChart,
@@ -66,13 +66,7 @@ export function ParentDashboardScreen(): React.JSX.Element {
         </CustomCard>
 
         <Spacer size={theme.spacing.md} />
-        <Row gap={theme.spacing.md} wrap style={{rowGap: theme.spacing.md}}>
-          {stats.map(s => (
-            <View key={s.key} style={{width: '47%'}}>
-              <StatTile stat={s} />
-            </View>
-          ))}
-        </Row>
+        <StatGrid stats={stats} />
 
         <SectionTitle title="Quick Links" />
         <Row gap={theme.spacing.md}>

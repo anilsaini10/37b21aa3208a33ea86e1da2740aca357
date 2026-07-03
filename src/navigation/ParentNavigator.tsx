@@ -2,6 +2,7 @@
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTheme} from '../core/theme';
 import {Icon} from '../shared/components';
 import type {ParentStackParamList, ParentTabParamList} from './types';
@@ -34,6 +35,7 @@ const TAB_ICON: Record<keyof ParentTabParamList, string> = {
 
 function ParentTabs(): React.JSX.Element {
   const {theme} = useTheme();
+  const insets = useSafeAreaInsets();
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
@@ -43,8 +45,9 @@ function ParentTabs(): React.JSX.Element {
         tabBarStyle: {
           backgroundColor: theme.colors.surface,
           borderTopColor: theme.colors.divider,
-          height: theme.components.tab.height,
-          paddingBottom: 6,
+          height: theme.components.tab.height + insets.bottom,
+          paddingBottom: Math.max(insets.bottom, 6),
+          paddingTop: 6,
         },
         tabBarIcon: ({color}) => <Icon name={TAB_ICON[route.name]} size={22} color={color} />,
       })}>
