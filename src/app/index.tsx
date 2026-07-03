@@ -34,6 +34,7 @@ function PaperBridge({children}: {children: React.ReactNode}): React.JSX.Element
   return <PaperProvider theme={paperTheme}>{children}</PaperProvider>;
 }
 
+
 export default function RootApp(): React.JSX.Element {
   return (
     <GestureHandlerRootView style={{flex: 1}}>
