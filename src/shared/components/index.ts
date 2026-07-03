@@ -26,3 +26,4 @@ export * from './StatGrid';
 export * from './SectionTitle';
 export * from './ListRow';
 export * from './LanguageSwitcher';
+export * from './AriseLogo';

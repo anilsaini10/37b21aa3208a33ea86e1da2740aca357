@@ -2,7 +2,7 @@
  * App root — composes the provider tree:
  *   GestureHandler → SafeArea → QueryClient → Theme → PaperProvider → Navigation
  */
-import React, {useMemo} from 'react';
+import React, {useMemo, useState} from 'react';
 import {StyleSheet} from 'react-native';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
@@ -12,6 +12,7 @@ import {ThemeProvider, useTheme} from '../core/theme';
 import {LanguageProvider} from '../core/i18n';
 import {queryClient} from '../core/query/queryClient';
 import {RootNavigator} from '../navigation/RootNavigator';
+import {SplashScreen} from './SplashScreen';
 import {bootstrap} from './bootstrap';
 
 // Run one-time setup at module load (registers MMKV + hydrates auth).
@@ -38,6 +39,8 @@ function PaperBridge({children}: {children: React.ReactNode}): React.JSX.Element
 
 
 export default function RootApp(): React.JSX.Element {
+  const [splashVisible, setSplashVisible] = useState(true);
+
   return (
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
@@ -48,6 +51,7 @@ export default function RootApp(): React.JSX.Element {
                 <RootNavigator />
               </PaperBridge>
             </ThemeProvider>
+            {splashVisible ? <SplashScreen onFinish={() => setSplashVisible(false)} /> : null}
           </LanguageProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

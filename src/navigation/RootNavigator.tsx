@@ -3,10 +3,9 @@
  * based on the auth store. Changing role/login state re-renders this and moves
  * the user to the correct stack automatically.
  */
-import React, {useCallback} from 'react';
+import React from 'react';
 import {NavigationContainer, DefaultTheme, DarkTheme} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import BootSplash from 'react-native-bootsplash';
 import {useTheme} from '../core/theme';
 import {useAuthStore} from '../features/auth/authStore';
 import type {RootStackParamList} from './types';
@@ -36,12 +35,8 @@ export function RootNavigator(): React.JSX.Element {
     },
   };
 
-  const onReady = useCallback(() => {
-    BootSplash.hide({fade: true});
-  }, []);
-
   return (
-    <NavigationContainer theme={navTheme} onReady={onReady}>
+    <NavigationContainer theme={navTheme}>
       <Stack.Navigator screenOptions={{headerShown: false}}>
         {!isAuthenticated ? (
           <Stack.Screen name={ScreenNames.Auth} component={AuthNavigator} />
