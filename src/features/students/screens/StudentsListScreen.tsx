@@ -1,7 +1,7 @@
-/** Students list — searchable, paginated roster with quick-add. */
+/** Students list — searchable, paginated roster for a specific class/section. */
 import React, {useState} from 'react';
 import {FlatList, View} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
@@ -26,9 +26,11 @@ type Nav = NativeStackNavigationProp<AdminStackParamList>;
 export function StudentsListScreen(): React.JSX.Element {
   const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
+  const route = useRoute<RouteProp<AdminStackParamList, 'StudentsList'>>();
+  const {classId, className, sectionId, sectionName} = route.params;
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const {data, isLoading} = useStudents({page, search, pageSize: 15});
+  const {data, isLoading} = useStudents({classId, sectionId, page, search, pageSize: 15});
   const styles = useThemedStyles(t2 => ({
     searchBarWrap: {
       paddingHorizontal: t2.spacing.lg,
@@ -41,6 +43,10 @@ export function StudentsListScreen(): React.JSX.Element {
     },
   }));
 
+  const headerTitle = sectionName
+    ? t('studentsList_headerTitleWithSection', {className, sectionName})
+    : t('studentsList_headerTitleNoSection', {className});
+
   const onSearch = (text: string): void => {
     setSearch(text);
     setPage(1);
@@ -49,7 +55,8 @@ export function StudentsListScreen(): React.JSX.Element {
   return (
     <Screen padded={false}>
       <CustomHeader
-        title={t('studentsList_headerTitle')}
+        title={headerTitle}
+        onBack={navigation.canGoBack() ? () => navigation.goBack() : undefined}
         actions={[{icon: 'add', onPress: () => navigation.navigate(ScreenNames.StudentForm, {})}]}
       />
       <View style={styles.searchBarWrap}>

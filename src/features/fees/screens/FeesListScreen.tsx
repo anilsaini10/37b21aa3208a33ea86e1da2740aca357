@@ -18,7 +18,7 @@ import {
   Loader,
 } from '../../../shared/components';
 import {feeStatusTone} from '../../../shared/helpers';
-import {formatCurrency} from '../../../core/utils/format';
+import {formatCurrency, formatCurrencyCompact} from '../../../core/utils/format';
 import {useFees, useFeeSummary} from '../fees.service';
 import type {AdminStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
@@ -57,14 +57,14 @@ export function FeesListScreen(): React.JSX.Element {
     {
       key: 'collected',
       label: t('feesList_collected'),
-      value: formatCurrency(summary.totalCollected),
+      value: formatCurrencyCompact(summary.totalCollected),
       icon: 'money',
       accent: 'success',
     },
     {
       key: 'pending',
       label: t('fees_pending'),
-      value: formatCurrency(summary.totalPending),
+      value: formatCurrencyCompact(summary.totalPending),
       icon: 'warning',
       accent: 'error',
     },

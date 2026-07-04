@@ -3,6 +3,7 @@ import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {db} from '../../core/mock/db';
 import {respond} from '../../core/mock/mockApi';
 import {generateId} from '../../core/utils/misc';
+import {notifyFromAppNotification} from '../../core/notifications';
 import type {
   Announcement,
   AppNotification,
@@ -40,6 +41,23 @@ export const communicationApi = {
       pinned: false,
     };
     db.announcements.unshift(announcement);
+
+    // Mirror the announcement into the in-app notification feed and, dynamically
+    // (title/body/category all come from the announcement itself), push a real
+    // device notification for it.
+    const notification: AppNotification = {
+      id: generateId('nt'),
+      title: announcement.title,
+      body: announcement.body,
+      type: 'announcement',
+      createdAt: announcement.publishedAt,
+      read: false,
+    };
+    db.notifications.unshift(notification);
+    notifyFromAppNotification(notification).catch(() => {
+      // Device notification unavailable/denied — the in-app feed entry still stands.
+    });
+
     return respond(announcement);
   },
 

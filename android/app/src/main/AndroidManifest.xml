@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
   <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
   <application
     android:name=".MainApplication"
@@ -23,5 +24,13 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
+
+    <!-- Used by the OS when it auto-renders a push that carries a
+         `notification` payload while the app is backgrounded/killed —
+         keeps that case visually consistent with our own notifee-driven
+         notifications, which also use this icon. -->
+    <meta-data
+      android:name="com.google.firebase.messaging.default_notification_icon"
+      android:resource="@drawable/bootsplash_logo" />
   </application>
 </manifest>

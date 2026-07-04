@@ -8,6 +8,7 @@ import {
   Screen,
   AppText,
   CustomHeader,
+  CustomButton,
   ListRow,
   EmptyState,
   Loader,
@@ -15,6 +16,7 @@ import {
 } from '../../../shared/components';
 import {timeAgo} from '../../../core/utils/format';
 import {useNotifications, useMarkNotificationRead} from '../communication.service';
+import {displayLocalNotification, getDeviceToken} from '../../../core/notifications';
 
 const TYPE_ICON: Record<string, string> = {
   fee: 'fee',
@@ -39,7 +41,25 @@ export function NotificationsScreen(): React.JSX.Element {
     metaBlock: {
       alignItems: 'flex-end',
     },
+    testButton: {
+      marginHorizontal: t2.spacing.lg,
+      marginTop: t2.spacing.md,
+    },
   }));
+
+  const sendTestNotification = () => {
+    displayLocalNotification({
+      title: 'Test notification',
+      body: 'This is a test local notification from notifee.',
+      category: 'general',
+    });
+  };
+
+  const logDeviceToken = () => {
+    getDeviceToken().then(token => {
+      console.log('FCM device token:', token);
+    });
+  };
 
   if (isLoading || !data) {
     return <Loader message={t('notifications_loadingNotifications')} />;
@@ -48,6 +68,20 @@ export function NotificationsScreen(): React.JSX.Element {
   return (
     <Screen padded={false}>
       <CustomHeader title={t('notifications_title')} onBack={() => navigation.goBack()} />
+      <CustomButton
+        title="Send Notifee notification"
+        onPress={sendTestNotification}
+        variant="outline"
+        size="sm"
+        style={styles.testButton}
+      />
+      <CustomButton
+        title="Log FCM device token"
+        onPress={logDeviceToken}
+        variant="outline"
+        size="sm"
+        style={styles.testButton}
+      />
       <FlatList
         data={data}
         keyExtractor={n => n.id}

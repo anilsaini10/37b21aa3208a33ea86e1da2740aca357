@@ -35,6 +35,7 @@ export type AdminTabParamList = {
 
 export type AdminStackParamList = {
   Tabs: undefined;
+  StudentsList: {classId: string; className: string; sectionId?: string; sectionName?: string};
   StudentDetail: {id: string};
   StudentForm: {id?: string};
   Teachers: undefined;
