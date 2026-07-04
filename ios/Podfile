@@ -8,6 +8,11 @@ require Pod::Executable.execute_command('node', ['-p',
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
+# Required for Firebase's Swift pods (e.g. FirebaseCoreInternal) when not
+# using `use_frameworks!` — they depend on GoogleUtilities, which needs
+# module maps generated to be importable from Swift as a static library.
+use_modular_headers!
+
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green

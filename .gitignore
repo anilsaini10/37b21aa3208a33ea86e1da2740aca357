@@ -66,6 +66,10 @@ yarn-error.log
 # testing
 /coverage
 
+# Firebase service account keys — server credentials, must never be committed
+# or bundled into the app (they can send push as this project if leaked).
+src/core/firebase-test/
+
 # Yarn
 .yarn/*
 !.yarn/patches

@@ -16,8 +16,13 @@ export interface TeacherInput {
 }
 
 export const teachersApi = {
-  list: (params?: QueryParams): Promise<Paginated<Teacher>> =>
-    respond(paginateList(db.teachers, params, ['name', 'employeeId', 'email'])),
+  list: (params?: QueryParams): Promise<Paginated<Teacher>> => {
+    let items = db.teachers;
+    if (params?.subject) {
+      items = items.filter(t => t.subjects.includes(String(params.subject)));
+    }
+    return respond(paginateList(items, params, ['name', 'employeeId', 'email']));
+  },
 
   getById: (id: string): Promise<Teacher | undefined> =>
     respond(db.teachers.find(t => t.id === id)),

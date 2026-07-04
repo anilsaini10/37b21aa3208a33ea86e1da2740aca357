@@ -57,4 +57,5 @@ export const StorageKeys = {
   ONBOARDING_DONE: 'app.onboardingDone',
   SYNC_QUEUE: 'offline.syncQueue',
   CACHE_PREFIX: 'cache.',
+  PUSH_DEVICE_TOKEN: 'notifications.deviceToken',
 } as const;

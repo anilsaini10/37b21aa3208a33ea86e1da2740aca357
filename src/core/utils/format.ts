@@ -35,6 +35,31 @@ export function formatCompact(n: number): string {
   return trimZero(n / 1_000_000) + 'M';
 }
 
+/** Compact numbers using Indian units: 10000 -> "10K", 100000 -> "1L", 25000000 -> "2.5Cr". */
+export function formatCompactIndian(n: number): string {
+  const sign = n < 0 ? '-' : '';
+  const abs = Math.abs(n);
+  if (abs < 1000) {
+    return String(n);
+  }
+  if (abs < 100_000) {
+    return sign + trimZero(abs / 1000) + 'K';
+  }
+  if (abs < 10_000_000) {
+    return sign + trimZero(abs / 100_000) + 'L';
+  }
+  return sign + trimZero(abs / 10_000_000) + 'Cr';
+}
+
+/** Currency formatted with compact magnitude suffixes (₹1L, ₹10K, $1.5M). */
+export function formatCurrencyCompact(amount: number, currency: 'INR' | 'USD' = 'INR'): string {
+  const symbol = currency === 'INR' ? '₹' : '$';
+  const rounded = Math.round(amount);
+  const compact =
+    currency === 'INR' ? formatCompactIndian(Math.abs(rounded)) : formatCompact(Math.abs(rounded));
+  return `${rounded < 0 ? '-' : ''}${symbol}${compact}`;
+}
+
 function trimZero(n: number): string {
   return n.toFixed(1).replace(/\.0$/, '');
 }
