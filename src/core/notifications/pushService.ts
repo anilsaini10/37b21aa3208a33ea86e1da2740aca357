@@ -71,7 +71,18 @@ function categoryFromData(data?: FirebaseMessagingTypes.RemoteMessage['data']): 
     : undefined;
 }
 
-async function displayRemoteMessage(message: RemoteMessage): Promise<void> {
+async function displayRemoteMessage(
+  message: RemoteMessage,
+  opts?: {skipIfSystemDisplayed?: boolean},
+): Promise<void> {
+  // When a push carries a `notification` payload, the OS itself renders it
+  // in the tray while the app is backgrounded/killed — displaying it again
+  // here via notifee would show it twice. Only skip in that background case;
+  // the foreground handler must still display it since neither platform
+  // auto-shows anything while the app is in the foreground.
+  if (opts?.skipIfSystemDisplayed && message.notification) {
+    return;
+  }
   const title = message.notification?.title ?? (message.data?.title as string | undefined);
   const body = message.notification?.body ?? (message.data?.body as string | undefined);
   if (!title && !body) {
@@ -101,11 +112,13 @@ export function registerForegroundHandler(): () => void {
  * Must be called at the top level of `index.js`, before
  * `AppRegistry.registerComponent` — Firebase invokes this outside the React
  * tree (and even while the Android app process is fully killed) whenever a
- * message arrives in the background.
+ * message arrives in the background. Messages that carry a `notification`
+ * payload are skipped here since the OS already rendered them; only
+ * data-only messages need a manual notifee display.
  */
 export function registerBackgroundHandler(): void {
   messaging().setBackgroundMessageHandler(async remoteMessage => {
-    await displayRemoteMessage(remoteMessage);
+    await displayRemoteMessage(remoteMessage, {skipIfSystemDisplayed: true});
   });
 }
 

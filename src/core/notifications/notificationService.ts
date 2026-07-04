@@ -68,6 +68,10 @@ export async function displayLocalNotification(input: LocalNotificationInput): P
     data: input.data,
     android: {
       channelId,
+      // App logo (also used for the splash screen) — kept as one asset so
+      // there's a single source of truth for the app's visual identity.
+      smallIcon: 'bootsplash_logo',
+      largeIcon: 'bootsplash_logo',
       pressAction: {id: 'default'},
     },
     ios: {},
