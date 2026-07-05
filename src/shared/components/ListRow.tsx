@@ -32,6 +32,8 @@ export function ListRow({
       alignItems: 'center',
       columnGap: t.spacing.md,
       paddingVertical: t.spacing.md,
+      elevation: 10,
+      shadowColor: 'red',
     },
     iconCircle: {
       width: 42,

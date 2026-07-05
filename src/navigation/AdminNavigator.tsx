@@ -16,6 +16,7 @@ import {StudentFormScreen} from '../features/students/screens/StudentFormScreen'
 import {TeachersListScreen} from '../features/teachers/screens/TeachersListScreen';
 import {TeacherFormScreen} from '../features/teachers/screens/TeacherFormScreen';
 import {FeesListScreen} from '../features/fees/screens/FeesListScreen';
+import {FeesStudentsListScreen} from '../features/fees/screens/FeesStudentsListScreen';
 import {FeeReceiptScreen} from '../features/fees/screens/FeeReceiptScreen';
 import {AttendanceReportScreen} from '../features/attendance/screens/AttendanceReportScreen';
 import {ExamsListScreen} from '../features/exams/screens/ExamsListScreen';
@@ -89,6 +90,7 @@ export function AdminNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.Settings} component={SettingsScreen} />
       <Stack.Screen name={ScreenNames.Notifications} component={NotificationsScreen} />
       <Stack.Screen name={ScreenNames.FeeReceipt} component={FeeReceiptScreen} />
+      <Stack.Screen name={ScreenNames.FeesStudentsList} component={FeesStudentsListScreen} />
     </Stack.Navigator>
   );
 }

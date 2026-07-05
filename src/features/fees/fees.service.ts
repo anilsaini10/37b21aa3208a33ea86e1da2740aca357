@@ -13,8 +13,20 @@ import type {
 } from '../../shared/types';
 
 export const feesApi = {
-  list: (params?: QueryParams): Promise<Paginated<FeeInvoice>> =>
-    respond(paginateList(db.feeInvoices, params, ['studentName', 'className', 'status'])),
+  list: (params?: QueryParams): Promise<Paginated<FeeInvoice>> => {
+    let items = db.feeInvoices;
+    if (params?.classId) {
+      // FeeInvoice only carries `className`, not `classId`/`sectionId` — join
+      // through the student record to filter by class/section reliably.
+      const studentIds = new Set(
+        db.students
+          .filter(s => s.classId === params.classId && (!params.sectionId || s.sectionId === params.sectionId))
+          .map(s => s.id),
+      );
+      items = items.filter(i => studentIds.has(i.studentId));
+    }
+    return respond(paginateList(items, params, ['studentName', 'className', 'status']));
+  },
 
   getByStudent: (studentId: string): Promise<FeeInvoice | undefined> =>
     respond(db.feeInvoices.find(i => i.studentId === studentId)),

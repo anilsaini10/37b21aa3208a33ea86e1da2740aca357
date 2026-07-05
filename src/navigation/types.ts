@@ -53,6 +53,7 @@ export type AdminStackParamList = {
   Settings: undefined;
   Notifications: undefined;
   FeeReceipt: {invoiceId: string};
+  FeesStudentsList: {classId: string; className: string; sectionId?: string; sectionName?: string};
 };
 
 // ---- Teacher --------------------------------------------------------------
