@@ -30,7 +30,7 @@ export function StudentsListScreen(): React.JSX.Element {
   const {classId, className, sectionId, sectionName} = route.params;
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const {data, isLoading} = useStudents({classId, sectionId, page, search, pageSize: 15});
+  const {data, isLoading, isError, error, refetch} = useStudents({classId, sectionId, page, search, pageSize: 15});
   const styles = useThemedStyles(t2 => ({
     searchBarWrap: {
       paddingHorizontal: t2.spacing.lg,
@@ -66,7 +66,15 @@ export function StudentsListScreen(): React.JSX.Element {
           placeholder={t('studentsList_searchPlaceholder')}
         />
       </View>
-      {isLoading || !data ? (
+      {isError ? (
+        <EmptyState
+          icon="warning"
+          title={t('common_somethingWentWrong')}
+          message={(error as {message?: string} | null)?.message ?? t('common_checkConnection')}
+          actionLabel={t('common_retry')}
+          onAction={() => refetch()}
+        />
+      ) : isLoading || !data ? (
         <Loader message={t('studentsList_loadingStudents')} />
       ) : (
         <FlatList

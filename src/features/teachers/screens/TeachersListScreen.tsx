@@ -15,8 +15,8 @@ import {
   Loader,
 } from '../../../shared/components';
 import {statusTone, capitalize} from '../../../shared/helpers';
-import {db} from '../../../core/mock/db';
 import {useTeachers} from '../teachers.service';
+import {useSubjects} from '../../subjects/subjects.service';
 import type {AdminStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {Teacher} from '../../../shared/types';
@@ -40,14 +40,15 @@ export function TeachersListScreen(): React.JSX.Element {
   const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
   const [subjectFilter, setSubjectFilter] = useState(ALL_SUBJECTS_VALUE);
-  const {data, isLoading} = useTeachers({
+  const {data: subjects} = useSubjects();
+  const {data, isLoading, isError, error, refetch} = useTeachers({
     pageSize: 50,
     subject: subjectFilter || undefined,
   });
 
   const subjectOptions = [
     {label: t('teachersList_allSubjects'), value: ALL_SUBJECTS_VALUE},
-    ...db.subjects.map(s => ({label: s.name, value: s.name})),
+    ...(subjects ?? []).map(s => ({label: s.name, value: s.name})),
   ];
 
   return (
@@ -65,7 +66,15 @@ export function TeachersListScreen(): React.JSX.Element {
           onChange={setSubjectFilter}
         />
       </View>
-      {isLoading || !data ? (
+      {isError ? (
+        <EmptyState
+          icon="warning"
+          title={t('common_somethingWentWrong')}
+          message={(error as {message?: string} | null)?.message ?? t('common_checkConnection')}
+          actionLabel={t('common_retry')}
+          onAction={() => refetch()}
+        />
+      ) : isLoading || !data ? (
         <Loader message={t('teachersList_loadingTeachers')} />
       ) : (
         <FlatList
@@ -79,7 +88,7 @@ export function TeachersListScreen(): React.JSX.Element {
               avatarUri={item.avatarUrl}
               title={item.name}
               subtitle={t('teachersList_rowSubtitle', {
-                subjects: item.subjects.join(', '),
+                subjects: item.subjects.map(s => `${s.name} — ${s.className}`).join(', '),
                 employeeId: item.employeeId,
               })}
               right={<Badge label={capitalize(item.status)} tone={statusTone(item.status)} />}

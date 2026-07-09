@@ -3,14 +3,19 @@ import {ActivityIndicator, Pressable, ScrollView, StatusBar, StyleSheet, View} f
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Svg, {Defs, LinearGradient, Rect, Stop} from 'react-native-svg';
 import {lightTheme, ThemeContext, useTheme} from '../../../core/theme';
-import {useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {AppText, CustomCard, CustomInput, CustomButton, Icon, Spacer} from '../../../shared/components';
 import {useAuthStore} from '../authStore';
+import {isValidEmail, isValidPhoneDigits} from '../../../shared/utils/validators';
 import type {AuthScreenProps} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 
 const LOGO_SIZE = 88;
+
+interface FieldErrors {
+  identifier?: string;
+  password?: string;
+}
 
 export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): React.JSX.Element {
   const themeCtx = useTheme();
@@ -18,18 +23,48 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
   const insets = useSafeAreaInsets();
   const {t} = useLanguage();
 
-  const {role} = route.params;
+  const {role, schoolId, schoolName} = route.params;
   const {loginWithPassword, isLoading, error, clearError} = useAuthStore();
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const title = role === 'admin' ? t('loginScreen_adminTitle') : t('loginScreen_teacherTitle');
   const roleIcon = role === 'admin' ? 'settings' : 'teacher';
 
+  const clearFieldError = (field: keyof FieldErrors) => {
+    if (error) {
+      clearError();
+    }
+    if (fieldErrors[field]) {
+      setFieldErrors(prev => ({...prev, [field]: undefined}));
+    }
+  };
+
+  /** identifier can be email or phone — validated as whichever format it looks like. */
+  const validate = (): FieldErrors => {
+    const errors: FieldErrors = {};
+    const trimmed = identifier.trim();
+    if (!trimmed) {
+      errors.identifier = t('loginScreen_identifierRequired');
+    } else if (trimmed.includes('@') ? !isValidEmail(trimmed) : !isValidPhoneDigits(trimmed)) {
+      errors.identifier = t('loginScreen_identifierInvalid');
+    }
+    if (!password) {
+      errors.password = t('loginScreen_passwordRequired');
+    }
+    return errors;
+  };
+
   const onSubmit = async () => {
     clearError();
-    await loginWithPassword(role, identifier, password);
+    const errors = validate();
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+    await loginWithPassword(role, identifier.trim(), password, schoolId);
     // On success the root navigator swaps to the role stack automatically.
   };
 
@@ -78,6 +113,14 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
             <AppText variant="body" color="textSecondary" center>
               {t('loginScreen_signInSubtitle')}
             </AppText>
+            {schoolName ? (
+              <>
+                <Spacer size={4} />
+                <AppText variant="caption" color="primary" center style={{fontWeight: '700'}}>
+                  {schoolName}
+                </AppText>
+              </>
+            ) : null}
           </View>
 
           <View style={{paddingHorizontal: theme.spacing.lg, marginTop: theme.spacing.xl}}>
@@ -96,11 +139,10 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
                 iconLeft="email"
                 autoCapitalize="none"
                 value={identifier}
+                error={fieldErrors.identifier}
                 onChangeText={val => {
                   setIdentifier(val);
-                  if (error) {
-                    clearError();
-                  }
+                  clearFieldError('identifier');
                 }}
                 required
               />
@@ -110,11 +152,10 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
                 iconLeft="lock"
                 secure
                 value={password}
+                error={fieldErrors.password}
                 onChangeText={val => {
                   setPassword(val);
-                  if (error) {
-                    clearError();
-                  }
+                  clearFieldError('password');
                 }}
                 containerStyle={{marginBottom: 0}}
                 required
@@ -136,8 +177,24 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
               onPress={() => navigation.navigate('ForgotPassword')}
             />
 
+            {role === 'admin' ? (
+              <>
+                <Spacer size={10} />
+                <Row style={{justifyContent: 'center'}}>
+                  <AppText variant="caption" color="textSecondary">
+                    {t('loginScreen_noAccount')}
+                  </AppText>
+                  <Pressable onPress={() => navigation.navigate(ScreenNames.SignUp)} hitSlop={8}>
+                    <AppText variant="caption" color="primary" style={{fontWeight: '700', marginLeft: 6}}>
+                      {t('loginScreen_signUp')}
+                    </AppText>
+                  </Pressable>
+                </Row>
+              </>
+            ) : null}
+
             <Spacer size={22} />
-          
+
           </View>
         </ScrollView>
       </View>

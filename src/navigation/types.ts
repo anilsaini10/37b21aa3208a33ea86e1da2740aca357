@@ -20,8 +20,10 @@ export type RootStackParamList = {
 // ---- Auth -----------------------------------------------------------------
 export type AuthStackParamList = {
   RoleSelect: undefined;
-  Login: {role: Extract<UserRole, 'admin' | 'teacher'>};
-  ParentLogin: undefined;
+  SelectSchool: {role: Extract<UserRole, 'teacher' | 'parent'>};
+  Login: {role: Extract<UserRole, 'admin' | 'teacher'>; schoolId?: string; schoolName?: string};
+  SignUp: undefined;
+  ParentLogin: {schoolId: string; schoolName: string};
   ForgotPassword: undefined;
 };
 
@@ -54,6 +56,10 @@ export type AdminStackParamList = {
   Notifications: undefined;
   FeeReceipt: {invoiceId: string};
   FeesStudentsList: {classId: string; className: string; sectionId?: string; sectionName?: string};
+  Profile: undefined;
+  ChangePassword: undefined;
+  ClassesManage: undefined;
+  SubjectsManage: undefined;
 };
 
 // ---- Teacher --------------------------------------------------------------

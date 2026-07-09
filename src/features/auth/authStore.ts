@@ -7,7 +7,7 @@
  */
 import {create} from 'zustand';
 import {storage, StorageKeys} from '../../core/storage/storage';
-import {authApi} from './authApi';
+import {authApi, type SignupInput} from './authApi';
 import type {AuthSession, AuthUser, UserRole} from '../../shared/types';
 import type {PermissionKey} from '../../core/config/permissions';
 import {hasPermission} from '../../core/config/permissions';
@@ -17,11 +17,19 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  /** Backend error code (e.g. `EMAIL_TAKEN`, `VALIDATION_ERROR`) for the last failed auth action, if any. */
+  errorCode: string | null;
 
   hydrate: () => void;
   setSession: (session: AuthSession) => void;
-  loginWithPassword: (role: UserRole, identifier: string, password: string) => Promise<boolean>;
-  verifyOtp: (phone: string, otp: string) => Promise<boolean>;
+  signup: (input: SignupInput) => Promise<boolean>;
+  loginWithPassword: (
+    role: UserRole,
+    identifier: string,
+    password: string,
+    schoolId?: string,
+  ) => Promise<boolean>;
+  verifyOtp: (phone: string, otp: string, schoolId: string, schoolName: string) => Promise<boolean>;
   logout: () => Promise<void>;
   clearError: () => void;
   can: (permission: PermissionKey) => boolean;
@@ -44,6 +52,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
   isLoading: false,
   error: null,
+  errorCode: null,
 
   hydrate: () => {
     const user = storage.getObject<AuthUser>(StorageKeys.AUTH_USER);
@@ -55,31 +64,49 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   setSession: (session: AuthSession) => {
     persistSession(session);
-    set({user: session.user, isAuthenticated: true, error: null});
+    set({user: session.user, isAuthenticated: true, error: null, errorCode: null});
   },
 
-  loginWithPassword: async (role, identifier, password) => {
-    set({isLoading: true, error: null});
+  signup: async (input: SignupInput) => {
+    set({isLoading: true, error: null, errorCode: null});
     try {
-      const session = await authApi.loginWithPassword(role, identifier, password);
+      const session = await authApi.signup(input);
       persistSession(session);
       set({user: session.user, isAuthenticated: true, isLoading: false});
       return true;
     } catch (e) {
-      set({isLoading: false, error: (e as Error).message});
+      const message = (e as {message?: string}).message ?? 'Signup failed. Please try again.';
+      const code = (e as {code?: string}).code ?? null;
+      set({isLoading: false, error: message, errorCode: code});
       return false;
     }
   },
 
-  verifyOtp: async (phone, otp) => {
-    set({isLoading: true, error: null});
+  loginWithPassword: async (role, identifier, password, schoolId) => {
+    set({isLoading: true, error: null, errorCode: null});
     try {
-      const session = await authApi.verifyOtp(phone, otp);
+      const session = await authApi.loginWithPassword(role, identifier, password, schoolId);
       persistSession(session);
       set({user: session.user, isAuthenticated: true, isLoading: false});
       return true;
     } catch (e) {
-      set({isLoading: false, error: (e as Error).message});
+      const message = (e as {message?: string}).message ?? 'Login failed. Please try again.';
+      const code = (e as {code?: string}).code ?? null;
+      set({isLoading: false, error: message, errorCode: code});
+      return false;
+    }
+  },
+
+  verifyOtp: async (phone, otp, schoolId, schoolName) => {
+    set({isLoading: true, error: null, errorCode: null});
+    try {
+      const session = await authApi.verifyOtp(phone, otp, schoolId, schoolName);
+      persistSession(session);
+      set({user: session.user, isAuthenticated: true, isLoading: false});
+      return true;
+    } catch (e) {
+      const message = (e as {message?: string}).message ?? 'Verification failed. Please try again.';
+      set({isLoading: false, error: message, errorCode: null});
       return false;
     }
   },
@@ -87,10 +114,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   logout: async () => {
     await authApi.logout();
     clearSession();
-    set({user: null, isAuthenticated: false, error: null});
+    set({user: null, isAuthenticated: false, error: null, errorCode: null});
   },
 
-  clearError: () => set({error: null}),
+  clearError: () => set({error: null, errorCode: null}),
 
   can: (permission) => {
     const user = get().user;

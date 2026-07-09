@@ -27,7 +27,11 @@ import {LibraryScreen} from '../features/library/screens/LibraryScreen';
 import {InventoryScreen} from '../features/inventory/screens/InventoryScreen';
 import {EventsScreen} from '../features/events/screens/EventsScreen';
 import {SettingsScreen} from '../features/settings/screens/SettingsScreen';
+import {ClassesManageScreen} from '../features/classes/screens/ClassesManageScreen';
+import {SubjectsManageScreen} from '../features/subjects/screens/SubjectsManageScreen';
 import {MoreScreen} from '../features/admin/screens/MoreScreen';
+import {AdminProfileScreen} from '../features/admin/screens/AdminProfileScreen';
+import {ChangePasswordScreen} from '../features/auth/screens/ChangePasswordScreen';
 import {AnnouncementsScreen} from '../features/communication/screens/AnnouncementsScreen';
 import {AnnouncementFormScreen} from '../features/communication/screens/AnnouncementFormScreen';
 import {NotificationsScreen} from '../features/communication/screens/NotificationsScreen';
@@ -91,6 +95,10 @@ export function AdminNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.Notifications} component={NotificationsScreen} />
       <Stack.Screen name={ScreenNames.FeeReceipt} component={FeeReceiptScreen} />
       <Stack.Screen name={ScreenNames.FeesStudentsList} component={FeesStudentsListScreen} />
+      <Stack.Screen name={ScreenNames.Profile} component={AdminProfileScreen} />
+      <Stack.Screen name={ScreenNames.ChangePassword} component={ChangePasswordScreen} />
+      <Stack.Screen name={ScreenNames.ClassesManage} component={ClassesManageScreen} />
+      <Stack.Screen name={ScreenNames.SubjectsManage} component={SubjectsManageScreen} />
     </Stack.Navigator>
   );
 }

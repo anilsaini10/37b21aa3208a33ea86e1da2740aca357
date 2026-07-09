@@ -95,7 +95,7 @@ export function SplashScreen({onFinish}: {onFinish: () => void}): React.JSX.Elem
         </AppText>
         <View style={styles.tagline}>
           <AppText variant="caption" color="textSecondary" center>
-            {t('schoolManagementSystem')}
+            {t('arise_full_form')}
           </AppText>
         </View>
       </Animated.View>

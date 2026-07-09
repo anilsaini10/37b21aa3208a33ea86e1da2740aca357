@@ -13,7 +13,10 @@ type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
 /** Modules reached from here — all take no route params. */
 type NoParamRoute =
+  | 'Profile'
   | 'Teachers'
+  | 'ClassesManage'
+  | 'SubjectsManage'
   | 'Attendance'
   | 'Exams'
   | 'Announcements'
@@ -32,7 +35,10 @@ interface ModuleItem {
 }
 
 const MODULES: ModuleItem[] = [
+  {labelKey: 'teacherProfile_profile', icon: 'profile', route: ScreenNames.Profile},
   {labelKey: 'moreScreen_teachers', icon: 'teacher', route: ScreenNames.Teachers},
+  {labelKey: 'moreScreen_classes', icon: 'class', route: ScreenNames.ClassesManage},
+  {labelKey: 'moreScreen_subjects', icon: 'homework', route: ScreenNames.SubjectsManage},
   {labelKey: 'moreScreen_attendance', icon: 'attendance', route: ScreenNames.Attendance},
   {labelKey: 'moreScreen_exams', icon: 'exam', route: ScreenNames.Exams},
   {labelKey: 'moreScreen_announcements', icon: 'announcement', route: ScreenNames.Announcements},

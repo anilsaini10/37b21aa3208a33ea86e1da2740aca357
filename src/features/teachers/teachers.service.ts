@@ -1,57 +1,94 @@
-/** Teachers service — list/create over the mock DB + hooks. */
+/** Teachers service — real backend (Express + Prisma), scoped server-side to the admin's school. */
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {db} from '../../core/mock/db';
-import {respond, paginateList} from '../../core/mock/mockApi';
-import {generateId} from '../../core/utils/misc';
-import type {Paginated, QueryParams, Teacher} from '../../shared/types';
+import {axiosClient} from '../../core/api/axiosClient';
+import {Endpoints} from '../../core/api/apiConfig';
+import {rethrowApiError} from '../../core/api/apiError';
+import type {Paginated, QueryParams, Status, Teacher, TeacherSubjectAssignment} from '../../shared/types';
 
 export interface TeacherInput {
   name: string;
   email: string;
   phone: string;
   gender: Teacher['gender'];
+  /** A subject NAME — the backend auto-creates it if it doesn't exist yet. */
   subject: string;
+  /** Which class this teacher teaches `subject` in — required by the backend. */
+  classId: string;
   salary: number;
   joiningDate: string;
 }
 
+export interface CreateTeacherResult {
+  teacher: Teacher;
+  /** One-time plaintext login password — always present for a new teacher account. */
+  defaultPassword: string;
+}
+
+/** Raw shape the real backend responds with — gender/status come back upper-case. */
+interface TeacherApi {
+  id: string;
+  employeeId: string;
+  name: string;
+  gender: string;
+  email: string;
+  phone: string;
+  subjects: TeacherSubjectAssignment[];
+  joiningDate: string;
+  salary: number;
+  status: string;
+  performanceScore: number;
+}
+
+function toTeacher(raw: TeacherApi): Teacher {
+  return {
+    id: raw.id,
+    employeeId: raw.employeeId,
+    name: raw.name,
+    gender: raw.gender.toLowerCase() as Teacher['gender'],
+    email: raw.email,
+    phone: raw.phone,
+    subjects: raw.subjects,
+    joiningDate: raw.joiningDate,
+    salary: raw.salary,
+    status: raw.status.toLowerCase() as Status,
+    performanceScore: raw.performanceScore,
+  };
+}
+
 export const teachersApi = {
-  list: (params?: QueryParams): Promise<Paginated<Teacher>> => {
-    let items = db.teachers;
-    if (params?.subject) {
-      items = items.filter(t => t.subjects.includes(String(params.subject)));
+  list: async (params?: QueryParams): Promise<Paginated<Teacher>> => {
+    try {
+      const {data} = await axiosClient.get<Paginated<TeacherApi>>(Endpoints.admin.teachers, {params});
+      return {...data, items: data.items.map(toTeacher)};
+    } catch (e) {
+      rethrowApiError(e, 'Failed to load teachers.');
     }
-    return respond(paginateList(items, params, ['name', 'employeeId', 'email']));
   },
 
-  getById: (id: string): Promise<Teacher | undefined> =>
-    respond(db.teachers.find(t => t.id === id)),
-
-  create: (input: TeacherInput): Promise<Teacher> => {
-    const teacher: Teacher = {
-      id: generateId('tch'),
-      employeeId: `EMP${200 + db.teachers.length}`,
-      name: input.name,
-      gender: input.gender,
-      email: input.email,
-      phone: input.phone,
-      subjectIds: [],
-      subjects: [input.subject],
-      joiningDate: input.joiningDate,
-      salary: input.salary,
-      status: 'active',
-      performanceScore: 85,
-    };
-    db.teachers.unshift(teacher);
-    return respond(teacher);
+  /** No dedicated get-by-id endpoint — resolved from the (already-cached) list. */
+  getById: async (id: string): Promise<Teacher | undefined> => {
+    const page = await teachersApi.list({pageSize: 500});
+    return page.items.find(t => t.id === id);
   },
 
-  remove: (id: string): Promise<void> => {
-    const idx = db.teachers.findIndex(t => t.id === id);
-    if (idx >= 0) {
-      db.teachers.splice(idx, 1);
+  create: async (input: TeacherInput): Promise<CreateTeacherResult> => {
+    try {
+      const {data} = await axiosClient.post<{teacher: TeacherApi; defaultPassword: string}>(
+        Endpoints.admin.teachers,
+        {...input, gender: input.gender.toUpperCase()},
+      );
+      return {teacher: toTeacher(data.teacher), defaultPassword: data.defaultPassword};
+    } catch (e) {
+      rethrowApiError(e, 'Failed to add teacher.');
     }
-    return respond(undefined);
+  },
+
+  remove: async (id: string): Promise<void> => {
+    try {
+      await axiosClient.delete(Endpoints.admin.teachers_byId(id));
+    } catch (e) {
+      rethrowApiError(e, 'Failed to remove teacher.');
+    }
   },
 };
 

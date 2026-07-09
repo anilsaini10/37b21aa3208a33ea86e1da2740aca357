@@ -30,7 +30,9 @@ export const ScreenNames = {
 
   // Auth
   RoleSelect: 'RoleSelect',
+  SelectSchool: 'SelectSchool',
   Login: 'Login',
+  SignUp: 'SignUp',
   ParentLogin: 'ParentLogin',
   ForgotPassword: 'ForgotPassword',
 
@@ -51,6 +53,8 @@ export const ScreenNames = {
   Inventory: 'Inventory',
   Reports: 'Reports',
   Settings: 'Settings',
+  ClassesManage: 'ClassesManage',
+  SubjectsManage: 'SubjectsManage',
 
   // Teacher
   Classes: 'Classes',

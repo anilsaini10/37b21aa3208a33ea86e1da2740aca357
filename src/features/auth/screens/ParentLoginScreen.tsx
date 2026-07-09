@@ -15,7 +15,8 @@ import {useAuthStore} from '../authStore';
 import {authApi} from '../authApi';
 import type {AuthScreenProps} from '../../../navigation/types';
 
-export function ParentLoginScreen({navigation}: AuthScreenProps<'ParentLogin'>): React.JSX.Element {
+export function ParentLoginScreen({route, navigation}: AuthScreenProps<'ParentLogin'>): React.JSX.Element {
+  const {schoolId, schoolName} = route.params;
   const {t} = useLanguage();
   const styles = useThemedStyles(theme => ({
     container: {
@@ -44,7 +45,7 @@ export function ParentLoginScreen({navigation}: AuthScreenProps<'ParentLogin'>):
 
   const submitOtp = async () => {
     clearError();
-    await verifyOtp(phone, otp);
+    await verifyOtp(phone, otp, schoolId, schoolName);
   };
 
   return (
@@ -52,6 +53,10 @@ export function ParentLoginScreen({navigation}: AuthScreenProps<'ParentLogin'>):
       <CustomHeader title={t('parentLoginScreen_title')} onBack={() => navigation.goBack()} />
       <View style={styles.container}>
         <Spacer size={12} />
+        <AppText variant="caption" color="primary" style={{fontWeight: '700'}}>
+          {schoolName}
+        </AppText>
+        <Spacer size={4} />
         <AppText variant="h2">
           {step === 'phone' ? t('parentLoginScreen_enterMobile') : t('parentLoginScreen_verifyOtp')}
         </AppText>

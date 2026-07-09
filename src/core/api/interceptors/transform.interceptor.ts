@@ -21,13 +21,18 @@ export function transformResponseInterceptor(response: AxiosResponse): AxiosResp
 
 export function transformErrorInterceptor(error: AxiosError): Promise<never> {
   const status = error.response?.status ?? 0;
-  const payload = error.response?.data as {message?: string; code?: string} | undefined;
+  // Backend sends `{ success: false, error: { message, code } }`; also accept
+  // a flat `{ message, code }` for endpoints that don't follow that shape.
+  const payload = error.response?.data as
+    | {message?: string; code?: string; error?: {message?: string; code?: string}}
+    | undefined;
   const apiError: ApiError = {
     status,
     message:
+      payload?.error?.message ??
       payload?.message ??
       (status === 0 ? 'Network error. Please check your connection.' : 'Something went wrong.'),
-    code: payload?.code,
+    code: payload?.error?.code ?? payload?.code,
   };
   return Promise.reject(apiError);
 }

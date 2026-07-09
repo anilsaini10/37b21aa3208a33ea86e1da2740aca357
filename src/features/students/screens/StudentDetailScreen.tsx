@@ -18,6 +18,7 @@ import {
   Spacer,
   SectionTitle,
   Loader,
+  EmptyState,
 } from '../../../shared/components';
 import {feeStatusTone, statusTone, capitalize} from '../../../shared/helpers';
 import {formatDate, formatCurrency} from '../../../core/utils/format';
@@ -52,7 +53,7 @@ export function StudentDetailScreen(): React.JSX.Element {
   const route = useRoute<RouteProp<AdminStackParamList, 'StudentDetail'>>();
   const {id} = route.params;
 
-  const {data: student, isLoading} = useStudent(id);
+  const {data: student, isLoading, isError, error, refetch} = useStudent(id);
   const {data: fee} = useStudentFee(id);
   const deleteMutation = useDeleteStudent();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -68,6 +69,17 @@ export function StudentDetailScreen(): React.JSX.Element {
     },
   }));
 
+  if (isError) {
+    return (
+      <EmptyState
+        icon="warning"
+        title={t('common_somethingWentWrong')}
+        message={(error as {message?: string} | null)?.message ?? t('common_checkConnection')}
+        actionLabel={t('common_retry')}
+        onAction={() => refetch()}
+      />
+    );
+  }
   if (isLoading || !student) {
     return <Loader message={t('studentDetail_loadingStudent')} />;
   }
@@ -117,6 +129,7 @@ export function StudentDetailScreen(): React.JSX.Element {
         <CustomCard>
           <InfoRow label={t('common_name')} value={student.parentName} />
           <InfoRow label={t('common_phone')} value={student.parentPhone} />
+          <InfoRow label={t('common_email')} value={student.parentEmail} />
         </CustomCard>
 
         <SectionTitle title={t('studentDetail_academicSection')} />

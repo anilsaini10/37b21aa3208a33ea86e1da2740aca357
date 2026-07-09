@@ -7,3 +7,4 @@ export * from './exam';
 export * from './communication';
 export * from './operations';
 export * from './dashboard';
+export * from './school';

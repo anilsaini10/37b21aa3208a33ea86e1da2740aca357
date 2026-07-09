@@ -47,6 +47,7 @@ export interface Student {
   parentId: ID;
   parentName: string;
   parentPhone: string;
+  parentEmail: string;
   avatarUrl?: string;
   bloodGroup?: string;
   address?: string;
@@ -70,14 +71,21 @@ export interface Teacher {
   gender: Gender;
   email: string;
   phone: string;
-  subjectIds: ID[];
-  subjects: string[];
+  /** Each entry is one subject taught in one class — a teacher may teach the same or different subjects across multiple classes. */
+  subjects: TeacherSubjectAssignment[];
   classTeacherOf?: string;
   avatarUrl?: string;
   joiningDate: string;
   salary: number;
   status: Status;
   performanceScore: number;
+}
+
+export interface TeacherSubjectAssignment {
+  subjectId: ID;
+  name: string;
+  classId: ID;
+  className: string;
 }
 
 export interface Parent {

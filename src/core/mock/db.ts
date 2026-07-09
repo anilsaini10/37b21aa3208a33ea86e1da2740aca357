@@ -70,8 +70,7 @@ const isoDate = (y: number, m: number, d: number): string =>
 const subjects: Subject[] = SUBJECT_NAMES.map((s, i) => ({
   id: `sub_${i + 1}`,
   name: s,
-  code: s.slice(0, 3).toUpperCase(),
-  classIds: [],
+  classes: [],
 }));
 
 // ---- Classes + Sections ---------------------------------------------------
@@ -95,13 +94,16 @@ for (let level = 1; level <= 10; level++) {
     name: `Class ${level}`,
     numericLevel: level,
     sections: secList,
+    subjects: [],
     totalStudents: 0,
   });
 }
 
 // ---- Teachers -------------------------------------------------------------
 const teachers: Teacher[] = Array.from({length: 12}, (_, i) => {
-  const subs = [pick(SUBJECT_NAMES)];
+  const subjectName = pick(SUBJECT_NAMES);
+  const subject = subjects.find(s => s.name === subjectName)!;
+  const teachingClass = pick(classes);
   const tName = name();
   return {
     id: `tch_${i + 1}`,
@@ -110,8 +112,9 @@ const teachers: Teacher[] = Array.from({length: 12}, (_, i) => {
     gender: gender(),
     email: `${tName.toLowerCase().replace(/\s/g, '.')}@school.edu`,
     phone: phone(),
-    subjectIds: [],
-    subjects: subs,
+    subjects: [
+      {subjectId: subject.id, name: subject.name, classId: teachingClass.id, className: teachingClass.name},
+    ],
     classTeacherOf: i < classes.length ? classes[i].name : undefined,
     joiningDate: isoDate(2018 + (i % 6), int(1, 12), int(1, 28)),
     salary: int(30000, 65000),
@@ -134,11 +137,12 @@ classes.forEach(cls => {
       const studentId = `stu_${students.length + 1}`;
       const pName = `${pick(['Mr.', 'Mrs.'])} ${sName.split(' ')[1]}`;
       const pPhone = phone();
+      const pEmail = `${pName.toLowerCase().replace(/[^a-z]/g, '')}@mail.com`;
       parents.push({
         id: parentId,
         name: pName,
         phone: pPhone,
-        email: `${pName.toLowerCase().replace(/[^a-z]/g, '')}@mail.com`,
+        email: pEmail,
         childIds: [studentId],
         occupation: pick(['Engineer', 'Doctor', 'Business', 'Teacher', 'Farmer']),
         address: `${int(1, 200)}, ${pick(['MG Road', 'Park Street', 'Lake View', 'Green Ave'])}`,
@@ -157,6 +161,7 @@ classes.forEach(cls => {
         parentId,
         parentName: pName,
         parentPhone: pPhone,
+        parentEmail: pEmail,
         bloodGroup: pick(['A+', 'B+', 'O+', 'AB+', 'O-']),
         address: `${int(1, 200)}, ${pick(['MG Road', 'Park Street', 'Lake View'])}`,
         status: 'active',

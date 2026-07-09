@@ -5,7 +5,14 @@ export interface SchoolClass {
   name: string;
   numericLevel: number;
   sections: Section[];
+  /** Subjects taught in this class's curriculum. */
+  subjects: ClassSubjectRef[];
   totalStudents: number;
+}
+
+export interface ClassSubjectRef {
+  id: ID;
+  name: string;
 }
 
 export interface Section {
@@ -21,8 +28,8 @@ export interface Section {
 export interface Subject {
   id: ID;
   name: string;
-  code: string;
-  classIds: ID[];
+  /** Classes that currently teach this subject. */
+  classes: {id: ID; name: string}[];
 }
 
 export type WeekDay =

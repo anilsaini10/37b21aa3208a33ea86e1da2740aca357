@@ -14,7 +14,7 @@ export interface AppEnv {
 }
 
 export const ENV: AppEnv = {
-  API_BASE_URL: 'https://api.schoolms.example.com/v1',
+  API_BASE_URL: 'http://10.0.2.2:5000',
   API_TIMEOUT_MS: 15000,
   USE_MOCK_API: true,
   ENABLE_LOGGING: __DEV__,

@@ -18,10 +18,11 @@ export function RoleSelectScreen({navigation}: AuthScreenProps<'RoleSelect'>): R
   const {t} = useLanguage();
 
   const onSelect = (role: UserRole) => {
-    if (role === 'parent') {
-      navigation.navigate(ScreenNames.ParentLogin);
-    } else {
+    if (role === 'admin') {
+      // Admins own a school already (or sign up to create one) — no school picker needed.
       navigation.navigate(ScreenNames.Login, {role});
+    } else {
+      navigation.navigate(ScreenNames.SelectSchool, {role});
     }
   };
 
@@ -70,7 +71,7 @@ export function RoleSelectScreen({navigation}: AuthScreenProps<'RoleSelect'>): R
               Greenwood School
             </AppText>
             <AppText variant="caption" color="textSecondary" center>
-              {t('schoolManagementSystem')}
+              {/* {t('schoolManagementSystem')} */}
             </AppText>
           </View>
 
