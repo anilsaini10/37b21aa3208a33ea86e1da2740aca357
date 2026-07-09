@@ -37,6 +37,7 @@ export const ScreenNames = {
   // Admin
   Students: 'Students',
   StudentsList: 'StudentsList',
+  FeesStudentsList: 'FeesStudentsList',
   More: 'More',
   StudentForm: 'StudentForm',
   Teachers: 'Teachers',

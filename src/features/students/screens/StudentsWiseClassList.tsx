@@ -28,7 +28,13 @@ export function StudentsWiseClassListScreen(): React.JSX.Element {
       flexGrow: 1,
     },
     card: {
-      marginBottom: theme.spacing.md,
+      marginBottom: theme.spacing.sm,
+      padding: theme.spacing.sm,
+      borderWidth: 0,
+      shadowOpacity: theme.dark ? 0.4 : 0.12,
+      shadowRadius: 10,
+      shadowOffset: {width: 0, height: 4},
+      elevation: 6,
     },
   }));
   const {t} = useLanguage();
