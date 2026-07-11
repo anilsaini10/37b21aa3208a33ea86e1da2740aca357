@@ -86,14 +86,19 @@ export const studentsApi = {
       const {data} = await axiosClient.get<Paginated<StudentApi>>(Endpoints.admin.students, {params});
       return {...data, items: data.items.map(toStudent)};
     } catch (e) {
+      console.error('studentsApi.list failed', e);
       rethrowApiError(e, 'Failed to load students.');
     }
   },
 
-  /** No dedicated get-by-id endpoint — resolved from the (already-cached) list, same pattern used for fee receipts. */
-  getById: async (id: string): Promise<Student | undefined> => {
-    const page = await studentsApi.list({pageSize: 500});
-    return page.items.find(s => s.id === id);
+  getById: async (id: string): Promise<Student> => {
+    try {
+      const {data} = await axiosClient.get<StudentApi>(Endpoints.admin.students_byId(id));
+      return toStudent(data);
+    } catch (e) {
+      console.error('studentsApi.getById failed', e);
+      rethrowApiError(e, 'Failed to load student.');
+    }
   },
 
   create: async (input: StudentInput): Promise<CreateStudentResult> => {
@@ -113,6 +118,7 @@ export const studentsApi = {
       const {data} = await axiosClient.put<StudentApi>(Endpoints.admin.students_byId(id), input);
       return toStudent(data);
     } catch (e) {
+      console.error('studentsApi.update failed', e);
       rethrowApiError(e, 'Failed to update student.');
     }
   },
@@ -121,6 +127,7 @@ export const studentsApi = {
     try {
       await axiosClient.delete(Endpoints.admin.students_byId(id));
     } catch (e) {
+      console.error('studentsApi.remove failed', e);
       rethrowApiError(e, 'Failed to remove student.');
     }
   },
@@ -129,8 +136,14 @@ export const studentsApi = {
 export const useStudents = (params?: QueryParams) =>
   useQuery({queryKey: ['students', params], queryFn: () => studentsApi.list(params)});
 
-export const useStudent = (id: string) =>
-  useQuery({queryKey: ['student', id], queryFn: () => studentsApi.getById(id), enabled: !!id});
+/** `initial` (e.g. the row already shown in the list) renders instantly while a fresh copy refetches in the background. */
+export const useStudent = (id: string, initial?: Student) =>
+  useQuery({
+    queryKey: ['student', id],
+    queryFn: () => studentsApi.getById(id),
+    enabled: !!id,
+    initialData: initial,
+  });
 
 export const useCreateStudent = () => {
   const qc = useQueryClient();

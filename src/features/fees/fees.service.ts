@@ -28,8 +28,10 @@ export const feesApi = {
     return respond(paginateList(items, params, ['studentName', 'className', 'status']));
   },
 
-  getByStudent: (studentId: string): Promise<FeeInvoice | undefined> =>
-    respond(db.feeInvoices.find(i => i.studentId === studentId)),
+  // React Query rejects `undefined` query results — return `null` when the student has no invoice
+  // (e.g. any student added through the real backend, since the mock invoices only cover seed data).
+  getByStudent: (studentId: string): Promise<FeeInvoice | null> =>
+    respond(db.feeInvoices.find(i => i.studentId === studentId) ?? null),
 
   summary: (): Promise<FeeCollectionSummary> => {
     const expected = sumBy(db.feeInvoices, i => i.totalAmount);

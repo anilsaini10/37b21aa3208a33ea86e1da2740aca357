@@ -1,6 +1,6 @@
-/** Teachers list — staff roster with status badges, filterable by subject. */
-import React, {useState} from 'react';
-import {FlatList, View} from 'react-native';
+/** Teachers list — searchable, paginated roster, filterable by subject and class. */
+import React, {useEffect, useState} from 'react';
+import {FlatList, RefreshControl, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useThemedStyles} from '../../../core/theme';
@@ -8,15 +8,20 @@ import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   CustomHeader,
+  SearchBar,
   ListRow,
   Badge,
   Select,
+  Pagination,
   EmptyState,
   Loader,
+  Row,
+  Spacer,
 } from '../../../shared/components';
 import {statusTone, capitalize} from '../../../shared/helpers';
 import {useTeachers} from '../teachers.service';
 import {useSubjects} from '../../subjects/subjects.service';
+import {useClasses} from '../../classes/classes.service';
 import type {AdminStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {Teacher} from '../../../shared/types';
@@ -24,12 +29,21 @@ import type {Teacher} from '../../../shared/types';
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
 const ALL_SUBJECTS_VALUE = '';
+const ALL_CLASSES_VALUE = '';
+const SEARCH_DEBOUNCE_MS = 350;
 
 export function TeachersListScreen(): React.JSX.Element {
   const styles = useThemedStyles(theme => ({
+    searchBarWrap: {
+      paddingHorizontal: theme.spacing.lg,
+      paddingTop: theme.spacing.md,
+    },
     filterWrap: {
       paddingHorizontal: theme.spacing.lg,
       paddingTop: theme.spacing.md,
+    },
+    filterItem: {
+      flex: 1,
     },
     listContent: {
       padding: theme.spacing.lg,
@@ -39,17 +53,46 @@ export function TeachersListScreen(): React.JSX.Element {
   }));
   const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
+
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [subjectFilter, setSubjectFilter] = useState(ALL_SUBJECTS_VALUE);
+  const [classFilter, setClassFilter] = useState(ALL_CLASSES_VALUE);
+  const [page, setPage] = useState(1);
+
   const {data: subjects} = useSubjects();
-  const {data, isLoading, isError, error, refetch} = useTeachers({
-    pageSize: 50,
+  const {data: classes} = useClasses();
+
+  // Debounce the search box so we don't refetch on every keystroke.
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(handle);
+  }, [search]);
+
+  const {data, isLoading, isRefetching, isError, error, refetch} = useTeachers({
+    page,
+    pageSize: 15,
+    search: debouncedSearch || undefined,
     subject: subjectFilter || undefined,
+    classId: classFilter || undefined,
   });
 
   const subjectOptions = [
     {label: t('teachersList_allSubjects'), value: ALL_SUBJECTS_VALUE},
     ...(subjects ?? []).map(s => ({label: s.name, value: s.name})),
   ];
+  const classOptions = [
+    {label: t('teachersList_allClasses'), value: ALL_CLASSES_VALUE},
+    ...(classes ?? []).map(c => ({label: c.name, value: c.id})),
+  ];
+
+  const onFilterChange = (setter: (value: string) => void) => (value: string): void => {
+    setter(value);
+    setPage(1);
+  };
 
   return (
     <Screen padded={false}>
@@ -58,13 +101,32 @@ export function TeachersListScreen(): React.JSX.Element {
         onBack={() => navigation.goBack()}
         actions={[{icon: 'add', onPress: () => navigation.navigate(ScreenNames.TeacherForm)}]}
       />
-      <View style={styles.filterWrap}>
-        <Select
-          label={t('teachersList_filterBySubject')}
-          value={subjectFilter}
-          options={subjectOptions}
-          onChange={setSubjectFilter}
+      <View style={styles.searchBarWrap}>
+        <SearchBar
+          value={search}
+          onChangeText={setSearch}
+          placeholder={t('teachersList_searchPlaceholder')}
         />
+      </View>
+      <View style={styles.filterWrap}>
+        <Row gap={12} align="flex-start">
+          <View style={styles.filterItem}>
+            <Select
+              label={t('teachersList_filterBySubject')}
+              value={subjectFilter}
+              options={subjectOptions}
+              onChange={onFilterChange(setSubjectFilter)}
+            />
+          </View>
+          <View style={styles.filterItem}>
+            <Select
+              label={t('teachersList_filterByClass')}
+              value={classFilter}
+              options={classOptions}
+              onChange={onFilterChange(setClassFilter)}
+            />
+          </View>
+        </Row>
       </View>
       {isError ? (
         <EmptyState
@@ -82,6 +144,15 @@ export function TeachersListScreen(): React.JSX.Element {
           keyExtractor={(item: Teacher) => item.id}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={() => {
+                setPage(1);
+                refetch();
+              }}
+            />
+          }
           renderItem={({item}) => (
             <ListRow
               avatarName={item.name}
@@ -92,6 +163,7 @@ export function TeachersListScreen(): React.JSX.Element {
                 employeeId: item.employeeId,
               })}
               right={<Badge label={capitalize(item.status)} tone={statusTone(item.status)} />}
+              onPress={() => navigation.navigate(ScreenNames.TeacherDetail, {teacherId: item.id, initial: item})}
             />
           )}
           ListEmptyComponent={
@@ -102,6 +174,14 @@ export function TeachersListScreen(): React.JSX.Element {
               actionLabel={t('teachersList_addTeacher')}
               onAction={() => navigation.navigate(ScreenNames.TeacherForm)}
             />
+          }
+          ListFooterComponent={
+            data.items.length > 0 ? (
+              <>
+                <Spacer size={8} />
+                <Pagination page={data.page} totalPages={data.totalPages} onChange={setPage} />
+              </>
+            ) : null
           }
         />
       )}

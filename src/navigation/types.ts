@@ -7,7 +7,7 @@
  * top of the tabs.
  */
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
-import type {UserRole} from '../shared/types';
+import type {Student, Teacher, UserRole} from '../shared/types';
 
 // ---- Root -----------------------------------------------------------------
 export type RootStackParamList = {
@@ -37,11 +37,19 @@ export type AdminTabParamList = {
 
 export type AdminStackParamList = {
   Tabs: undefined;
-  StudentsList: {classId: string; className: string; sectionId?: string; sectionName?: string};
-  StudentDetail: {id: string};
+  StudentsList: {
+    classId: string;
+    className: string;
+    sectionId?: string;
+    sectionName?: string;
+    /** Every section of this class, so the list screen can offer a section filter without another API call. */
+    sections?: {id: string; name: string; studentCount: number}[];
+  };
+  StudentDetail: {id: string; initial?: Student};
   StudentForm: {id?: string};
   Teachers: undefined;
   TeacherForm: undefined;
+  TeacherDetail: {teacherId: string; initial?: Teacher};
   Attendance: undefined;
   Exams: undefined;
   ExamReport: {examId: string};

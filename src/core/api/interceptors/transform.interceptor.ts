@@ -4,6 +4,7 @@
  * consistent `ApiError` shape.
  */
 import type {AxiosError, AxiosResponse} from 'axios';
+import {notifyUnauthorized} from '../sessionEvents';
 
 export interface ApiError {
   status: number;
@@ -34,5 +35,10 @@ export function transformErrorInterceptor(error: AxiosError): Promise<never> {
       (status === 0 ? 'Network error. Please check your connection.' : 'Something went wrong.'),
     code: payload?.error?.code ?? payload?.code,
   };
+  // Token missing/expired — clear the session app-wide so the root navigator
+  // swaps back to the login flow, instead of every screen handling this itself.
+  if (status === 401) {
+    notifyUnauthorized();
+  }
   return Promise.reject(apiError);
 }

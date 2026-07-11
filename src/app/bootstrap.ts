@@ -16,6 +16,7 @@ import {
   registerNotificationOpenedHandlers,
 } from '../core/notifications';
 import {useAuthStore} from '../features/auth/authStore';
+import {setUnauthorizedHandler} from '../core/api/sessionEvents';
 import {logger} from '../core/utils/logger';
 
 let done = false;
@@ -70,6 +71,10 @@ export function bootstrap(): void {
     logger.warn('MMKV backend unavailable, using in-memory storage', e);
   }
   useAuthStore.getState().hydrate();
+
+  // Any request coming back 401 (missing/expired token) clears the session
+  // app-wide — the root navigator swaps back to the login flow on its own.
+  setUnauthorizedHandler(() => useAuthStore.getState().forceLogout());
 
   requestNotificationPermission().catch(e => {
     // Local notifications unavailable (e.g. simulator without entitlements, or denied) — non-fatal.

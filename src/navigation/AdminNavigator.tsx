@@ -15,6 +15,7 @@ import {StudentDetailScreen} from '../features/students/screens/StudentDetailScr
 import {StudentFormScreen} from '../features/students/screens/StudentFormScreen';
 import {TeachersListScreen} from '../features/teachers/screens/TeachersListScreen';
 import {TeacherFormScreen} from '../features/teachers/screens/TeacherFormScreen';
+import {TeacherDetailScreen} from '../features/teachers/screens/TeacherDetailScreen';
 import {FeesListScreen} from '../features/fees/screens/FeesListScreen';
 import {FeesStudentsListScreen} from '../features/fees/screens/FeesStudentsListScreen';
 import {FeeReceiptScreen} from '../features/fees/screens/FeeReceiptScreen';
@@ -81,6 +82,7 @@ export function AdminNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.StudentForm} component={StudentFormScreen} />
       <Stack.Screen name={ScreenNames.Teachers} component={TeachersListScreen} />
       <Stack.Screen name={ScreenNames.TeacherForm} component={TeacherFormScreen} />
+      <Stack.Screen name={ScreenNames.TeacherDetail} component={TeacherDetailScreen} />
       <Stack.Screen name={ScreenNames.Attendance} component={AttendanceReportScreen} />
       <Stack.Screen name={ScreenNames.Exams} component={ExamsListScreen} />
       <Stack.Screen name={ScreenNames.ExamReport} component={ExamReportScreen} />

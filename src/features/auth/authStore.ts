@@ -31,6 +31,9 @@ interface AuthState {
   ) => Promise<boolean>;
   verifyOtp: (phone: string, otp: string, schoolId: string, schoolName: string) => Promise<boolean>;
   logout: () => Promise<void>;
+  /** Clears the session locally without calling the logout endpoint — used when the
+   * backend itself has already invalidated the session (e.g. a 401 on any request). */
+  forceLogout: () => void;
   clearError: () => void;
   can: (permission: PermissionKey) => boolean;
 }
@@ -113,6 +116,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     await authApi.logout();
+    clearSession();
+    set({user: null, isAuthenticated: false, error: null, errorCode: null});
+  },
+
+  forceLogout: () => {
     clearSession();
     set({user: null, isAuthenticated: false, error: null, errorCode: null});
   },

@@ -61,14 +61,19 @@ export const teachersApi = {
       const {data} = await axiosClient.get<Paginated<TeacherApi>>(Endpoints.admin.teachers, {params});
       return {...data, items: data.items.map(toTeacher)};
     } catch (e) {
+      console.error('teachersApi.list failed', e);
       rethrowApiError(e, 'Failed to load teachers.');
     }
   },
 
-  /** No dedicated get-by-id endpoint — resolved from the (already-cached) list. */
-  getById: async (id: string): Promise<Teacher | undefined> => {
-    const page = await teachersApi.list({pageSize: 500});
-    return page.items.find(t => t.id === id);
+  getById: async (id: string): Promise<Teacher> => {
+    try {
+      const {data} = await axiosClient.get<TeacherApi>(Endpoints.admin.teachers_byId(id));
+      return toTeacher(data);
+    } catch (e) {
+      console.error('teachersApi.getById failed', e);
+      rethrowApiError(e, 'Failed to load teacher.');
+    }
   },
 
   create: async (input: TeacherInput): Promise<CreateTeacherResult> => {
@@ -79,6 +84,7 @@ export const teachersApi = {
       );
       return {teacher: toTeacher(data.teacher), defaultPassword: data.defaultPassword};
     } catch (e) {
+      console.error('teachersApi.create failed', e);
       rethrowApiError(e, 'Failed to add teacher.');
     }
   },
@@ -87,6 +93,7 @@ export const teachersApi = {
     try {
       await axiosClient.delete(Endpoints.admin.teachers_byId(id));
     } catch (e) {
+      console.error('teachersApi.remove failed', e);
       rethrowApiError(e, 'Failed to remove teacher.');
     }
   },
@@ -95,8 +102,14 @@ export const teachersApi = {
 export const useTeachers = (params?: QueryParams) =>
   useQuery({queryKey: ['teachers', params], queryFn: () => teachersApi.list(params)});
 
-export const useTeacher = (id: string) =>
-  useQuery({queryKey: ['teacher', id], queryFn: () => teachersApi.getById(id), enabled: !!id});
+/** `initial` (e.g. the row already shown in the list) renders instantly while a fresh copy refetches in the background. */
+export const useTeacher = (id: string, initial?: Teacher) =>
+  useQuery({
+    queryKey: ['teacher', id],
+    queryFn: () => teachersApi.getById(id),
+    enabled: !!id,
+    initialData: initial,
+  });
 
 export const useCreateTeacher = () => {
   const qc = useQueryClient();

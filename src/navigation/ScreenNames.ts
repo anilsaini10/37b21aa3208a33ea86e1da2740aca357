@@ -44,6 +44,7 @@ export const ScreenNames = {
   StudentForm: 'StudentForm',
   Teachers: 'Teachers',
   TeacherForm: 'TeacherForm',
+  TeacherDetail: 'TeacherDetail',
   Exams: 'Exams',
   ExamReport: 'ExamReport',
   AnnouncementForm: 'AnnouncementForm',

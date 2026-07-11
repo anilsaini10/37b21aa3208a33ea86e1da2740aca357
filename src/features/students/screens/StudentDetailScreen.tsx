@@ -1,6 +1,6 @@
 /** Student detail — profile, academic, parent, fee & documents + delete. */
 import React, {useState} from 'react';
-import {ScrollView, View, StyleSheet} from 'react-native';
+import {Linking, RefreshControl, ScrollView, View, StyleSheet} from 'react-native';
 import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme, useThemedStyles} from '../../../core/theme';
@@ -29,6 +29,26 @@ import {ScreenNames} from '../../../navigation/ScreenNames';
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
+function AttendanceBar({percentage}: {percentage: number}): React.JSX.Element {
+  const {theme} = useTheme();
+  const styles = useThemedStyles(t2 => ({
+    track: {
+      height: 8,
+      borderRadius: t2.radius.pill,
+      backgroundColor: t2.colors.surfaceVariant,
+      overflow: 'hidden',
+      marginTop: t2.spacing.xs,
+    },
+  }));
+  const clamped = Math.max(0, Math.min(100, percentage));
+  const tone = clamped >= 75 ? theme.colors.success : clamped >= 50 ? theme.colors.warning : theme.colors.error;
+  return (
+    <View style={styles.track}>
+      <View style={{width: `${clamped}%`, height: '100%', backgroundColor: tone}} />
+    </View>
+  );
+}
+
 const infoRowStyles = StyleSheet.create({
   row: {
     paddingVertical: 4,
@@ -51,9 +71,9 @@ export function StudentDetailScreen(): React.JSX.Element {
   const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
   const route = useRoute<RouteProp<AdminStackParamList, 'StudentDetail'>>();
-  const {id} = route.params;
+  const {id, initial} = route.params;
 
-  const {data: student, isLoading, isError, error, refetch} = useStudent(id);
+  const {data: student, isLoading, isRefetching, isError, error, refetch} = useStudent(id, initial);
   const {data: fee} = useStudentFee(id);
   const deleteMutation = useDeleteStudent();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -102,7 +122,8 @@ export function StudentDetailScreen(): React.JSX.Element {
       />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => refetch()} />}>
         <CustomCard>
           <Row gap={theme.spacing.md}>
             <Avatar name={student.name} uri={student.avatarUrl} size={72} />
@@ -128,8 +149,22 @@ export function StudentDetailScreen(): React.JSX.Element {
         <SectionTitle title={t('studentDetail_parentGuardianSection')} />
         <CustomCard>
           <InfoRow label={t('common_name')} value={student.parentName} />
-          <InfoRow label={t('common_phone')} value={student.parentPhone} />
-          <InfoRow label={t('common_email')} value={student.parentEmail} />
+          <Row justify="space-between" style={infoRowStyles.row}>
+            <AppText variant="body" color="textSecondary">
+              {t('common_phone')}
+            </AppText>
+            <AppText variant="body" color="primary" onPress={() => Linking.openURL(`tel:${student.parentPhone}`)}>
+              {student.parentPhone}
+            </AppText>
+          </Row>
+          <Row justify="space-between" style={infoRowStyles.row}>
+            <AppText variant="body" color="textSecondary">
+              {t('common_email')}
+            </AppText>
+            <AppText variant="body" color="primary" onPress={() => Linking.openURL(`mailto:${student.parentEmail}`)}>
+              {student.parentEmail}
+            </AppText>
+          </Row>
         </CustomCard>
 
         <SectionTitle title={t('studentDetail_academicSection')} />
@@ -137,7 +172,14 @@ export function StudentDetailScreen(): React.JSX.Element {
           <InfoRow label={t('studentDetail_class')} value={student.className} />
           <InfoRow label={t('studentDetail_section')} value={student.sectionName} />
           <InfoRow label={t('studentDetail_rollNo')} value={String(student.rollNo)} />
-          <InfoRow label={t('studentDetail_attendance')} value={`${student.attendancePercentage}%`} />
+          <Spacer size={4} />
+          <Row justify="space-between">
+            <AppText variant="body" color="textSecondary">
+              {t('studentDetail_attendance')}
+            </AppText>
+            <AppText variant="body">{`${student.attendancePercentage}%`}</AppText>
+          </Row>
+          <AttendanceBar percentage={student.attendancePercentage} />
         </CustomCard>
 
         {fee ? (
