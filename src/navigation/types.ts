@@ -7,7 +7,7 @@
  * top of the tabs.
  */
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
-import type {Student, Teacher, UserRole} from '../shared/types';
+import type {AdminAnnouncement, AdminEvent, Student, Teacher, UserRole} from '../shared/types';
 
 // ---- Root -----------------------------------------------------------------
 export type RootStackParamList = {
@@ -54,8 +54,9 @@ export type AdminStackParamList = {
   Exams: undefined;
   ExamReport: {examId: string};
   Announcements: undefined;
-  AnnouncementForm: undefined;
+  AnnouncementForm: {id?: string; initial?: AdminAnnouncement};
   Events: undefined;
+  EventForm: {id?: string; initial?: AdminEvent};
   Transport: undefined;
   Library: undefined;
   Inventory: undefined;

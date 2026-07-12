@@ -19,13 +19,14 @@ import type {
   Exam,
   Homework,
   HomeworkSubmission,
-  Announcement,
   SchoolEvent,
   BusRoute,
   Book,
   BookIssue,
   InventoryItem,
   AttendanceRecord,
+  AttendanceStatus,
+  TeacherAttendanceRecord,
   ChatThread,
   AppNotification,
   MarkEntry,
@@ -308,14 +309,7 @@ const homeworkSubmissions: HomeworkSubmission[] = homework.flatMap(hw =>
     }),
 );
 
-// ---- Announcements + Events ----------------------------------------------
-const announcements: Announcement[] = [
-  {id: 'an_1', title: 'Annual Sports Day', body: 'Sports day will be held on 20th July. All students must participate.', audience: 'all', category: 'event', publishedAt: isoDate(2026, 6, 25), publishedBy: 'Principal', pinned: true},
-  {id: 'an_2', title: 'Fee Payment Reminder', body: 'Q2 fees are due by 15th July. Please pay on time to avoid late charges.', audience: ['parent'], category: 'circular', publishedAt: isoDate(2026, 6, 28), publishedBy: 'Accounts', pinned: false},
-  {id: 'an_3', title: 'PTM Scheduled', body: 'Parent-Teacher meeting on 12th July, 10 AM onwards.', audience: ['parent', 'teacher'], category: 'notice', publishedAt: isoDate(2026, 6, 29), publishedBy: 'Admin', pinned: false},
-  {id: 'an_4', title: 'Staff Meeting', body: 'All teaching staff to attend the review meeting on Friday.', audience: ['teacher'], category: 'urgent', publishedAt: isoDate(2026, 6, 30), publishedBy: 'Vice Principal', pinned: false},
-];
-
+// ---- Events ----------------------------------------------------------------
 const events: SchoolEvent[] = [
   {id: 'ev_1', title: 'Independence Day', description: 'Flag hoisting & cultural program', date: isoDate(2026, 8, 15), type: 'function'},
   {id: 'ev_2', title: 'Mid Term Exams', description: 'Mid term examinations begin', date: isoDate(2026, 8, 5), endDate: isoDate(2026, 8, 16), type: 'exam'},
@@ -373,17 +367,45 @@ const inventory: InventoryItem[] = Array.from({length: 12}, (_, i) => ({
   value: int(500, 50000),
 }));
 
-// ---- Attendance (today) ---------------------------------------------------
+// ---- Attendance (last 14 days, students + teachers) ------------------------
 const today = isoDate(2026, 7, 1);
-const attendanceRecords: AttendanceRecord[] = students.slice(0, 80).map((s, i) => ({
-  id: `att_${i + 1}`,
-  date: today,
-  studentId: s.id,
-  studentName: s.name,
-  classId: s.classId,
-  sectionId: s.sectionId,
-  status: i % 9 === 0 ? 'absent' : i % 13 === 0 ? 'late' : 'present',
-}));
+const ATTENDANCE_DAYS = 14;
+const attendanceDates: string[] = Array.from({length: ATTENDANCE_DAYS}, (_, i) => {
+  const d = new Date(2026, 6, 1);
+  d.setDate(d.getDate() - i);
+  return isoDate(d.getFullYear(), d.getMonth() + 1, d.getDate());
+});
+const ATTENDANCE_STATUS_POOL: AttendanceStatus[] = [
+  'present', 'present', 'present', 'present', 'present', 'present', 'absent', 'absent', 'late', 'leave',
+];
+
+const attendanceRecords: AttendanceRecord[] = attendanceDates.flatMap(date =>
+  students.map((s, i) => ({
+    id: `att_${date}_${i + 1}`,
+    date,
+    studentId: s.id,
+    studentName: s.name,
+    classId: s.classId,
+    sectionId: s.sectionId,
+    status: pick(ATTENDANCE_STATUS_POOL),
+  })),
+);
+
+const teacherAttendanceRecords: TeacherAttendanceRecord[] = attendanceDates.flatMap(date =>
+  teachers.map((tch, i) => {
+    const status = pick(ATTENDANCE_STATUS_POOL);
+    const worked = status === 'present' || status === 'late';
+    return {
+      id: `tatt_${date}_${i + 1}`,
+      date,
+      teacherId: tch.id,
+      teacherName: tch.name,
+      status,
+      checkIn: worked ? `${String(int(8, 9)).padStart(2, '0')}:${String(int(0, 59)).padStart(2, '0')}` : undefined,
+      checkOut: worked ? `${String(int(16, 17)).padStart(2, '0')}:${String(int(0, 59)).padStart(2, '0')}` : undefined,
+    };
+  }),
+);
 
 // ---- Chat + Notifications -------------------------------------------------
 const chatThreads: ChatThread[] = [
@@ -413,13 +435,13 @@ export const db = {
   marks,
   homework,
   homeworkSubmissions,
-  announcements,
   events,
   busRoutes,
   books,
   bookIssues,
   inventory,
   attendanceRecords,
+  teacherAttendanceRecords,
   chatThreads,
   notifications,
   today,

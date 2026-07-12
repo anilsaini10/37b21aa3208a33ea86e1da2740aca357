@@ -41,6 +41,10 @@ export const Endpoints = {
     students_byId: (id: string) => `/api/admin/students/${id}`,
     teachers: '/api/admin/teachers',
     teachers_byId: (id: string) => `/api/admin/teachers/${id}`,
+    announcements: '/api/admin/announcements',
+    announcements_byId: (id: string) => `/api/admin/announcements/${id}`,
+    events: '/api/admin/events',
+    events_byId: (id: string) => `/api/admin/events/${id}`,
     fees: '/api/admin/fees',
     attendance: '/api/admin/attendance',
     exams: '/api/admin/exams',
@@ -52,11 +56,16 @@ export const Endpoints = {
     attendance: '/api/teacher/attendance',
     homework: '/api/teacher/homework',
     timetable: '/api/teacher/timetable',
+    announcements: '/api/teacher/announcements',
   },
   parent: {
     dashboard: '/api/parent/dashboard',
     attendance: '/api/parent/attendance',
     fees: '/api/parent/fees',
     results: '/api/parent/results',
+  },
+  // Parent's announcements feed is mounted under `/api/students`, not `/api/parent` — matches the backend as given.
+  students: {
+    announcements: '/api/students/announcements',
   },
 } as const;

@@ -44,7 +44,7 @@ const MODULES: ModuleItem[] = [
   {labelKey: 'moreScreen_announcements', icon: 'announcement', route: ScreenNames.Announcements},
   {labelKey: 'moreScreen_events', icon: 'event', route: ScreenNames.Events},
   {labelKey: 'moreScreen_transport', icon: 'transport', route: ScreenNames.Transport},
-  {labelKey: 'moreScreen_library', icon: 'library', route: ScreenNames.Library},
+  // {labelKey: 'moreScreen_library', icon: 'library', route: ScreenNames.Library},
   {labelKey: 'moreScreen_inventory', icon: 'inventory', route: ScreenNames.Inventory},
   {labelKey: 'moreScreen_reports', icon: 'reports', route: ScreenNames.Reports},
   {labelKey: 'moreScreen_settings', icon: 'settings', route: ScreenNames.Settings},

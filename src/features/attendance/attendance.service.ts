@@ -1,4 +1,4 @@
-/** Attendance service — mark/list student attendance + summaries + hooks. */
+/** Attendance service — mark/list student + teacher attendance, daily summaries + hooks. */
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {db} from '../../core/mock/db';
 import {respond} from '../../core/mock/mockApi';
@@ -9,6 +9,26 @@ import type {
   DailyAttendanceSummary,
   Student,
 } from '../../shared/types';
+
+/** The mock dataset's anchor "today" — a sensible default date for the report screen. */
+export const attendanceToday = db.today;
+
+function summarise(records: {status: AttendanceStatus}[], date: string): DailyAttendanceSummary {
+  const present = records.filter(r => r.status === 'present').length;
+  const absent = records.filter(r => r.status === 'absent').length;
+  const late = records.filter(r => r.status === 'late').length;
+  const leave = records.filter(r => r.status === 'leave').length;
+  const total = records.length || 1;
+  return {
+    date,
+    present,
+    absent,
+    late,
+    leave,
+    total: records.length,
+    percentage: Math.round((present / total) * 100),
+  };
+}
 
 export const attendanceApi = {
   studentsForClass: (classId: string, sectionId: string): Promise<Student[]> =>
@@ -34,24 +54,18 @@ export const attendanceApi = {
     return respond({saved: entries.length});
   },
 
-  summary: (classId?: string): Promise<DailyAttendanceSummary> => {
-    const records = classId
-      ? db.attendanceRecords.filter(r => r.classId === classId)
-      : db.attendanceRecords;
-    const present = records.filter(r => r.status === 'present').length;
-    const absent = records.filter(r => r.status === 'absent').length;
-    const late = records.filter(r => r.status === 'late').length;
-    const leave = records.filter(r => r.status === 'leave').length;
-    const total = records.length || 1;
-    return respond({
-      date: db.today,
-      present,
-      absent,
-      late,
-      leave,
-      total: records.length,
-      percentage: Math.round((present / total) * 100),
-    });
+  /** Student attendance summary for one specific date (defaults to "today" in the mock dataset). */
+  summary: (date: string = db.today, classId?: string): Promise<DailyAttendanceSummary> => {
+    const records = db.attendanceRecords.filter(
+      r => r.date === date && (!classId || r.classId === classId),
+    );
+    return respond(summarise(records, date));
+  },
+
+  /** Teacher attendance summary for one specific date. */
+  teacherSummary: (date: string = db.today): Promise<DailyAttendanceSummary> => {
+    const records = db.teacherAttendanceRecords.filter(r => r.date === date);
+    return respond(summarise(records, date));
   },
 
   history: (studentId: string): Promise<AttendanceRecord[]> =>
@@ -65,8 +79,17 @@ export const useAttendanceStudents = (classId: string, sectionId: string) =>
     enabled: !!classId && !!sectionId,
   });
 
-export const useAttendanceSummary = (classId?: string) =>
-  useQuery({queryKey: ['attendance', 'summary', classId], queryFn: () => attendanceApi.summary(classId)});
+export const useAttendanceSummary = (date?: string, classId?: string) =>
+  useQuery({
+    queryKey: ['attendance', 'summary', date, classId],
+    queryFn: () => attendanceApi.summary(date, classId),
+  });
+
+export const useTeacherAttendanceSummary = (date?: string) =>
+  useQuery({
+    queryKey: ['attendance', 'teacherSummary', date],
+    queryFn: () => attendanceApi.teacherSummary(date),
+  });
 
 export const useMarkAttendance = () => {
   const qc = useQueryClient();

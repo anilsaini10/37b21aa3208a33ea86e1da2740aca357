@@ -27,6 +27,7 @@ import {TransportScreen} from '../features/transport/screens/TransportScreen';
 import {LibraryScreen} from '../features/library/screens/LibraryScreen';
 import {InventoryScreen} from '../features/inventory/screens/InventoryScreen';
 import {EventsScreen} from '../features/events/screens/EventsScreen';
+import {EventFormScreen} from '../features/events/screens/EventFormScreen';
 import {SettingsScreen} from '../features/settings/screens/SettingsScreen';
 import {ClassesManageScreen} from '../features/classes/screens/ClassesManageScreen';
 import {SubjectsManageScreen} from '../features/subjects/screens/SubjectsManageScreen';
@@ -89,6 +90,7 @@ export function AdminNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.Announcements} component={AnnouncementsScreen} />
       <Stack.Screen name={ScreenNames.AnnouncementForm} component={AnnouncementFormScreen} />
       <Stack.Screen name={ScreenNames.Events} component={EventsScreen} />
+      <Stack.Screen name={ScreenNames.EventForm} component={EventFormScreen} />
       <Stack.Screen name={ScreenNames.Transport} component={TransportScreen} />
       <Stack.Screen name={ScreenNames.Library} component={LibraryScreen} />
       <Stack.Screen name={ScreenNames.Inventory} component={InventoryScreen} />

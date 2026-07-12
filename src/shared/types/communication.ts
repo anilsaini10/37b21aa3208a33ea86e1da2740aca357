@@ -28,15 +28,28 @@ export interface HomeworkSubmission {
   completedAt?: string;
 }
 
-export interface Announcement {
+export type AnnouncementAudience = 'ALL' | 'TEACHER' | 'PARENT';
+
+/** Derived server-side from publishAt/expiresAt vs now — only ever present on admin GET responses. */
+export type AnnouncementStatus = 'SCHEDULED' | 'ACTIVE' | 'EXPIRED';
+
+/** Announcement (real backend) — admin manages via `/api/admin/announcements`; teacher/parent read via their own role-scoped feed endpoints. */
+export interface AdminAnnouncement {
   id: ID;
   title: string;
-  body: string;
-  audience: UserRole[] | 'all';
-  category: 'notice' | 'circular' | 'event' | 'urgent';
-  publishedAt: string;
-  publishedBy: string;
-  pinned: boolean;
+  message: string;
+  audience: AnnouncementAudience;
+  /** Date this announcement is ABOUT (e.g. "Sports Day on Dec 25") — display only, doesn't affect visibility. */
+  eventDate: string | null;
+  /** Hidden from teacher/parent feeds until this moment; null = visible immediately. */
+  publishAt: string | null;
+  /** Disappears from teacher/parent feeds after this moment; null = never expires. */
+  expiresAt: string | null;
+  /** Admin-view only; absent on the teacher/parent feed (everything there is implicitly ACTIVE) and on create/update responses. */
+  status?: AnnouncementStatus;
+  createdBy: {id: ID; name: string};
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface SchoolEvent {
@@ -47,6 +60,23 @@ export interface SchoolEvent {
   endDate?: string;
   location?: string;
   type: 'holiday' | 'exam' | 'function' | 'meeting' | 'sports';
+}
+
+export type EventType = 'HOLIDAY' | 'EXAM' | 'MEETING' | 'ACTIVITY' | 'OTHER';
+
+/** School event (real backend) — admin manages via `/api/admin/events`. */
+export interface AdminEvent {
+  id: ID;
+  title: string;
+  description: string | null;
+  eventType: EventType;
+  audience: AnnouncementAudience;
+  /** ISO date — single-day events have startDate === endDate. */
+  startDate: string;
+  endDate: string;
+  createdBy: {id: ID; name: string};
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ChatThread {

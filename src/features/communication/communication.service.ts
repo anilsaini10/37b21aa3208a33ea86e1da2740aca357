@@ -1,17 +1,14 @@
-/** Communication service — announcements, events, notifications, chat + hooks. */
+/**
+ * Communication service — events, notifications, chat + hooks.
+ *
+ * Announcements moved to `announcements.service.ts` (real backend, role-scoped
+ * feeds) — this file no longer has an announcements mock.
+ */
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {db} from '../../core/mock/db';
 import {respond} from '../../core/mock/mockApi';
 import {generateId} from '../../core/utils/misc';
-import {notifyFromAppNotification} from '../../core/notifications';
-import type {
-  Announcement,
-  AppNotification,
-  ChatMessage,
-  ChatThread,
-  SchoolEvent,
-  UserRole,
-} from '../../shared/types';
+import type {AppNotification, ChatMessage, ChatThread, SchoolEvent} from '../../shared/types';
 
 // In-memory chat messages keyed by thread.
 const chatMessages: Record<string, ChatMessage[]> = {
@@ -22,45 +19,6 @@ const chatMessages: Record<string, ChatMessage[]> = {
 };
 
 export const communicationApi = {
-  announcements: (role?: UserRole): Promise<Announcement[]> => {
-    const list = role
-      ? db.announcements.filter(a => a.audience === 'all' || a.audience.includes(role))
-      : db.announcements;
-    return respond([...list].sort((a, b) => Number(b.pinned) - Number(a.pinned)));
-  },
-
-  createAnnouncement: (input: {title: string; body: string; category: Announcement['category']; audience: Announcement['audience']}): Promise<Announcement> => {
-    const announcement: Announcement = {
-      id: generateId('an'),
-      title: input.title,
-      body: input.body,
-      audience: input.audience,
-      category: input.category,
-      publishedAt: new Date().toISOString(),
-      publishedBy: 'You',
-      pinned: false,
-    };
-    db.announcements.unshift(announcement);
-
-    // Mirror the announcement into the in-app notification feed and, dynamically
-    // (title/body/category all come from the announcement itself), push a real
-    // device notification for it.
-    const notification: AppNotification = {
-      id: generateId('nt'),
-      title: announcement.title,
-      body: announcement.body,
-      type: 'announcement',
-      createdAt: announcement.publishedAt,
-      read: false,
-    };
-    db.notifications.unshift(notification);
-    notifyFromAppNotification(notification).catch(() => {
-      // Device notification unavailable/denied — the in-app feed entry still stands.
-    });
-
-    return respond(announcement);
-  },
-
   events: (): Promise<SchoolEvent[]> => respond(db.events),
 
   notifications: (): Promise<AppNotification[]> => respond(db.notifications),
@@ -91,9 +49,6 @@ export const communicationApi = {
     return respond(message);
   },
 };
-
-export const useAnnouncements = (role?: UserRole) =>
-  useQuery({queryKey: ['announcements', role], queryFn: () => communicationApi.announcements(role)});
 
 export const useEvents = () => useQuery({queryKey: ['events'], queryFn: communicationApi.events});
 

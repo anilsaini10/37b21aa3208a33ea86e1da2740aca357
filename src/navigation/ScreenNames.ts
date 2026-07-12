@@ -49,6 +49,7 @@ export const ScreenNames = {
   ExamReport: 'ExamReport',
   AnnouncementForm: 'AnnouncementForm',
   Events: 'Events',
+  EventForm: 'EventForm',
   Transport: 'Transport',
   Library: 'Library',
   Inventory: 'Inventory',

@@ -31,6 +31,7 @@ export function EmptyState({
     },
     actionButton: {
       marginTop: theme.spacing.sm,
+      alignSelf: 'center',
     },
   }));
   return (
