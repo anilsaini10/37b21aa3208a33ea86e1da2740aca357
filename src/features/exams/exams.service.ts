@@ -1,19 +1,12 @@
-/** Exams service — exams, marks, report cards + hooks. */
+/** Report cards service (mock) — parent-facing exam results, derived from the seeded dataset. */
 import {useQuery} from '@tanstack/react-query';
 import {db} from '../../core/mock/db';
 import {respond} from '../../core/mock/mockApi';
 import {gradeFor, percentage} from '../../core/utils/grade';
 import {groupBy} from '../../core/utils/misc';
-import type {Exam, MarkEntry, ReportCard} from '../../shared/types';
+import type {ReportCard} from '../../shared/types';
 
 export const examsApi = {
-  list: (): Promise<Exam[]> => respond(db.exams),
-
-  getById: (id: string): Promise<Exam | undefined> => respond(db.exams.find(e => e.id === id)),
-
-  marks: (examId: string): Promise<MarkEntry[]> =>
-    respond(db.marks.filter(m => m.examId === examId)),
-
   reportCard: (examId: string, studentId: string): Promise<ReportCard | undefined> => {
     const exam = db.exams.find(e => e.id === examId);
     const student = db.students.find(s => s.id === studentId);
@@ -61,11 +54,6 @@ export const examsApi = {
     return cards;
   },
 };
-
-export const useExams = () => useQuery({queryKey: ['exams'], queryFn: examsApi.list});
-
-export const useExamMarks = (examId: string) =>
-  useQuery({queryKey: ['exams', 'marks', examId], queryFn: () => examsApi.marks(examId), enabled: !!examId});
 
 export const useReportCard = (examId: string, studentId: string) =>
   useQuery({

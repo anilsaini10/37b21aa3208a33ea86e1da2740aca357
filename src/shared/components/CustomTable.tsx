@@ -47,13 +47,15 @@ export function CustomTable<T>({
     },
   }));
 
-  const cellStyle = (col: TableColumn<T>) => ({
+  const cellStyle = (col: TableColumn<T>, isLast: boolean) => ({
     width: col.width,
     flex: col.width ? undefined : col.flex ?? 1,
     paddingHorizontal: theme.spacing.sm,
     justifyContent: 'center' as const,
     alignItems:
       col.align === 'right' ? ('flex-end' as const) : col.align === 'center' ? ('center' as const) : ('flex-start' as const),
+    borderRightWidth: isLast ? 0 : 1,
+    borderRightColor: theme.colors.divider,
   });
 
   return (
@@ -61,8 +63,8 @@ export function CustomTable<T>({
       <View style={styles.tableWrapper}>
         {/* Header */}
         <View style={styles.headerRow}>
-          {columns.map(col => (
-            <View key={col.key} style={cellStyle(col)}>
+          {columns.map((col, i) => (
+            <View key={col.key} style={cellStyle(col, i === columns.length - 1)}>
               <AppText variant="label" color="textSecondary">
                 {col.title}
               </AppText>
@@ -76,8 +78,8 @@ export function CustomTable<T>({
             key={keyExtractor(row, index)}
             onTouchEnd={onRowPress ? () => onRowPress(row) : undefined}
             style={styles.dataRow}>
-            {columns.map(col => (
-              <View key={col.key} style={cellStyle(col)}>
+            {columns.map((col, i) => (
+              <View key={col.key} style={cellStyle(col, i === columns.length - 1)}>
                 {col.render ? (
                   col.render(row)
                 ) : (

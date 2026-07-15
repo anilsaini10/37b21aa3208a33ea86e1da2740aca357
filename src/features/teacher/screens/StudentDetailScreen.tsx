@@ -10,6 +10,7 @@ import {
   AppText,
   CustomHeader,
   CustomCard,
+  CustomButton,
   Avatar,
   Badge,
   Row,
@@ -20,6 +21,7 @@ import {
 import {statusTone, capitalize} from '../../../shared/helpers';
 import {formatDate} from '../../../core/utils/format';
 import {useStudent} from '../../students/students.service';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {TeacherStackParamList} from '../../../navigation/types';
 
 type Nav = NativeStackNavigationProp<TeacherStackParamList>;
@@ -92,6 +94,15 @@ export function StudentDetailScreen(): React.JSX.Element {
           <InfoRow label={t('studentDetail_rollNo')} value={String(student.rollNo)} />
           <InfoRow label={t('studentDetail_attendance')} value={`${student.attendancePercentage}%`} />
         </CustomCard>
+        <CustomButton
+          title={t('studentDetail_viewAttendanceHistory')}
+          variant="outline"
+          size="sm"
+          iconLeft="attendance"
+          onPress={() =>
+            navigation.navigate(ScreenNames.StudentAttendanceHistory, {studentId: student.id, studentName: student.name})
+          }
+        />
 
         <SectionTitle title={t('studentDetail_personalSection')} />
         <CustomCard>

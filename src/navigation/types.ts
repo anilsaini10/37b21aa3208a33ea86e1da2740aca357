@@ -7,7 +7,18 @@
  * top of the tabs.
  */
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
-import type {AdminAnnouncement, AdminEvent, Student, Teacher, UserRole} from '../shared/types';
+import type {
+  AdminAnnouncement,
+  AdminEvent,
+  AdminExam,
+  ExamResult,
+  Student,
+  Teacher,
+  TeacherHomework,
+  TimetablePeriod,
+  UserRole,
+  WeekDay,
+} from '../shared/types';
 
 // ---- Root -----------------------------------------------------------------
 export type RootStackParamList = {
@@ -51,8 +62,20 @@ export type AdminStackParamList = {
   TeacherForm: undefined;
   TeacherDetail: {teacherId: string; initial?: Teacher};
   Attendance: undefined;
+  ClassAttendance: {classId: string; className: string; fromDate: string; toDate: string};
   Exams: undefined;
-  ExamReport: {examId: string};
+  ExamForm: {examId?: string; initial?: AdminExam};
+  ExamClasses: {examId: string; examName?: string};
+  ExamReport: {examId: string; classId: string; className?: string; maxMarks: number};
+  StudentMarks: {
+    examId: string;
+    classId: string;
+    studentId: string;
+    studentName: string;
+    maxMarks: number;
+    resultId?: string;
+    initial?: ExamResult | null;
+  };
   Announcements: undefined;
   AnnouncementForm: {id?: string; initial?: AdminAnnouncement};
   Events: undefined;
@@ -69,6 +92,8 @@ export type AdminStackParamList = {
   ChangePassword: undefined;
   ClassesManage: undefined;
   SubjectsManage: undefined;
+  ClassSchedule: undefined;
+  PeriodForm: {classId: string; sectionId: string; day: WeekDay; periodId?: string; initial?: TimetablePeriod};
 };
 
 // ---- Teacher --------------------------------------------------------------
@@ -81,13 +106,12 @@ export type TeacherTabParamList = {
 
 export type TeacherStackParamList = {
   Tabs: undefined;
-  MarkAttendance: undefined;
-  CreateHomework: undefined;
+  MarkAttendance: {classId: string; className: string; sectionId: string; sectionName: string};
+  HomeworkForm: {homeworkId?: string; initial?: TeacherHomework};
   Timetable: undefined;
   ClassStudents: {classId: string; className: string; sectionId?: string; sectionName?: string};
-  HomeworkList: {classId: string; className: string; sectionId?: string; sectionName?: string};
-  HomeworkDetail: {id: string};
   StudentDetail: {id: string};
+  StudentAttendanceHistory: {studentId: string; studentName?: string};
   Leave: undefined;
   Chat: undefined;
   Announcements: undefined;

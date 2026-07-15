@@ -20,8 +20,12 @@ import {FeesListScreen} from '../features/fees/screens/FeesListScreen';
 import {FeesStudentsListScreen} from '../features/fees/screens/FeesStudentsListScreen';
 import {FeeReceiptScreen} from '../features/fees/screens/FeeReceiptScreen';
 import {AttendanceReportScreen} from '../features/attendance/screens/AttendanceReportScreen';
+import {ClassAttendanceScreen} from '../features/attendance/screens/ClassAttendanceScreen';
 import {ExamsListScreen} from '../features/exams/screens/ExamsListScreen';
+import {ExamFormScreen} from '../features/exams/screens/ExamFormScreen';
+import {ExamClassesScreen} from '../features/exams/screens/ExamClassesScreen';
 import {ExamReportScreen} from '../features/exams/screens/ExamReportScreen';
+import {StudentMarksScreen} from '../features/exams/screens/StudentMarksScreen';
 import {ReportsScreen} from '../features/reports/screens/ReportsScreen';
 import {TransportScreen} from '../features/transport/screens/TransportScreen';
 import {LibraryScreen} from '../features/library/screens/LibraryScreen';
@@ -31,6 +35,8 @@ import {EventFormScreen} from '../features/events/screens/EventFormScreen';
 import {SettingsScreen} from '../features/settings/screens/SettingsScreen';
 import {ClassesManageScreen} from '../features/classes/screens/ClassesManageScreen';
 import {SubjectsManageScreen} from '../features/subjects/screens/SubjectsManageScreen';
+import {AdminTimetableScreen} from '../features/timetable/screens/AdminTimetableScreen';
+import {PeriodFormScreen} from '../features/timetable/screens/PeriodFormScreen';
 import {MoreScreen} from '../features/admin/screens/MoreScreen';
 import {AdminProfileScreen} from '../features/admin/screens/AdminProfileScreen';
 import {ChangePasswordScreen} from '../features/auth/screens/ChangePasswordScreen';
@@ -85,8 +91,12 @@ export function AdminNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.TeacherForm} component={TeacherFormScreen} />
       <Stack.Screen name={ScreenNames.TeacherDetail} component={TeacherDetailScreen} />
       <Stack.Screen name={ScreenNames.Attendance} component={AttendanceReportScreen} />
+      <Stack.Screen name={ScreenNames.ClassAttendance} component={ClassAttendanceScreen} />
       <Stack.Screen name={ScreenNames.Exams} component={ExamsListScreen} />
+      <Stack.Screen name={ScreenNames.ExamForm} component={ExamFormScreen} />
+      <Stack.Screen name={ScreenNames.ExamClasses} component={ExamClassesScreen} />
       <Stack.Screen name={ScreenNames.ExamReport} component={ExamReportScreen} />
+      <Stack.Screen name={ScreenNames.StudentMarks} component={StudentMarksScreen} />
       <Stack.Screen name={ScreenNames.Announcements} component={AnnouncementsScreen} />
       <Stack.Screen name={ScreenNames.AnnouncementForm} component={AnnouncementFormScreen} />
       <Stack.Screen name={ScreenNames.Events} component={EventsScreen} />
@@ -103,6 +113,8 @@ export function AdminNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.ChangePassword} component={ChangePasswordScreen} />
       <Stack.Screen name={ScreenNames.ClassesManage} component={ClassesManageScreen} />
       <Stack.Screen name={ScreenNames.SubjectsManage} component={SubjectsManageScreen} />
+      <Stack.Screen name={ScreenNames.ClassSchedule} component={AdminTimetableScreen} />
+      <Stack.Screen name={ScreenNames.PeriodForm} component={PeriodFormScreen} />
     </Stack.Navigator>
   );
 }

@@ -3,7 +3,7 @@ import React from 'react';
 import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme, useThemedStyles} from '../../../core/theme';
+import {useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -15,7 +15,6 @@ import {
   SectionTitle,
   BarChart,
   Loader,
-  Row,
   Spacer,
   Divider,
 } from '../../../shared/components';
@@ -28,7 +27,6 @@ import type {StatCard} from '../../../shared/types';
 type Nav = NativeStackNavigationProp<TeacherStackParamList>;
 
 export function TeacherDashboardScreen(): React.JSX.Element {
-  const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
   const user = useAuthStore(s => s.user);
   const {data, isLoading} = useTeacherDashboard();
@@ -36,9 +34,6 @@ export function TeacherDashboardScreen(): React.JSX.Element {
   const styles = useThemedStyles(t2 => ({
     scrollContent: {
       padding: t2.spacing.lg,
-    },
-    flexOne: {
-      flex: 1,
     },
   }));
 
@@ -72,23 +67,11 @@ export function TeacherDashboardScreen(): React.JSX.Element {
         <StatGrid stats={stats} />
 
         <SectionTitle title={t('teacherDashboard_quickActions')} />
-        <Row gap={theme.spacing.md}>
-          <View style={styles.flexOne}>
-            <CustomButton
-              title={t('teacherDashboard_markAttendance')}
-              iconLeft="attendance"
-              onPress={() => navigation.navigate(ScreenNames.MarkAttendance)}
-            />
-          </View>
-          <View style={styles.flexOne}>
-            <CustomButton
-              title={t('teacherDashboard_createHomework')}
-              variant="outline"
-              iconLeft="homework"
-              onPress={() => navigation.navigate(ScreenNames.CreateHomework)}
-            />
-          </View>
-        </Row>
+        <CustomButton
+          title={t('teacherDashboard_createHomework')}
+          iconLeft="homework"
+          onPress={() => navigation.navigate(ScreenNames.HomeworkForm, {})}
+        />
 
         <SectionTitle title={t('teacherDashboard_todaysSchedule')} />
         <CustomCard>

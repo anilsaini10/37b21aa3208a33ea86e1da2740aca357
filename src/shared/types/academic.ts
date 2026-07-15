@@ -40,23 +40,53 @@ export type WeekDay =
   | 'friday'
   | 'saturday';
 
+export type PeriodType = 'class' | 'break';
+
 export interface TimetablePeriod {
   id: ID;
   day: WeekDay;
   periodNo: number;
   startTime: string;
   endTime: string;
-  subjectId: ID;
-  subjectName: string;
-  teacherId: ID;
-  teacherName: string;
+  type: PeriodType;
+  /** Only present when `type === 'class'`. */
+  subjectId?: ID;
+  subjectName?: string;
+  teacherId?: ID;
+  teacherName?: string;
+  room?: string;
+  /** Only present when `type === 'break'` — e.g. "Lunch Break", "Assembly". */
+  label?: string;
   classId: ID;
   sectionId: ID;
-  room?: string;
 }
 
 export interface Timetable {
   classId: ID;
   sectionId: ID;
   periods: TimetablePeriod[];
+}
+
+// ---- Teacher's own classes (real backend, /api/teacher/classes) -----------
+// Scopes class/section/subject pickers (Homework, Attendance) to only what
+// this teacher actually teaches or is Class Teacher of.
+
+export interface TeacherClassSection {
+  sectionId: ID;
+  sectionName: string;
+  classTeacherId: ID | null;
+  studentCount: number;
+}
+
+export interface TeacherClassSubject {
+  subjectId: ID;
+  subjectName: string;
+}
+
+export interface TeacherClassSummary {
+  classId: ID;
+  className: string;
+  sections: TeacherClassSection[];
+  /** Only subjects THIS teacher is assigned to teach in this class. */
+  mySubjects: TeacherClassSubject[];
 }

@@ -31,6 +31,8 @@ import type {
   AppNotification,
   MarkEntry,
   Gender,
+  TimetablePeriod,
+  WeekDay,
 } from '../../shared/types';
 import {gradeFor, percentage} from '../utils/grade';
 
@@ -189,6 +191,59 @@ const staff: Staff[] = Array.from({length: 8}, (_, i) => ({
   status: 'active',
 }));
 
+// ---- Timetable --------------------------------------------------------------
+// Admin-editable weekly schedule per class+section — a real mutable store
+// (not a derived/pure-function value) so admin CRUD persists for the session
+// and the teacher/parent read-only timetable view stays in sync.
+const TIMETABLE_DAYS: WeekDay[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+const TIMETABLE_SLOTS = [
+  {periodNo: 1, startTime: '09:00', endTime: '09:45'},
+  {periodNo: 2, startTime: '09:45', endTime: '10:30'},
+  {periodNo: 3, startTime: '10:30', endTime: '11:15'},
+  {periodNo: 4, startTime: '11:45', endTime: '12:30'},
+  {periodNo: 5, startTime: '12:30', endTime: '13:15'},
+];
+const LUNCH_BREAK = {startTime: '11:15', endTime: '11:45'};
+
+const timetablePeriods: TimetablePeriod[] = [];
+classes.forEach(cls => {
+  cls.sections.forEach(section => {
+    TIMETABLE_DAYS.forEach((day, dIdx) => {
+      TIMETABLE_SLOTS.forEach((slot, sIdx) => {
+        const subject = subjects[(dIdx + sIdx) % subjects.length];
+        const teacher = teachers[(dIdx + sIdx) % teachers.length];
+        timetablePeriods.push({
+          id: `tt_${cls.id}_${section.id}_${day}_${slot.periodNo}`,
+          day,
+          periodNo: slot.periodNo,
+          startTime: slot.startTime,
+          endTime: slot.endTime,
+          type: 'class',
+          subjectId: subject.id,
+          subjectName: subject.name,
+          teacherId: teacher.id,
+          teacherName: teacher.name,
+          classId: cls.id,
+          sectionId: section.id,
+          room: `R${101 + (sIdx % 6)}`,
+        });
+      });
+      // Seeded lunch break every day — admin can edit/remove or add more breaks.
+      timetablePeriods.push({
+        id: `tt_${cls.id}_${section.id}_${day}_lunch`,
+        day,
+        periodNo: 100,
+        startTime: LUNCH_BREAK.startTime,
+        endTime: LUNCH_BREAK.endTime,
+        type: 'break',
+        label: 'Lunch Break',
+        classId: cls.id,
+        sectionId: section.id,
+      });
+    });
+  });
+});
+
 // ---- Fees -----------------------------------------------------------------
 const feeInvoices: FeeInvoice[] = students.slice(0, 60).map((s, i) => {
   const total = int(15000, 45000);
@@ -227,43 +282,50 @@ const feePayments: FeePayment[] = feeInvoices
   }));
 
 // ---- Exams + Marks --------------------------------------------------------
-const exams: Exam[] = classes.slice(0, 5).map((cls, i) => ({
-  id: `exm_${i + 1}`,
-  name: pick(['Unit Test 1', 'Mid Term', 'Final Term', 'Unit Test 2']),
-  type: pick(['unit_test', 'midterm', 'final']),
-  classId: cls.id,
-  className: cls.name,
-  startDate: isoDate(2026, 8 + (i % 3), int(1, 10)),
-  endDate: isoDate(2026, 8 + (i % 3), int(11, 20)),
-  status: pick(['scheduled', 'ongoing', 'completed']),
-  schedule: subjects.slice(0, 4).map((sub, j) => ({
-    id: `es_${i}_${j}`,
-    subjectId: sub.id,
-    subjectName: sub.name,
-    date: isoDate(2026, 8 + (i % 3), int(1, 20)),
-    startTime: '09:00',
-    endTime: '11:00',
-    maxMarks: 100,
-    room: `R${int(101, 110)}`,
-  })),
-}));
+// Each exam spans 2 classes (e.g. a Half Yearly Exam covering Class 3 and Class 4).
+const exams: Exam[] = Array.from({length: 5}, (_, i) => {
+  const examClasses = [classes[i % classes.length], classes[(i + 1) % classes.length]];
+  return {
+    id: `exm_${i + 1}`,
+    name: pick(['Unit Test 1', 'Mid Term', 'Final Term', 'Unit Test 2']),
+    type: pick(['unit_test', 'midterm', 'final']),
+    classes: examClasses.map(cls => ({classId: cls.id, className: cls.name})),
+    startDate: isoDate(2026, 8 + (i % 3), int(1, 10)),
+    endDate: isoDate(2026, 8 + (i % 3), int(11, 20)),
+    status: pick(['scheduled', 'ongoing', 'completed']),
+    schedule: subjects.slice(0, 4).map((sub, j) => ({
+      id: `es_${i}_${j}`,
+      subjectId: sub.id,
+      subjectName: sub.name,
+      date: isoDate(2026, 8 + (i % 3), int(1, 20)),
+      startTime: '09:00',
+      endTime: '11:00',
+      maxMarks: 100,
+      room: `R${int(101, 110)}`,
+    })),
+  };
+});
 
 const marks: MarkEntry[] = [];
 exams.forEach(exam => {
-  const classStudents = students.filter(s => s.classId === exam.classId).slice(0, 8);
-  classStudents.forEach(s => {
-    exam.schedule.forEach(sc => {
-      const obtained = int(35, 98);
-      marks.push({
-        id: `mk_${marks.length + 1}`,
-        examId: exam.id,
-        studentId: s.id,
-        studentName: s.name,
-        subjectId: sc.subjectId,
-        subjectName: sc.subjectName,
-        marksObtained: obtained,
-        maxMarks: sc.maxMarks,
-        grade: gradeFor(percentage(obtained, sc.maxMarks)),
+  exam.classes.forEach(({classId, className}) => {
+    const classStudents = students.filter(s => s.classId === classId).slice(0, 8);
+    classStudents.forEach(s => {
+      exam.schedule.forEach(sc => {
+        const obtained = int(35, 98);
+        marks.push({
+          id: `mk_${marks.length + 1}`,
+          examId: exam.id,
+          studentId: s.id,
+          studentName: s.name,
+          classId,
+          className,
+          subjectId: sc.subjectId,
+          subjectName: sc.subjectName,
+          marksObtained: obtained,
+          maxMarks: sc.maxMarks,
+          grade: gradeFor(percentage(obtained, sc.maxMarks)),
+        });
       });
     });
   });
@@ -429,6 +491,7 @@ export const db = {
   parents,
   students,
   staff,
+  timetablePeriods,
   feeInvoices,
   feePayments,
   exams,

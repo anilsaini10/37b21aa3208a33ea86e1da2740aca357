@@ -17,6 +17,7 @@ export const ScreenNames = {
   Dashboard: 'Dashboard',
   Profile: 'Profile',
   Attendance: 'Attendance',
+  ClassAttendance: 'ClassAttendance',
   Fees: 'Fees',
   Homework: 'Homework',
   Timetable: 'Timetable',
@@ -27,6 +28,7 @@ export const ScreenNames = {
   ChangePassword: 'ChangePassword',
   FeeReceipt: 'FeeReceipt',
   StudentDetail: 'StudentDetail',
+  StudentAttendanceHistory: 'StudentAttendanceHistory',
 
   // Auth
   RoleSelect: 'RoleSelect',
@@ -46,7 +48,10 @@ export const ScreenNames = {
   TeacherForm: 'TeacherForm',
   TeacherDetail: 'TeacherDetail',
   Exams: 'Exams',
+  ExamForm: 'ExamForm',
+  ExamClasses: 'ExamClasses',
   ExamReport: 'ExamReport',
+  StudentMarks: 'StudentMarks',
   AnnouncementForm: 'AnnouncementForm',
   Events: 'Events',
   EventForm: 'EventForm',
@@ -57,14 +62,14 @@ export const ScreenNames = {
   Settings: 'Settings',
   ClassesManage: 'ClassesManage',
   SubjectsManage: 'SubjectsManage',
+  ClassSchedule: 'ClassSchedule',
+  PeriodForm: 'PeriodForm',
 
   // Teacher
   Classes: 'Classes',
   MarkAttendance: 'MarkAttendance',
-  CreateHomework: 'CreateHomework',
+  HomeworkForm: 'HomeworkForm',
   ClassStudents: 'ClassStudents',
-  HomeworkList: 'HomeworkList',
-  HomeworkDetail: 'HomeworkDetail',
 
   // Parent
   ChildProfile: 'ChildProfile',

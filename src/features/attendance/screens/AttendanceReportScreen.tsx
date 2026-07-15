@@ -1,6 +1,6 @@
-/** Attendance report — school-wide daily summary for both students and teachers, for a chosen date. */
+/** Attendance report — Teacher tab (summary + per-teacher breakdown) and Students tab (class-wise, drill into a class), for a chosen date range. */
 import React, {useState} from 'react';
-import {View, ScrollView} from 'react-native';
+import {Pressable, View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme, useThemedStyles} from '../../../core/theme';
@@ -12,16 +12,78 @@ import {
   CustomCard,
   DatePicker,
   BarChart,
+  Badge,
   Icon,
   Loader,
+  EmptyState,
   Row,
   Spacer,
+  Divider,
 } from '../../../shared/components';
-import {useAttendanceSummary, useTeacherAttendanceSummary, attendanceToday} from '../attendance.service';
+import {
+  useTeacherRangeSummary,
+  useTeacherAttendanceList,
+  useClassAttendanceSummaries,
+  attendanceToday,
+} from '../attendance.service';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {AdminStackParamList} from '../../../navigation/types';
-import type {DailyAttendanceSummary} from '../../../shared/types';
+import type {AttendanceCounts, ClassAttendanceSummary} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
+
+type Tab = 'teacher' | 'students';
+
+/** From/To date pickers laid out side by side with a connecting arrow — auto-clamps so the range is never inverted. */
+export function DateRangeFilter({
+  fromDate,
+  toDate,
+  onChange,
+}: {
+  fromDate: string;
+  toDate: string;
+  onChange: (fromDate: string, toDate: string) => void;
+}): React.JSX.Element {
+  const {theme} = useTheme();
+  const {t} = useLanguage();
+  const styles = useThemedStyles(t2 => ({
+    card: {
+      marginBottom: t2.spacing.md,
+    },
+    fieldWrap: {
+      flex: 1,
+    },
+    arrow: {
+      marginTop: 30,
+    },
+  }));
+
+  return (
+    <CustomCard style={styles.card}>
+      <AppText variant="label" color="textSecondary">
+        {t('attendanceReport_dateRangeLabel')}
+      </AppText>
+      <Spacer size={theme.spacing.xs} />
+      <Row gap={theme.spacing.sm} align="flex-start">
+        <View style={styles.fieldWrap}>
+          <DatePicker
+            label={t('attendanceReport_fromDate')}
+            value={fromDate}
+            onChange={d => onChange(d, d > toDate ? d : toDate)}
+          />
+        </View>
+        <Icon name="forward" size={16} color={theme.colors.textMuted} style={styles.arrow} />
+        <View style={styles.fieldWrap}>
+          <DatePicker
+            label={t('attendanceReport_toDate')}
+            value={toDate}
+            onChange={d => onChange(d < fromDate ? d : fromDate, d)}
+          />
+        </View>
+      </Row>
+    </CustomCard>
+  );
+}
 
 function AttendanceSection({
   icon,
@@ -30,7 +92,7 @@ function AttendanceSection({
 }: {
   icon: string;
   title: string;
-  summary: DailyAttendanceSummary;
+  summary: AttendanceCounts;
 }): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
@@ -118,36 +180,174 @@ function AttendanceSection({
   );
 }
 
+export function BreakdownLine({present, absent, late, leave}: AttendanceCounts): React.JSX.Element {
+  const {theme} = useTheme();
+  return (
+    <Row gap={theme.spacing.sm}>
+      <AppText variant="caption" style={{color: theme.colors.success}}>
+        {present}P
+      </AppText>
+      <AppText variant="caption" style={{color: theme.colors.error}}>
+        {absent}A
+      </AppText>
+      <AppText variant="caption" style={{color: theme.colors.warning}}>
+        {late}L
+      </AppText>
+      <AppText variant="caption" style={{color: theme.colors.info}}>
+        {leave}Lv
+      </AppText>
+    </Row>
+  );
+}
+
+function MiniStat({label, value, color}: {label: string; value: number; color: string}): React.JSX.Element {
+  return (
+    <View style={{alignItems: 'center'}}>
+      <AppText variant="bodyBold" style={{color}}>
+        {value}
+      </AppText>
+      <AppText variant="label" color="textMuted">
+        {label}
+      </AppText>
+    </View>
+  );
+}
+
+function ClassAttendanceCard({
+  cls,
+  onPress,
+}: {
+  cls: ClassAttendanceSummary;
+  onPress: () => void;
+}): React.JSX.Element {
+  const {theme} = useTheme();
+  const {t} = useLanguage();
+  return (
+    <CustomCard onPress={onPress} style={{marginBottom: theme.spacing.md}}>
+      <Row justify="space-between" align="center">
+        <AppText variant="bodyBold">{cls.className}</AppText>
+        <AppText variant="caption" color="primary">
+          {cls.percentage}%
+        </AppText>
+      </Row>
+      <Spacer size={theme.spacing.sm} />
+      <Row justify="space-around">
+        <MiniStat label={t('attendance_present')} value={cls.present} color={theme.colors.success} />
+        <MiniStat label={t('attendance_absent')} value={cls.absent} color={theme.colors.error} />
+        <MiniStat label={t('attendanceReport_leave')} value={cls.leave} color={theme.colors.info} />
+        <MiniStat label={t('attendanceReport_total')} value={cls.total} color={theme.colors.primary} />
+      </Row>
+    </CustomCard>
+  );
+}
+
 export function AttendanceReportScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
   const {t} = useLanguage();
-  const [selectedDate, setSelectedDate] = useState(attendanceToday);
-  const {data: studentSummary, isLoading: studentsLoading} = useAttendanceSummary(selectedDate);
-  const {data: teacherSummary, isLoading: teachersLoading} = useTeacherAttendanceSummary(selectedDate);
+  const [fromDate, setFromDate] = useState(attendanceToday);
+  const [toDate, setToDate] = useState(attendanceToday);
+  const [tab, setTab] = useState<Tab>('teacher');
+
+  const {data: teacherSummary, isLoading: teacherSummaryLoading} = useTeacherRangeSummary(fromDate, toDate);
+  const {data: teacherList, isLoading: teacherListLoading} = useTeacherAttendanceList(fromDate, toDate);
+  const {data: classSummaries, isLoading: classSummariesLoading} = useClassAttendanceSummaries(fromDate, toDate);
 
   const styles = useThemedStyles(t2 => ({
     scrollContent: {
       padding: t2.spacing.lg,
     },
+    tabsRow: {
+      flexDirection: 'row',
+      columnGap: t2.spacing.sm,
+      marginBottom: t2.spacing.sm,
+    },
   }));
 
-  const isLoading = studentsLoading || teachersLoading || !studentSummary || !teacherSummary;
+  const TABS: {label: string; value: Tab}[] = [
+    {label: t('attendanceReport_tabTeacher'), value: 'teacher'},
+    {label: t('attendanceReport_tabStudents'), value: 'students'},
+  ];
+
+  const isTeacherLoading = teacherSummaryLoading || teacherListLoading || !teacherSummary || !teacherList;
+  const isStudentsLoading = classSummariesLoading || !classSummaries;
 
   return (
     <Screen padded={false}>
       <CustomHeader title={t('attendanceReport_title')} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <DatePicker label={t('attendanceReport_selectDate')} value={selectedDate} onChange={setSelectedDate} />
+        <DateRangeFilter
+          fromDate={fromDate}
+          toDate={toDate}
+          onChange={(f, tD) => {
+            setFromDate(f);
+            setToDate(tD);
+          }}
+        />
 
-        {isLoading ? (
+        <Row gap={theme.spacing.sm} style={styles.tabsRow}>
+          {TABS.map(tabOption => (
+            <Pressable key={tabOption.value} onPress={() => setTab(tabOption.value)}>
+              <Badge label={tabOption.label} tone={tab === tabOption.value ? 'primary' : 'neutral'} />
+            </Pressable>
+          ))}
+        </Row>
+
+        {tab === 'teacher' ? (
+          isTeacherLoading ? (
+            <Loader message={t('attendanceReport_loadingAttendance')} />
+          ) : (
+            <>
+              <AttendanceSection icon="teacher" title={t('attendanceReport_teachersSection')} summary={teacherSummary} />
+              <Spacer size={theme.spacing.md} />
+              <AppText variant="label" color="textSecondary">
+                {t('attendanceReport_teacherListTitle')}
+              </AppText>
+              <Spacer size={theme.spacing.xs} />
+              {teacherList.length === 0 ? (
+                <EmptyState
+                  icon="teacher"
+                  title={t('attendanceReport_noTeacherRecords')}
+                  message={t('attendanceReport_noRecordsMessage')}
+                />
+              ) : (
+                <CustomCard padded={false} style={{paddingHorizontal: theme.spacing.lg}}>
+                  {teacherList.map((rec, i) => (
+                    <React.Fragment key={rec.teacherId}>
+                      {i > 0 ? <Divider /> : null}
+                      <Row justify="space-between" align="center" style={{paddingVertical: theme.spacing.sm}}>
+                        <AppText variant="bodyBold">{rec.teacherName}</AppText>
+                        <BreakdownLine present={rec.present} absent={rec.absent} late={rec.late} leave={rec.leave} total={rec.total} percentage={rec.percentage} />
+                      </Row>
+                    </React.Fragment>
+                  ))}
+                </CustomCard>
+              )}
+            </>
+          )
+        ) : isStudentsLoading ? (
           <Loader message={t('attendanceReport_loadingAttendance')} />
+        ) : classSummaries.length === 0 ? (
+          <EmptyState
+            icon="students"
+            title={t('attendanceReport_noClassRecords')}
+            message={t('attendanceReport_noRecordsMessage')}
+          />
         ) : (
-          <>
-            <AttendanceSection icon="students" title={t('attendanceReport_studentsSection')} summary={studentSummary} />
-            <Spacer size={theme.spacing.lg} />
-            <AttendanceSection icon="teacher" title={t('attendanceReport_teachersSection')} summary={teacherSummary} />
-          </>
+          classSummaries.map(cls => (
+            <ClassAttendanceCard
+              key={cls.classId}
+              cls={cls}
+              onPress={() =>
+                navigation.navigate(ScreenNames.ClassAttendance, {
+                  classId: cls.classId,
+                  className: cls.className,
+                  fromDate,
+                  toDate,
+                })
+              }
+            />
+          ))
         )}
         <Spacer size={24} />
       </ScrollView>

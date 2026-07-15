@@ -17,6 +17,7 @@ type NoParamRoute =
   | 'Teachers'
   | 'ClassesManage'
   | 'SubjectsManage'
+  | 'ClassSchedule'
   | 'Attendance'
   | 'Exams'
   | 'Announcements'
@@ -39,6 +40,7 @@ const MODULES: ModuleItem[] = [
   {labelKey: 'moreScreen_teachers', icon: 'teacher', route: ScreenNames.Teachers},
   {labelKey: 'moreScreen_classes', icon: 'class', route: ScreenNames.ClassesManage},
   {labelKey: 'moreScreen_subjects', icon: 'homework', route: ScreenNames.SubjectsManage},
+  {labelKey: 'moreScreen_classSchedule', icon: 'timetable', route: ScreenNames.ClassSchedule},
   {labelKey: 'moreScreen_attendance', icon: 'attendance', route: ScreenNames.Attendance},
   {labelKey: 'moreScreen_exams', icon: 'exam', route: ScreenNames.Exams},
   {labelKey: 'moreScreen_announcements', icon: 'announcement', route: ScreenNames.Announcements},
@@ -48,7 +50,7 @@ const MODULES: ModuleItem[] = [
   {labelKey: 'moreScreen_inventory', icon: 'inventory', route: ScreenNames.Inventory},
   {labelKey: 'moreScreen_reports', icon: 'reports', route: ScreenNames.Reports},
   {labelKey: 'moreScreen_settings', icon: 'settings', route: ScreenNames.Settings},
-  {labelKey: 'moreScreen_notifications', icon: 'notification', route: ScreenNames.Notifications},
+  // {labelKey: 'moreScreen_notifications', icon: 'notification', route: ScreenNames.Notifications},
 ];
 
 export function MoreScreen(): React.JSX.Element {

@@ -1,101 +1,106 @@
-/** Attendance service — mark/list student + teacher attendance, daily summaries + hooks. */
-import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
+/** Attendance service (mock) — admin teacher/student range reports + hooks. */
+import {useQuery} from '@tanstack/react-query';
 import {db} from '../../core/mock/db';
 import {respond} from '../../core/mock/mockApi';
-import {generateId} from '../../core/utils/misc';
+import {groupBy} from '../../core/utils/misc';
 import type {
-  AttendanceRecord,
+  AttendanceCounts,
+  AttendanceRangeSummary,
   AttendanceStatus,
-  DailyAttendanceSummary,
-  Student,
+  ClassAttendanceSummary,
+  StudentAttendanceBreakdown,
+  TeacherAttendanceBreakdown,
 } from '../../shared/types';
 
 /** The mock dataset's anchor "today" — a sensible default date for the report screen. */
 export const attendanceToday = db.today;
 
-function summarise(records: {status: AttendanceStatus}[], date: string): DailyAttendanceSummary {
+function countByStatus(records: {status: AttendanceStatus}[]): AttendanceCounts {
   const present = records.filter(r => r.status === 'present').length;
   const absent = records.filter(r => r.status === 'absent').length;
   const late = records.filter(r => r.status === 'late').length;
   const leave = records.filter(r => r.status === 'leave').length;
-  const total = records.length || 1;
-  return {
-    date,
-    present,
-    absent,
-    late,
-    leave,
-    total: records.length,
-    percentage: Math.round((present / total) * 100),
-  };
+  const total = records.length;
+  return {present, absent, late, leave, total, percentage: total ? Math.round((present / total) * 100) : 0};
+}
+
+function inRange(date: string, fromDate: string, toDate: string): boolean {
+  return date >= fromDate && date <= toDate;
 }
 
 export const attendanceApi = {
-  studentsForClass: (classId: string, sectionId: string): Promise<Student[]> =>
-    respond(db.students.filter(s => s.classId === classId && s.sectionId === sectionId)),
+  /** Teacher attendance, aggregated across a date range. */
+  teacherRangeSummary: (fromDate: string, toDate: string): Promise<AttendanceRangeSummary> => {
+    const records = db.teacherAttendanceRecords.filter(r => inRange(r.date, fromDate, toDate));
+    return respond({fromDate, toDate, ...countByStatus(records)});
+  },
 
-  markBulk: (
-    date: string,
-    entries: {studentId: string; status: AttendanceStatus}[],
-  ): Promise<{saved: number}> => {
-    entries.forEach(entry => {
-      const student = db.students.find(s => s.id === entry.studentId);
-      const record: AttendanceRecord = {
-        id: generateId('att'),
-        date,
-        studentId: entry.studentId,
-        studentName: student?.name ?? '',
-        classId: student?.classId ?? '',
-        sectionId: student?.sectionId ?? '',
-        status: entry.status,
+  /** Every teacher's attendance breakdown across a date range — feeds the Teacher tab's list. */
+  teacherList: (fromDate: string, toDate: string): Promise<TeacherAttendanceBreakdown[]> => {
+    const records = db.teacherAttendanceRecords.filter(r => inRange(r.date, fromDate, toDate));
+    const byTeacher = groupBy(records, r => r.teacherId);
+    const rows = Object.entries(byTeacher).map(([teacherId, entries]) => ({
+      teacherId,
+      teacherName: entries[0].teacherName,
+      ...countByStatus(entries),
+    }));
+    return respond(rows.sort((a, b) => a.teacherName.localeCompare(b.teacherName)));
+  },
+
+  /** One row per class with attendance counts across a date range — feeds the Students tab's class list. */
+  classSummaries: (fromDate: string, toDate: string): Promise<ClassAttendanceSummary[]> => {
+    const records = db.attendanceRecords.filter(r => inRange(r.date, fromDate, toDate));
+    const byClass = groupBy(records, r => r.classId);
+    const rows = db.classes.map(cls => ({
+      classId: cls.id,
+      className: cls.name,
+      ...countByStatus(byClass[cls.id] ?? []),
+    }));
+    return respond(rows);
+  },
+
+  /** Every student in one class with their attendance breakdown across a date range. */
+  classStudents: (fromDate: string, toDate: string, classId: string): Promise<StudentAttendanceBreakdown[]> => {
+    const records = db.attendanceRecords.filter(r => inRange(r.date, fromDate, toDate) && r.classId === classId);
+    const byStudent = groupBy(records, r => r.studentId);
+    const rows = Object.entries(byStudent).map(([studentId, entries]) => {
+      const student = db.students.find(s => s.id === studentId);
+      return {
+        studentId,
+        studentName: entries[0].studentName,
+        rollNo: student?.rollNo ?? 0,
+        sectionName: student?.sectionName ?? '',
+        ...countByStatus(entries),
       };
-      db.attendanceRecords.push(record);
     });
-    return respond({saved: entries.length});
+    return respond(rows.sort((a, b) => a.rollNo - b.rollNo));
   },
-
-  /** Student attendance summary for one specific date (defaults to "today" in the mock dataset). */
-  summary: (date: string = db.today, classId?: string): Promise<DailyAttendanceSummary> => {
-    const records = db.attendanceRecords.filter(
-      r => r.date === date && (!classId || r.classId === classId),
-    );
-    return respond(summarise(records, date));
-  },
-
-  /** Teacher attendance summary for one specific date. */
-  teacherSummary: (date: string = db.today): Promise<DailyAttendanceSummary> => {
-    const records = db.teacherAttendanceRecords.filter(r => r.date === date);
-    return respond(summarise(records, date));
-  },
-
-  history: (studentId: string): Promise<AttendanceRecord[]> =>
-    respond(db.attendanceRecords.filter(r => r.studentId === studentId)),
 };
 
-export const useAttendanceStudents = (classId: string, sectionId: string) =>
+export const useTeacherRangeSummary = (fromDate: string, toDate: string) =>
   useQuery({
-    queryKey: ['attendance', 'students', classId, sectionId],
-    queryFn: () => attendanceApi.studentsForClass(classId, sectionId),
-    enabled: !!classId && !!sectionId,
+    queryKey: ['attendance', 'teacherRangeSummary', fromDate, toDate],
+    queryFn: () => attendanceApi.teacherRangeSummary(fromDate, toDate),
+    enabled: !!fromDate && !!toDate,
   });
 
-export const useAttendanceSummary = (date?: string, classId?: string) =>
+export const useTeacherAttendanceList = (fromDate: string, toDate: string) =>
   useQuery({
-    queryKey: ['attendance', 'summary', date, classId],
-    queryFn: () => attendanceApi.summary(date, classId),
+    queryKey: ['attendance', 'teacherList', fromDate, toDate],
+    queryFn: () => attendanceApi.teacherList(fromDate, toDate),
+    enabled: !!fromDate && !!toDate,
   });
 
-export const useTeacherAttendanceSummary = (date?: string) =>
+export const useClassAttendanceSummaries = (fromDate: string, toDate: string) =>
   useQuery({
-    queryKey: ['attendance', 'teacherSummary', date],
-    queryFn: () => attendanceApi.teacherSummary(date),
+    queryKey: ['attendance', 'classSummaries', fromDate, toDate],
+    queryFn: () => attendanceApi.classSummaries(fromDate, toDate),
+    enabled: !!fromDate && !!toDate,
   });
 
-export const useMarkAttendance = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({date, entries}: {date: string; entries: {studentId: string; status: AttendanceStatus}[]}) =>
-      attendanceApi.markBulk(date, entries),
-    onSuccess: () => qc.invalidateQueries({queryKey: ['attendance']}),
+export const useClassStudentsAttendance = (fromDate: string, toDate: string, classId: string) =>
+  useQuery({
+    queryKey: ['attendance', 'classStudents', fromDate, toDate, classId],
+    queryFn: () => attendanceApi.classStudents(fromDate, toDate, classId),
+    enabled: !!fromDate && !!toDate && !!classId,
   });
-};

@@ -41,8 +41,8 @@ export function DatePicker({
   label,
   value,
   onChange,
-  minYear = 1990,
-  maxYear = 2035,
+  minYear = 2026,
+  maxYear = 2045,
 }: DatePickerProps): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();

@@ -28,6 +28,28 @@ export interface HomeworkSubmission {
   completedAt?: string;
 }
 
+// ---- Teacher homework (real backend, /api/teacher/homework) ---------------
+
+export type HomeworkType = 'ASSIGNMENT' | 'PROJECT' | 'READING' | 'PRACTICE' | 'OTHER';
+
+/** Homework (real backend) — a teacher creates/manages via `/api/teacher/homework`. */
+export interface TeacherHomework {
+  id: ID;
+  classId: ID;
+  className: string;
+  sectionId: ID;
+  sectionName: string;
+  subjectId: ID;
+  subjectName: string;
+  title: string;
+  description: string | null;
+  type: HomeworkType;
+  dueDate: string;
+  createdBy: {id: ID; name: string};
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type AnnouncementAudience = 'ALL' | 'TEACHER' | 'PARENT';
 
 /** Derived server-side from publishAt/expiresAt vs now — only ever present on admin GET responses. */

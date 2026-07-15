@@ -1,7 +1,7 @@
-/** Mark Attendance — pick class/section, toggle P/A/L per student, save in bulk. */
+/** Mark Attendance (Class Teacher only) — pick a date, quick-tap each student's status, save in bulk. */
 import React, {useEffect, useState} from 'react';
 import {Pressable, View, ScrollView} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
@@ -11,8 +11,7 @@ import {
   CustomHeader,
   CustomCard,
   CustomButton,
-  SectionTitle,
-  Select,
+  DatePicker,
   Badge,
   Loader,
   EmptyState,
@@ -20,32 +19,59 @@ import {
   Spacer,
   Divider,
 } from '../../../shared/components';
-import {db} from '../../../core/mock/db';
-import {useAttendanceStudents, useMarkAttendance} from '../attendance.service';
+import {useSectionAttendance, useMarkSectionAttendance} from '../teacherAttendance.service';
 import type {TeacherStackParamList} from '../../../navigation/types';
+import type {AttendanceStatusCode} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<TeacherStackParamList>;
-type AttStatus = 'present' | 'absent' | 'late';
 
-const OPTION_KEYS: AttStatus[] = ['present', 'absent', 'late'];
+const STATUS_CODES: AttendanceStatusCode[] = ['PRESENT', 'ABSENT', 'LATE', 'LEAVE', 'HOLIDAY'];
 
-/** Present → green, Absent → red, Late → amber, matching the app's semantic tones. */
-const STATUS_TONE: Record<AttStatus, 'success' | 'error' | 'warning'> = {
-  present: 'success',
-  absent: 'error',
-  late: 'warning',
+const STATUS_TONE: Record<AttendanceStatusCode, 'success' | 'error' | 'warning' | 'info' | 'textMuted'> = {
+  PRESENT: 'success',
+  ABSENT: 'error',
+  LATE: 'warning',
+  LEAVE: 'info',
+  HOLIDAY: 'textMuted',
 };
+
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
 
 export function MarkAttendanceScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
+  const route = useRoute<RouteProp<TeacherStackParamList, 'MarkAttendance'>>();
   const {t} = useLanguage();
+  const {className, sectionName, sectionId} = route.params;
+
+  const [selectedDate, setSelectedDate] = useState(todayIso());
+  const [statuses, setStatuses] = useState<Record<string, AttendanceStatusCode>>({});
+  const [saved, setSaved] = useState(false);
+  const [submitError, setSubmitError] = useState<string | undefined>();
+
+  const {data, isLoading, isError, error, refetch} = useSectionAttendance(sectionId, selectedDate);
+  const markAttendance = useMarkSectionAttendance();
+
+  const STATUS_ABBR: Record<AttendanceStatusCode, string> = {
+    PRESENT: t('markAttendance_presentAbbr'),
+    ABSENT: t('markAttendance_absentAbbr'),
+    LATE: t('markAttendance_lateAbbr'),
+    LEAVE: t('markAttendance_leaveAbbr'),
+    HOLIDAY: t('markAttendance_holidayAbbr'),
+  };
+  const STATUS_LABEL: Record<AttendanceStatusCode, string> = {
+    PRESENT: t('markAttendance_presentLabel'),
+    ABSENT: t('markAttendance_absentLabel'),
+    LATE: t('markAttendance_lateLabel'),
+    LEAVE: t('attendanceReport_leave'),
+    HOLIDAY: t('attendance_holiday'),
+  };
+
   const styles = useThemedStyles(t2 => ({
     scrollContent: {
       padding: t2.spacing.lg,
-    },
-    selectFlex: {
-      flex: 1,
     },
     summaryRow: {
       marginBottom: t2.spacing.md,
@@ -60,7 +86,7 @@ export function MarkAttendanceScreen(): React.JSX.Element {
       flex: 1,
     },
     optionButton: {
-      width: 44,
+      width: 40,
       height: 36,
       borderRadius: t2.components.button.radius,
       alignItems: 'center',
@@ -68,103 +94,72 @@ export function MarkAttendanceScreen(): React.JSX.Element {
     },
   }));
 
-  const OPTIONS: {key: AttStatus; label: string}[] = OPTION_KEYS.map(key => ({
-    key,
-    label:
-      key === 'present'
-        ? t('markAttendance_presentAbbr')
-        : key === 'absent'
-        ? t('markAttendance_absentAbbr')
-        : t('markAttendance_lateAbbr'),
-  }));
+  useEffect(() => {
+    if (data) {
+      const next: Record<string, AttendanceStatusCode> = {};
+      data.students.forEach(s => {
+        next[s.studentId] = s.status ?? 'PRESENT';
+      });
+      setStatuses(next);
+      setSaved(false);
+      setSubmitError(undefined);
+    }
+  }, [data]);
 
-  const SUMMARY: {key: AttStatus; label: string}[] = OPTION_KEYS.map(key => ({
-    key,
-    label:
-      key === 'present'
-        ? t('markAttendance_presentLabel')
-        : key === 'absent'
-        ? t('markAttendance_absentLabel')
-        : t('markAttendance_lateLabel'),
-  }));
+  const setStatus = (studentId: string, status: AttendanceStatusCode): void => {
+    setStatuses(prev => ({...prev, [studentId]: status}));
+    setSaved(false);
+  };
 
-  const [classId, setClassId] = useState(db.classes[0]?.id ?? '');
-  const [sectionId, setSectionId] = useState(db.sections[0]?.id ?? '');
-  const [statuses, setStatuses] = useState<Record<string, AttStatus>>({});
-  const [saved, setSaved] = useState(false);
-
-  const counts: Record<AttStatus, number> = {present: 0, absent: 0, late: 0};
+  const counts: Record<AttendanceStatusCode, number> = {PRESENT: 0, ABSENT: 0, LATE: 0, LEAVE: 0, HOLIDAY: 0};
   Object.values(statuses).forEach(status => {
     counts[status] += 1;
   });
 
-  const {data: students, isLoading} = useAttendanceStudents(classId, sectionId);
-  const markAttendance = useMarkAttendance();
-
-  const classOptions = db.classes.map(c => ({label: c.name, value: c.id}));
-  const sectionsForClass = db.sections.filter(s => s.classId === classId);
-  const sectionOptions = sectionsForClass.map(s => ({
-    label: t('common_sectionOptionLabel', {name: s.name}),
-    value: s.id,
-  }));
-
-  const onChangeClass = (nextClassId: string) => {
-    setClassId(nextClassId);
-    const firstSection = db.sections.find(s => s.classId === nextClassId);
-    setSectionId(firstSection?.id ?? '');
-  };
-
-  useEffect(() => {
-    if (students) {
-      const next: Record<string, AttStatus> = {};
-      students.forEach(s => {
-        next[s.id] = 'present';
-      });
-      setStatuses(next);
-      setSaved(false);
-    }
-  }, [students]);
-
-  const setStatus = (id: string, status: AttStatus) => {
-    setStatuses(prev => ({...prev, [id]: status}));
-    setSaved(false);
-  };
-
-  const onSave = () => {
+  const onSave = (): void => {
+    setSubmitError(undefined);
     markAttendance.mutate(
       {
-        date: new Date().toISOString().slice(0, 10),
-        entries: Object.entries(statuses).map(([studentId, status]) => ({studentId, status})),
+        sectionId,
+        date: selectedDate,
+        records: Object.entries(statuses).map(([studentId, status]) => ({studentId, status})),
       },
-      {onSuccess: () => setSaved(true)},
+      {
+        onSuccess: () => setSaved(true),
+        onError: (e: Error) => setSubmitError(e.message),
+      },
     );
   };
 
+  const notClassTeacher = isError && (error as {code?: string} | null)?.code === 'NOT_CLASS_TEACHER';
+
   return (
     <Screen padded={false}>
-      <CustomHeader title={t('markAttendance_title')} onBack={() => navigation.goBack()} />
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
-        <Row gap={theme.spacing.md} align="flex-start">
-          <View style={styles.selectFlex}>
-            <Select label={t('markAttendance_class')} value={classId} options={classOptions} onChange={onChangeClass} />
-          </View>
-          <View style={styles.selectFlex}>
-            <Select
-              label={t('markAttendance_section')}
-              value={sectionId}
-              options={sectionOptions}
-              onChange={setSectionId}
-            />
-          </View>
-        </Row>
+      <CustomHeader
+        title={t('markAttendance_title')}
+        subtitle={t('markAttendance_classSectionSubtitle', {className, sectionName})}
+        onBack={() => navigation.goBack()}
+      />
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <DatePicker label={t('markAttendance_date')} value={selectedDate} onChange={setSelectedDate} />
 
-        <SectionTitle title={t('markAttendance_students')} />
-
-        {isLoading ? (
+        {notClassTeacher ? (
+          <EmptyState
+            icon="warning"
+            title={t('markAttendance_notClassTeacherTitle')}
+            message={t('markAttendance_notClassTeacherMessage')}
+          />
+        ) : isError ? (
+          <EmptyState
+            icon="warning"
+            title={t('common_somethingWentWrong')}
+            message={(error as {message?: string} | null)?.message ?? t('common_checkConnection')}
+            actionLabel={t('common_retry')}
+            onAction={() => refetch()}
+          />
+        ) : isLoading || !data ? (
           <Loader message={t('markAttendance_loadingStudents')} />
-        ) : !students || students.length === 0 ? (
+        ) : data.students.length === 0 ? (
           <EmptyState
             icon="students"
             title={t('markAttendance_noStudentsTitle')}
@@ -172,18 +167,16 @@ export function MarkAttendanceScreen(): React.JSX.Element {
           />
         ) : (
           <>
-            <Row gap={theme.spacing.sm} style={styles.summaryRow}>
-              {SUMMARY.map(item => {
-                const color = theme.colors[STATUS_TONE[item.key]];
+            <Row gap={theme.spacing.xs} style={styles.summaryRow}>
+              {STATUS_CODES.map(code => {
+                const color = theme.colors[STATUS_TONE[code]];
                 return (
-                  <View
-                    key={item.key}
-                    style={[styles.summaryItem, {backgroundColor: color + '18'}]}>
+                  <View key={code} style={[styles.summaryItem, {backgroundColor: color + '18'}]}>
                     <AppText variant="bodyBold" style={{color}}>
-                      {counts[item.key]}
+                      {counts[code]}
                     </AppText>
                     <AppText variant="label" style={{color}}>
-                      {item.label}
+                      {STATUS_LABEL[code]}
                     </AppText>
                   </View>
                 );
@@ -191,8 +184,8 @@ export function MarkAttendanceScreen(): React.JSX.Element {
             </Row>
 
             <CustomCard>
-              {students.map((student, i) => (
-                <View key={student.id}>
+              {data.students.map((student, i) => (
+                <View key={student.studentId}>
                   {i > 0 ? <Divider /> : null}
                   <Row justify="space-between" gap={theme.spacing.sm}>
                     <View style={styles.studentInfo}>
@@ -203,14 +196,14 @@ export function MarkAttendanceScreen(): React.JSX.Element {
                         {t('markAttendance_rollNumber', {rollNo: String(student.rollNo)})}
                       </AppText>
                     </View>
-                    <Row gap={theme.spacing.xs}>
-                      {OPTIONS.map(opt => {
-                        const isSelected = statuses[student.id] === opt.key;
-                        const color = theme.colors[STATUS_TONE[opt.key]];
+                    <Row gap={4}>
+                      {STATUS_CODES.map(code => {
+                        const isSelected = statuses[student.studentId] === code;
+                        const color = theme.colors[STATUS_TONE[code]];
                         return (
                           <Pressable
-                            key={opt.key}
-                            onPress={() => setStatus(student.id, opt.key)}
+                            key={code}
+                            onPress={() => setStatus(student.studentId, code)}
                             style={[
                               styles.optionButton,
                               {
@@ -219,10 +212,8 @@ export function MarkAttendanceScreen(): React.JSX.Element {
                                 borderColor: color + '55',
                               },
                             ]}>
-                            <AppText
-                              variant="button"
-                              style={{color: isSelected ? theme.colors.onPrimary : color}}>
-                              {opt.label}
+                            <AppText variant="button" style={{color: isSelected ? theme.colors.onPrimary : color, fontSize: 12}}>
+                              {STATUS_ABBR[code]}
                             </AppText>
                           </Pressable>
                         );
@@ -232,18 +223,18 @@ export function MarkAttendanceScreen(): React.JSX.Element {
                 </View>
               ))}
             </CustomCard>
-          </>
-        )}
 
-        {students && students.length > 0 ? (
-          <>
             <Spacer size={16} />
+            {submitError ? (
+              <AppText variant="caption" color="error" style={{marginBottom: theme.spacing.sm}}>
+                {submitError}
+              </AppText>
+            ) : null}
             {saved ? (
-              <Row justify="center">
+              <Row justify="center" style={{marginBottom: theme.spacing.sm}}>
                 <Badge label={t('markAttendance_saved')} tone="success" />
               </Row>
             ) : null}
-            <Spacer size={8} />
             <CustomButton
               title={t('markAttendance_saveAttendance')}
               iconLeft="check"
@@ -251,7 +242,7 @@ export function MarkAttendanceScreen(): React.JSX.Element {
               onPress={onSave}
             />
           </>
-        ) : null}
+        )}
         <Spacer size={24} />
       </ScrollView>
     </Screen>

@@ -9,13 +9,12 @@ import type {TeacherStackParamList, TeacherTabParamList} from './types';
 import {ScreenNames} from './ScreenNames';
 
 import {TeacherDashboardScreen} from '../features/dashboard/screens/TeacherDashboardScreen';
-import {HomeWorkClassListScreen} from '../features/homework/screens/HomeWorkClassList';
 import {HomeworkListScreen} from '../features/homework/screens/HomeworkListScreen';
-import {HomeworkDetailScreen} from '../features/homework/screens/HomeworkDetailScreen';
-import {CreateHomeworkScreen} from '../features/homework/screens/CreateHomeworkScreen';
+import {HomeworkFormScreen} from '../features/homework/screens/HomeworkFormScreen';
 import {ClassListScreen} from '../features/teacher/screens/ClassList';
 import {ClassStudentsScreen} from '../features/teacher/screens/ClassStudentsScreen';
 import {StudentDetailScreen} from '../features/teacher/screens/StudentDetailScreen';
+import {StudentAttendanceHistoryScreen} from '../features/attendance/screens/StudentAttendanceHistoryScreen';
 import {TeacherProfileScreen} from '../features/teacher/screens/TeacherProfileScreen';
 import {MarkAttendanceScreen} from '../features/attendance/screens/MarkAttendanceScreen';
 import {TimetableScreen} from '../features/timetable/screens/TimetableScreen';
@@ -54,7 +53,7 @@ function TeacherTabs(): React.JSX.Element {
         tabBarIcon: ({color}) => <Icon name={TAB_ICON[route.name]} size={22} color={color} />,
       })}>
       <Tab.Screen name={ScreenNames.Dashboard} component={TeacherDashboardScreen} />
-      <Tab.Screen name={ScreenNames.Homework} component={HomeWorkClassListScreen} />
+      <Tab.Screen name={ScreenNames.Homework} component={HomeworkListScreen} />
       <Tab.Screen name={ScreenNames.Classes} component={ClassListScreen} />
       <Tab.Screen name={ScreenNames.Profile} component={TeacherProfileScreen} />
     </Tab.Navigator>
@@ -66,12 +65,11 @@ export function TeacherNavigator(): React.JSX.Element {
     <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen name={ScreenNames.Tabs} component={TeacherTabs} />
       <Stack.Screen name={ScreenNames.MarkAttendance} component={MarkAttendanceScreen} />
-      <Stack.Screen name={ScreenNames.CreateHomework} component={CreateHomeworkScreen} />
+      <Stack.Screen name={ScreenNames.HomeworkForm} component={HomeworkFormScreen} />
       <Stack.Screen name={ScreenNames.Timetable} component={TimetableScreen} />
       <Stack.Screen name={ScreenNames.ClassStudents} component={ClassStudentsScreen} />
-      <Stack.Screen name={ScreenNames.HomeworkList} component={HomeworkListScreen} />
-      <Stack.Screen name={ScreenNames.HomeworkDetail} component={HomeworkDetailScreen} />
       <Stack.Screen name={ScreenNames.StudentDetail} component={StudentDetailScreen} />
+      <Stack.Screen name={ScreenNames.StudentAttendanceHistory} component={StudentAttendanceHistoryScreen} />
       <Stack.Screen name={ScreenNames.Leave} component={LeaveScreen} />
       <Stack.Screen name={ScreenNames.Chat} component={ChatScreen} />
       <Stack.Screen name={ScreenNames.Announcements} component={AnnouncementsScreen} />

@@ -53,6 +53,10 @@ export function TimetableScreen(): React.JSX.Element {
     periodCard: {
       marginBottom: t2.spacing.md,
     },
+    breakCard: {
+      backgroundColor: t2.colors.warning + '14',
+      borderColor: t2.colors.warning + '55',
+    },
     periodNoBlock: {
       width: 52,
       alignItems: 'center',
@@ -111,32 +115,46 @@ export function TimetableScreen(): React.JSX.Element {
         {periods.length === 0 ? (
           <EmptyState title={t('timetable_noClasses')} message={t('timetable_noClassesMessage')} icon="timetable" />
         ) : (
-          periods.map(period => (
-            <CustomCard key={period.id} style={styles.periodCard}>
-              <Row gap={theme.spacing.md}>
-                <View style={styles.periodNoBlock}>
-                  <AppText variant="h3" color="primary">
-                    {period.periodNo}
+          periods.map(period =>
+            period.type === 'break' ? (
+              <CustomCard key={period.id} style={[styles.periodCard, styles.breakCard]}>
+                <Row gap={theme.spacing.sm} align="center" justify="center">
+                  <Icon name="clock" size={16} color={theme.colors.warning} />
+                  <AppText variant="bodyBold" color="warning">
+                    {period.label}
                   </AppText>
-                  <AppText variant="label" color="textMuted">
-                    {t('timetable_period')}
+                  <AppText variant="caption" color="textSecondary">
+                    {period.startTime} - {period.endTime}
                   </AppText>
-                </View>
-                <View style={styles.periodInfo}>
-                  <AppText variant="bodyBold">{period.subjectName}</AppText>
-                  <Row gap={theme.spacing.xs}>
-                    <Icon name="clock" size={13} color={theme.colors.textMuted} />
-                    <AppText variant="caption" color="textSecondary">
-                      {period.startTime} - {period.endTime}
+                </Row>
+              </CustomCard>
+            ) : (
+              <CustomCard key={period.id} style={styles.periodCard}>
+                <Row gap={theme.spacing.md}>
+                  <View style={styles.periodNoBlock}>
+                    <AppText variant="h3" color="primary">
+                      {period.periodNo}
                     </AppText>
-                  </Row>
-                  <AppText variant="label" color="textMuted">
-                    {t('timetable_teacherRoom', {teacher: period.teacherName, room: period.room ?? ''})}
-                  </AppText>
-                </View>
-              </Row>
-            </CustomCard>
-          ))
+                    <AppText variant="label" color="textMuted">
+                      {t('timetable_period')}
+                    </AppText>
+                  </View>
+                  <View style={styles.periodInfo}>
+                    <AppText variant="bodyBold">{period.subjectName}</AppText>
+                    <Row gap={theme.spacing.xs}>
+                      <Icon name="clock" size={13} color={theme.colors.textMuted} />
+                      <AppText variant="caption" color="textSecondary">
+                        {period.startTime} - {period.endTime}
+                      </AppText>
+                    </Row>
+                    <AppText variant="label" color="textMuted">
+                      {t('timetable_teacherRoom', {teacher: period.teacherName ?? '', room: period.room ?? ''})}
+                    </AppText>
+                  </View>
+                </Row>
+              </CustomCard>
+            ),
+          )
         )}
       </ScrollView>
     </Screen>

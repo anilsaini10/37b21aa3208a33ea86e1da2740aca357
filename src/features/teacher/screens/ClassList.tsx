@@ -1,9 +1,9 @@
 /** Class list — every class, grouped by section when the class has any. */
 import React from 'react';
-import {ScrollView, View} from 'react-native';
+import {Pressable, ScrollView, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useThemedStyles} from '../../../core/theme';
+import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {db} from '../../../core/mock/db';
 import {
@@ -12,6 +12,7 @@ import {
   CustomCard,
   ListRow,
   SectionTitle,
+  Icon,
   Divider,
   EmptyState,
 } from '../../../shared/components';
@@ -22,19 +23,23 @@ import type {SchoolClass} from '../../../shared/types';
 type Nav = NativeStackNavigationProp<TeacherStackParamList>;
 
 export function ClassListScreen(): React.JSX.Element {
-  const styles = useThemedStyles(theme => ({
+  const {theme} = useTheme();
+  const styles = useThemedStyles(theme2 => ({
     scrollContent: {
-      padding: theme.spacing.lg,
+      padding: theme2.spacing.lg,
       flexGrow: 1,
     },
     card: {
-      marginBottom: theme.spacing.sm,
-      padding: theme.spacing.sm,
+      marginBottom: theme2.spacing.sm,
+      padding: theme2.spacing.sm,
       borderWidth: 0,
-      shadowOpacity: theme.dark ? 0.4 : 0.12,
+      shadowOpacity: theme2.dark ? 0.4 : 0.12,
       shadowRadius: 10,
       shadowOffset: {width: 0, height: 4},
       elevation: 6,
+    },
+    attendanceButton: {
+      padding: theme2.spacing.xs,
     },
   }));
   const {t} = useLanguage();
@@ -47,6 +52,15 @@ export function ClassListScreen(): React.JSX.Element {
 
   const openSection = (cls: SchoolClass, section: SchoolClass['sections'][number]): void => {
     navigation.navigate(ScreenNames.ClassStudents, {
+      classId: cls.id,
+      className: cls.name,
+      sectionId: section.id,
+      sectionName: section.name,
+    });
+  };
+
+  const takeAttendance = (cls: SchoolClass, section: SchoolClass['sections'][number]): void => {
+    navigation.navigate(ScreenNames.MarkAttendance, {
       classId: cls.id,
       className: cls.name,
       sectionId: section.id,
@@ -80,6 +94,14 @@ export function ClassListScreen(): React.JSX.Element {
                         title={t('classList_sectionLabel', {name: section.name})}
                         subtitle={t('classList_studentCount', {count: section.studentCount})}
                         onPress={() => openSection(cls, section)}
+                        right={
+                          <Pressable
+                            onPress={() => takeAttendance(cls, section)}
+                            hitSlop={8}
+                            style={styles.attendanceButton}>
+                            <Icon name="attendance" size={22} color={theme.colors.primary} />
+                          </Pressable>
+                        }
                       />
                     </View>
                   ))}

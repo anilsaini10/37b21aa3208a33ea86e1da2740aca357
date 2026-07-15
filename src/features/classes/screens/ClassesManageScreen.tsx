@@ -1,4 +1,4 @@
-/** Admin — Classes & Sections management: list, expand for detail, create class, add section. */
+/** Admin — Classes & Sections management: list, expand for detail, create/edit/delete class + section. */
 import React, {useState} from 'react';
 import {Pressable, ScrollView, View} from 'react-native';
 import {useTheme, useThemedStyles} from '../../../core/theme';
@@ -10,6 +10,7 @@ import {
   CustomModal,
   CustomInput,
   CustomButton,
+  Select,
   AppText,
   Badge,
   Icon,
@@ -19,20 +20,36 @@ import {
   EmptyState,
   Loader,
 } from '../../../shared/components';
-import {useClasses, useCreateClass, useAddSection} from '../classes.service';
-import type {SchoolClass} from '../../../shared/types';
+import {
+  useClasses,
+  useCreateClass,
+  useAddSection,
+  useUpdateClass,
+  useDeleteClass,
+  useUpdateSection,
+  useDeleteSection,
+} from '../classes.service';
+import {useTeachers} from '../../teachers/teachers.service';
+import type {SchoolClass, Section} from '../../../shared/types';
 
 interface SectionRow {
   name: string;
   capacity: string;
 }
 
+const NO_CLASS_TEACHER = '';
+
 export function ClassesManageScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
   const {data: classes, isLoading, isError, error, refetch} = useClasses();
+  const {data: teachersPage} = useTeachers({pageSize: 100});
   const createClassMutation = useCreateClass();
   const addSectionMutation = useAddSection();
+  const updateClassMutation = useUpdateClass();
+  const deleteClassMutation = useDeleteClass();
+  const updateSectionMutation = useUpdateSection();
+  const deleteSectionMutation = useDeleteSection();
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -47,6 +64,23 @@ export function ClassesManageScreen(): React.JSX.Element {
   const [newSectionCapacity, setNewSectionCapacity] = useState('40');
   const [sectionModalError, setSectionModalError] = useState<string | undefined>();
 
+  const [classEditTarget, setClassEditTarget] = useState<SchoolClass | null>(null);
+  const [editClassName, setEditClassName] = useState('');
+  const [editClassNumericLevel, setEditClassNumericLevel] = useState('');
+  const [editClassError, setEditClassError] = useState<string | undefined>();
+
+  const [deleteClassTarget, setDeleteClassTarget] = useState<SchoolClass | null>(null);
+  const [deleteClassError, setDeleteClassError] = useState<string | undefined>();
+
+  const [sectionEditTarget, setSectionEditTarget] = useState<Section | null>(null);
+  const [editSectionName, setEditSectionName] = useState('');
+  const [editSectionCapacity, setEditSectionCapacity] = useState('');
+  const [editSectionClassTeacherId, setEditSectionClassTeacherId] = useState(NO_CLASS_TEACHER);
+  const [editSectionError, setEditSectionError] = useState<string | undefined>();
+
+  const [deleteSectionTarget, setDeleteSectionTarget] = useState<Section | null>(null);
+  const [deleteSectionError, setDeleteSectionError] = useState<string | undefined>();
+
   const styles = useThemedStyles(t2 => ({
     scrollContent: {padding: t2.spacing.lg, flexGrow: 1},
     card: {marginBottom: t2.spacing.md},
@@ -54,7 +88,13 @@ export function ClassesManageScreen(): React.JSX.Element {
     chipsRow: {rowGap: t2.spacing.sm, marginTop: t2.spacing.xs},
     sectionRowInputWrap: {flex: 1},
     removeButton: {marginLeft: t2.spacing.sm},
+    modalButtonWrap: {flex: 1},
   }));
+
+  const classTeacherOptions = [
+    {label: t('classesManage_noClassTeacher'), value: NO_CLASS_TEACHER},
+    ...(teachersPage?.items ?? []).map(tch => ({label: tch.name, value: tch.id})),
+  ];
 
   const openClassModal = (): void => {
     setClassName('');
@@ -129,24 +169,151 @@ export function ClassesManageScreen(): React.JSX.Element {
     );
   };
 
+  const openClassEditModal = (cls: SchoolClass): void => {
+    setClassEditTarget(cls);
+    setEditClassName(cls.name);
+    setEditClassNumericLevel(String(cls.numericLevel));
+    setEditClassError(undefined);
+  };
+
+  const submitEditClass = (): void => {
+    if (!classEditTarget) {
+      return;
+    }
+    const trimmedName = editClassName.trim();
+    const level = Number(editClassNumericLevel);
+    const patch: {name?: string; numericLevel?: number} = {};
+    if (trimmedName && trimmedName !== classEditTarget.name) {
+      patch.name = trimmedName;
+    }
+    if (level && level !== classEditTarget.numericLevel) {
+      patch.numericLevel = level;
+    }
+    if (Object.keys(patch).length === 0) {
+      setClassEditTarget(null);
+      return;
+    }
+    updateClassMutation.mutate(
+      {classId: classEditTarget.id, input: patch},
+      {
+        onSuccess: () => setClassEditTarget(null),
+        onError: (e: Error & {code?: string}) => {
+          setEditClassError(e.code === 'CLASS_NAME_TAKEN' ? t('classesManage_classNameTaken') : e.message);
+        },
+      },
+    );
+  };
+
+  const confirmDeleteClass = (): void => {
+    if (!deleteClassTarget) {
+      return;
+    }
+    deleteClassMutation.mutate(deleteClassTarget.id, {
+      onSuccess: () => setDeleteClassTarget(null),
+      onError: (e: Error & {code?: string}) => {
+        setDeleteClassError(
+          e.code === 'CLASS_HAS_STUDENTS' ? t('classesManage_classHasStudents') : e.message,
+        );
+      },
+    });
+  };
+
+  const openSectionEditModal = (section: Section): void => {
+    setSectionEditTarget(section);
+    setEditSectionName(section.name);
+    setEditSectionCapacity(String(section.capacity));
+    setEditSectionClassTeacherId(section.classTeacherId ?? NO_CLASS_TEACHER);
+    setEditSectionError(undefined);
+  };
+
+  const submitEditSection = (): void => {
+    if (!sectionEditTarget) {
+      return;
+    }
+    const trimmedName = editSectionName.trim();
+    const capacity = Number(editSectionCapacity);
+    const currentTeacherId = sectionEditTarget.classTeacherId ?? NO_CLASS_TEACHER;
+    const patch: {name?: string; capacity?: number; classTeacherId?: string | null} = {};
+    if (trimmedName && trimmedName !== sectionEditTarget.name) {
+      patch.name = trimmedName;
+    }
+    if (capacity && capacity !== sectionEditTarget.capacity) {
+      patch.capacity = capacity;
+    }
+    if (editSectionClassTeacherId !== currentTeacherId) {
+      patch.classTeacherId = editSectionClassTeacherId === NO_CLASS_TEACHER ? null : editSectionClassTeacherId;
+    }
+    if (Object.keys(patch).length === 0) {
+      setSectionEditTarget(null);
+      return;
+    }
+    updateSectionMutation.mutate(
+      {classId: sectionEditTarget.classId, sectionId: sectionEditTarget.id, input: patch},
+      {
+        onSuccess: () => setSectionEditTarget(null),
+        onError: (e: Error & {code?: string}) => {
+          if (e.code === 'SECTION_NAME_TAKEN') {
+            setEditSectionError(t('classesManage_sectionNameTaken'));
+          } else if (e.code === 'TEACHER_ALREADY_CLASS_TEACHER') {
+            setEditSectionError(t('classesManage_teacherAlreadyClassTeacher'));
+          } else if (e.code === 'TEACHER_NOT_FOUND') {
+            setEditSectionError(t('classesManage_teacherNotFound'));
+          } else {
+            setEditSectionError(e.message);
+          }
+        },
+      },
+    );
+  };
+
+  const confirmDeleteSection = (): void => {
+    if (!deleteSectionTarget) {
+      return;
+    }
+    deleteSectionMutation.mutate(
+      {classId: deleteSectionTarget.classId, sectionId: deleteSectionTarget.id},
+      {
+        onSuccess: () => setDeleteSectionTarget(null),
+        onError: (e: Error & {code?: string}) => {
+          setDeleteSectionError(
+            e.code === 'SECTION_HAS_STUDENTS' ? t('classesManage_sectionHasStudents') : e.message,
+          );
+        },
+      },
+    );
+  };
+
   const renderClass = (cls: SchoolClass): React.JSX.Element => {
     const expanded = expandedId === cls.id;
     return (
       <CustomCard key={cls.id} style={styles.card} padded={false}>
         <Pressable onPress={() => setExpandedId(expanded ? null : cls.id)} style={{padding: theme.spacing.lg}}>
           <Row justify="space-between" align="center">
-            <View>
+            <View style={{flex: 1}}>
               <AppText variant="h3">{cls.name}</AppText>
               <AppText variant="caption" color="textSecondary">
                 {t('classesManage_studentsCount', {count: cls.totalStudents})}
               </AppText>
             </View>
-            <Icon
-              name="forward"
-              size={18}
-              color={theme.colors.textMuted}
-              style={{transform: [{rotate: expanded ? '-90deg' : '90deg'}]}}
-            />
+            <Row gap={theme.spacing.md} align="center">
+              <Pressable onPress={() => openClassEditModal(cls)} hitSlop={8}>
+                <Icon name="edit" size={18} color={theme.colors.textMuted} />
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  setDeleteClassTarget(cls);
+                  setDeleteClassError(undefined);
+                }}
+                hitSlop={8}>
+                <Icon name="delete" size={18} color={theme.colors.error} />
+              </Pressable>
+              <Icon
+                name="forward"
+                size={18}
+                color={theme.colors.textMuted}
+                style={{transform: [{rotate: expanded ? '-90deg' : '90deg'}]}}
+              />
+            </Row>
           </Row>
         </Pressable>
 
@@ -165,7 +332,7 @@ export function ClassesManageScreen(): React.JSX.Element {
               cls.sections.map((section, index) => (
                 <View key={section.id}>
                   {index > 0 ? <Divider /> : null}
-                  <Row justify="space-between" style={styles.sectionRow}>
+                  <Row justify="space-between" align="center" style={styles.sectionRow}>
                     <View>
                       <AppText variant="bodyBold">{section.name}</AppText>
                       <AppText variant="caption" color="textSecondary">
@@ -175,9 +342,22 @@ export function ClassesManageScreen(): React.JSX.Element {
                         })}
                       </AppText>
                     </View>
-                    {section.classTeacherName ? (
-                      <Badge label={section.classTeacherName} tone="info" />
-                    ) : null}
+                    <Row gap={theme.spacing.sm} align="center">
+                      {section.classTeacherName ? (
+                        <Badge label={section.classTeacherName} tone="info" />
+                      ) : null}
+                      <Pressable onPress={() => openSectionEditModal(section)} hitSlop={8}>
+                        <Icon name="edit" size={16} color={theme.colors.textMuted} />
+                      </Pressable>
+                      <Pressable
+                        onPress={() => {
+                          setDeleteSectionTarget(section);
+                          setDeleteSectionError(undefined);
+                        }}
+                        hitSlop={8}>
+                        <Icon name="delete" size={16} color={theme.colors.error} />
+                      </Pressable>
+                    </Row>
                   </Row>
                 </View>
               ))
@@ -330,6 +510,123 @@ export function ClassesManageScreen(): React.JSX.Element {
         ) : null}
         <Spacer size={16} />
         <CustomButton title={t('common_add')} onPress={submitSection} loading={addSectionMutation.isPending} />
+      </CustomModal>
+
+      <CustomModal
+        visible={!!classEditTarget}
+        onClose={() => setClassEditTarget(null)}
+        title={t('classesManage_editClass')}>
+        <CustomInput
+          label={t('classesManage_classNameLabel')}
+          placeholder={t('classesManage_classNamePlaceholder')}
+          value={editClassName}
+          onChangeText={setEditClassName}
+          required
+        />
+        <CustomInput
+          label={t('classesManage_numericLevelLabel')}
+          placeholder={t('classesManage_numericLevelPlaceholder')}
+          keyboardType="numeric"
+          value={editClassNumericLevel}
+          onChangeText={setEditClassNumericLevel}
+          containerStyle={{marginBottom: 0}}
+          required
+        />
+        {editClassError ? (
+          <AppText variant="caption" color="error" style={{marginTop: theme.spacing.sm}}>
+            {editClassError}
+          </AppText>
+        ) : null}
+        <Spacer size={16} />
+        <CustomButton title={t('common_save')} onPress={submitEditClass} loading={updateClassMutation.isPending} />
+      </CustomModal>
+
+      <CustomModal
+        visible={!!deleteClassTarget}
+        onClose={() => setDeleteClassTarget(null)}
+        title={t('classesManage_deleteClass')}>
+        <AppText variant="body" color="textSecondary">
+          {t('classesManage_deleteClassConfirm', {name: deleteClassTarget?.name ?? ''})}
+        </AppText>
+        {deleteClassError ? (
+          <AppText variant="caption" color="error" style={{marginTop: theme.spacing.sm}}>
+            {deleteClassError}
+          </AppText>
+        ) : null}
+        <Spacer size={16} />
+        <Row gap={theme.spacing.md}>
+          <View style={styles.modalButtonWrap}>
+            <CustomButton title={t('common_cancel')} variant="outline" onPress={() => setDeleteClassTarget(null)} />
+          </View>
+          <View style={styles.modalButtonWrap}>
+            <CustomButton
+              title={t('common_delete')}
+              variant="danger"
+              loading={deleteClassMutation.isPending}
+              onPress={confirmDeleteClass}
+            />
+          </View>
+        </Row>
+      </CustomModal>
+
+      <CustomModal
+        visible={!!sectionEditTarget}
+        onClose={() => setSectionEditTarget(null)}
+        title={t('classesManage_editSection')}>
+        <CustomInput
+          label={t('classesManage_sectionNameLabel')}
+          placeholder={t('classesManage_sectionNamePlaceholder')}
+          value={editSectionName}
+          onChangeText={setEditSectionName}
+          required
+        />
+        <CustomInput
+          label={t('classesManage_capacityLabel')}
+          keyboardType="numeric"
+          value={editSectionCapacity}
+          onChangeText={setEditSectionCapacity}
+          required
+        />
+        <Select
+          label={t('classesManage_classTeacherLabel')}
+          value={editSectionClassTeacherId}
+          options={classTeacherOptions}
+          onChange={setEditSectionClassTeacherId}
+        />
+        {editSectionError ? (
+          <AppText variant="caption" color="error" style={{marginBottom: theme.spacing.sm}}>
+            {editSectionError}
+          </AppText>
+        ) : null}
+        <CustomButton title={t('common_save')} onPress={submitEditSection} loading={updateSectionMutation.isPending} />
+      </CustomModal>
+
+      <CustomModal
+        visible={!!deleteSectionTarget}
+        onClose={() => setDeleteSectionTarget(null)}
+        title={t('classesManage_deleteSection')}>
+        <AppText variant="body" color="textSecondary">
+          {t('classesManage_deleteSectionConfirm', {name: deleteSectionTarget?.name ?? ''})}
+        </AppText>
+        {deleteSectionError ? (
+          <AppText variant="caption" color="error" style={{marginTop: theme.spacing.sm}}>
+            {deleteSectionError}
+          </AppText>
+        ) : null}
+        <Spacer size={16} />
+        <Row gap={theme.spacing.md}>
+          <View style={styles.modalButtonWrap}>
+            <CustomButton title={t('common_cancel')} variant="outline" onPress={() => setDeleteSectionTarget(null)} />
+          </View>
+          <View style={styles.modalButtonWrap}>
+            <CustomButton
+              title={t('common_delete')}
+              variant="danger"
+              loading={deleteSectionMutation.isPending}
+              onPress={confirmDeleteSection}
+            />
+          </View>
+        </Row>
       </CustomModal>
     </Screen>
   );
