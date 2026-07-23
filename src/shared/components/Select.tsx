@@ -16,6 +16,9 @@ export interface SelectProps {
   error?: string;
   onChange: (value: string) => void;
   required?: boolean;
+  disabled?: boolean;
+  /** Called instead of opening the picker when `disabled` is true — e.g. surface a hint like "select X first". */
+  onDisabledPress?: () => void;
 }
 
 export function Select({
@@ -26,6 +29,8 @@ export function Select({
   error,
   onChange,
   required,
+  disabled,
+  onDisabledPress,
 }: SelectProps): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
@@ -68,6 +73,9 @@ export function Select({
       borderBottomWidth: 1,
       borderBottomColor: t2.colors.divider,
     },
+    fieldDisabled: {
+      opacity: 0.6,
+    },
   }));
 
   return (
@@ -79,8 +87,12 @@ export function Select({
         </AppText>
       ) : null}
       <Pressable
-        onPress={() => setOpen(true)}
-        style={[styles.fieldBase, error ? styles.fieldBorderError : styles.fieldBorderNormal]}>
+        onPress={() => (disabled ? onDisabledPress?.() : setOpen(true))}
+        style={[
+          styles.fieldBase,
+          error ? styles.fieldBorderError : styles.fieldBorderNormal,
+          disabled ? styles.fieldDisabled : null,
+        ]}>
         <AppText color={selected ? 'text' : 'textMuted'}>
           {selected?.label ?? placeholder ?? t('common_select')}
         </AppText>

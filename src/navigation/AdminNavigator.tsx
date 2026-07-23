@@ -1,4 +1,4 @@
-/** Admin role navigator: bottom tabs (Dashboard/Students/Fees/More) + detail stack. */
+/** Admin role navigator: bottom tabs (Dashboard/Students/Teachers/More) + detail stack. */
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -7,6 +7,7 @@ import {useTheme} from '../core/theme';
 import {Icon} from '../shared/components';
 import type {AdminStackParamList, AdminTabParamList} from './types';
 import {ScreenNames} from './ScreenNames';
+import {floatingTabBarStyle} from './floatingTabBar';
 
 import {AdminDashboardScreen} from '../features/dashboard/screens/AdminDashboardScreen';
 import {StudentsWiseClassListScreen} from '../features/students/screens/StudentsWiseClassList';
@@ -16,11 +17,17 @@ import {StudentFormScreen} from '../features/students/screens/StudentFormScreen'
 import {TeachersListScreen} from '../features/teachers/screens/TeachersListScreen';
 import {TeacherFormScreen} from '../features/teachers/screens/TeacherFormScreen';
 import {TeacherDetailScreen} from '../features/teachers/screens/TeacherDetailScreen';
+import {TeacherEditScreen} from '../features/teachers/screens/TeacherEditScreen';
 import {FeesListScreen} from '../features/fees/screens/FeesListScreen';
 import {FeesStudentsListScreen} from '../features/fees/screens/FeesStudentsListScreen';
 import {FeeReceiptScreen} from '../features/fees/screens/FeeReceiptScreen';
 import {AttendanceReportScreen} from '../features/attendance/screens/AttendanceReportScreen';
 import {ClassAttendanceScreen} from '../features/attendance/screens/ClassAttendanceScreen';
+import {MarkStaffAttendanceScreen} from '../features/attendance/screens/MarkStaffAttendanceScreen';
+import {StaffAttendanceRegisterScreen} from '../features/attendance/screens/StaffAttendanceRegisterScreen';
+import {StaffListScreen} from '../features/staff/screens/StaffListScreen';
+import {StaffFormScreen} from '../features/staff/screens/StaffFormScreen';
+import {StaffDetailScreen} from '../features/staff/screens/StaffDetailScreen';
 import {ExamsListScreen} from '../features/exams/screens/ExamsListScreen';
 import {ExamFormScreen} from '../features/exams/screens/ExamFormScreen';
 import {ExamClassesScreen} from '../features/exams/screens/ExamClassesScreen';
@@ -37,12 +44,15 @@ import {ClassesManageScreen} from '../features/classes/screens/ClassesManageScre
 import {SubjectsManageScreen} from '../features/subjects/screens/SubjectsManageScreen';
 import {AdminTimetableScreen} from '../features/timetable/screens/AdminTimetableScreen';
 import {PeriodFormScreen} from '../features/timetable/screens/PeriodFormScreen';
+import {TeacherScheduleScreen} from '../features/timetable/screens/TeacherScheduleScreen';
 import {MoreScreen} from '../features/admin/screens/MoreScreen';
 import {AdminProfileScreen} from '../features/admin/screens/AdminProfileScreen';
 import {ChangePasswordScreen} from '../features/auth/screens/ChangePasswordScreen';
 import {AnnouncementsScreen} from '../features/communication/screens/AnnouncementsScreen';
 import {AnnouncementFormScreen} from '../features/communication/screens/AnnouncementFormScreen';
 import {NotificationsScreen} from '../features/communication/screens/NotificationsScreen';
+import {AdminLeaveScreen} from '../features/leave/screens/AdminLeaveScreen';
+import {AdminTeacherLeaveScreen} from '../features/leave/screens/AdminTeacherLeaveScreen';
 
 const Tab = createBottomTabNavigator<AdminTabParamList>();
 const Stack = createNativeStackNavigator<AdminStackParamList>();
@@ -50,7 +60,7 @@ const Stack = createNativeStackNavigator<AdminStackParamList>();
 const TAB_ICON: Record<keyof AdminTabParamList, string> = {
   Dashboard: 'dashboard',
   Students: 'students',
-  Fees: 'fee',
+  Teachers: 'teacher',
   More: 'settings',
 };
 
@@ -63,18 +73,12 @@ function AdminTabs(): React.JSX.Element {
         headerShown: false,
         tabBarActiveTintColor: theme.colors.tabActive,
         tabBarInactiveTintColor: theme.colors.tabInactive,
-        tabBarStyle: {
-          backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.divider,
-          height: theme.components.tab.height + insets.bottom,
-          paddingBottom: Math.max(insets.bottom, 6),
-          paddingTop: 6,
-        },
+        tabBarStyle: floatingTabBarStyle(theme, insets),
         tabBarIcon: ({color}) => <Icon name={TAB_ICON[route.name]} size={22} color={color} />,
       })}>
       <Tab.Screen name={ScreenNames.Dashboard} component={AdminDashboardScreen} />
       <Tab.Screen name={ScreenNames.Students} component={StudentsWiseClassListScreen} />
-      <Tab.Screen name={ScreenNames.Fees} component={FeesListScreen} />
+      <Tab.Screen name={ScreenNames.Teachers} component={TeachersListScreen} />
       <Tab.Screen name={ScreenNames.More} component={MoreScreen} />
     </Tab.Navigator>
   );
@@ -87,9 +91,10 @@ export function AdminNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.StudentsList} component={StudentsListScreen} />
       <Stack.Screen name={ScreenNames.StudentDetail} component={StudentDetailScreen} />
       <Stack.Screen name={ScreenNames.StudentForm} component={StudentFormScreen} />
-      <Stack.Screen name={ScreenNames.Teachers} component={TeachersListScreen} />
+      <Stack.Screen name={ScreenNames.Fees} component={FeesListScreen} />
       <Stack.Screen name={ScreenNames.TeacherForm} component={TeacherFormScreen} />
       <Stack.Screen name={ScreenNames.TeacherDetail} component={TeacherDetailScreen} />
+      <Stack.Screen name={ScreenNames.TeacherEdit} component={TeacherEditScreen} />
       <Stack.Screen name={ScreenNames.Attendance} component={AttendanceReportScreen} />
       <Stack.Screen name={ScreenNames.ClassAttendance} component={ClassAttendanceScreen} />
       <Stack.Screen name={ScreenNames.Exams} component={ExamsListScreen} />
@@ -115,6 +120,14 @@ export function AdminNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.SubjectsManage} component={SubjectsManageScreen} />
       <Stack.Screen name={ScreenNames.ClassSchedule} component={AdminTimetableScreen} />
       <Stack.Screen name={ScreenNames.PeriodForm} component={PeriodFormScreen} />
+      <Stack.Screen name={ScreenNames.TeacherSchedule} component={TeacherScheduleScreen} />
+      <Stack.Screen name={ScreenNames.Leave} component={AdminLeaveScreen} />
+      <Stack.Screen name={ScreenNames.TeacherLeaveRequests} component={AdminTeacherLeaveScreen} />
+      <Stack.Screen name={ScreenNames.MarkStaffAttendance} component={MarkStaffAttendanceScreen} />
+      <Stack.Screen name={ScreenNames.StaffAttendanceRegister} component={StaffAttendanceRegisterScreen} />
+      <Stack.Screen name={ScreenNames.Staff} component={StaffListScreen} />
+      <Stack.Screen name={ScreenNames.StaffForm} component={StaffFormScreen} />
+      <Stack.Screen name={ScreenNames.StaffDetail} component={StaffDetailScreen} />
     </Stack.Navigator>
   );
 }

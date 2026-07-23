@@ -1,6 +1,6 @@
-/** Report card — per-subject marks table + overall result summary. */
+/** Exam result — this child's marks/grade for one exam, or a pending/absent placeholder. */
 import React from 'react';
-import {StyleSheet, View, ScrollView} from 'react-native';
+import {ScrollView} from 'react-native';
 import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme, useThemedStyles} from '../../../core/theme';
@@ -10,7 +10,6 @@ import {
   AppText,
   CustomHeader,
   CustomCard,
-  CustomTable,
   Badge,
   EmptyState,
   Loader,
@@ -18,122 +17,99 @@ import {
   Spacer,
   Divider,
 } from '../../../shared/components';
-import type {TableColumn} from '../../../shared/components';
-import {db} from '../../../core/mock/db';
-import {useReportCard} from '../exams.service';
+import {formatDate} from '../../../core/utils/format';
+import {examResultStatusTone} from '../../../shared/helpers';
+import {useParentExamDetail} from '../../parent/parentExams.service';
 import type {ParentStackParamList} from '../../../navigation/types';
 
 type Nav = NativeStackNavigationProp<ParentStackParamList>;
-type SubjectRow = {subjectName: string; marks: number; maxMarks: number; grade: string};
-
-const summaryStyles = StyleSheet.create({
-  item: {
-    alignItems: 'center',
-  },
-});
-
-function SummaryItem({label, value}: {label: string; value: string}): React.JSX.Element {
-  return (
-    <View style={summaryStyles.item}>
-      <AppText variant="h3">{value}</AppText>
-      <AppText variant="label" color="textMuted">
-        {label}
-      </AppText>
-    </View>
-  );
-}
 
 export function ReportCardScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
   const route = useRoute<RouteProp<ParentStackParamList, 'ReportCard'>>();
-  const {examId} = route.params;
-  const child = db.students[0];
-  const {data: card, isLoading} = useReportCard(examId, child.id);
+  const {examId, studentId} = route.params;
   const {t} = useLanguage();
+  const {data: exam, isLoading, isError, error, refetch} = useParentExamDetail(examId, studentId);
   const styles = useThemedStyles(t2 => ({
-    scrollContent: {
-      padding: t2.spacing.lg,
-    },
-    tableCard: {
-      overflow: 'hidden',
-    },
+    scrollContent: {padding: t2.spacing.lg},
   }));
 
-  if (isLoading) {
+  if (isLoading || !exam) {
+    if (isError) {
+      return (
+        <Screen padded={false}>
+          <CustomHeader title={t('reportCard_title')} onBack={() => navigation.goBack()} />
+          <EmptyState
+            icon="warning"
+            title={t('common_somethingWentWrong')}
+            message={(error as {message?: string} | null)?.message ?? t('common_checkConnection')}
+            actionLabel={t('common_retry')}
+            onAction={() => refetch()}
+          />
+        </Screen>
+      );
+    }
     return <Loader message={t('reportCard_loading')} />;
   }
 
-  if (!card) {
-    return (
-      <Screen padded={false}>
-        <CustomHeader title={t('reportCard_title')} onBack={() => navigation.goBack()} />
-        <EmptyState
-          title={t('reportCard_noReportCard')}
-          message={t('reportCard_noReportCardMessage')}
-          icon="grade"
-        />
-      </Screen>
-    );
-  }
-
-  const columns: TableColumn<SubjectRow>[] = [
-    {key: 'subject', title: t('reportCard_subject'), flex: 2, accessor: r => r.subjectName},
-    {
-      key: 'marks',
-      title: t('reportCard_marks'),
-      align: 'center',
-      render: r => (
-        <AppText variant="caption">
-          {r.marks}/{r.maxMarks}
-        </AppText>
-      ),
-    },
-    {
-      key: 'grade',
-      title: t('reportCard_grade'),
-      align: 'center',
-      render: r => <Badge label={r.grade} tone="primary" />,
-    },
-  ];
+  const {result} = exam;
 
   return (
     <Screen padded={false}>
       <CustomHeader title={t('reportCard_title')} onBack={() => navigation.goBack()} />
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <CustomCard>
-          <AppText variant="h3">{card.examName}</AppText>
+          <AppText variant="h3">{exam.title}</AppText>
+          {exam.description ? (
+            <AppText variant="caption" color="textSecondary">
+              {exam.description}
+            </AppText>
+          ) : null}
+          <Spacer size={6} />
           <AppText variant="caption" color="textSecondary">
-            {card.studentName}
+            {formatDate(exam.startDate)} - {formatDate(exam.endDate)}
           </AppText>
-          <AppText variant="caption" color="textSecondary">
-            {card.className}
+          <Spacer size={4} />
+          <AppText variant="label" color="textMuted">
+            {t('reportCard_maxMarks')}: {exam.maxMarks}
           </AppText>
         </CustomCard>
 
         <Spacer size={theme.spacing.md} />
-        <CustomCard padded={false} style={styles.tableCard}>
-          <CustomTable<SubjectRow>
-            columns={columns}
-            data={card.subjects}
-            keyExtractor={(r, i) => r.subjectName + i}
-          />
-        </CustomCard>
 
-        <Spacer size={theme.spacing.md} />
-        <CustomCard>
-          <Row justify="space-around">
-            <SummaryItem label={t('reportCard_total')} value={`${card.totalMarks}/${card.totalMaxMarks}`} />
-            <SummaryItem label={t('reportCard_percentage')} value={`${card.percentage}%`} />
-          </Row>
-          <Divider />
-          <Row justify="space-around">
-            <SummaryItem label={t('reportCard_grade')} value={card.overallGrade} />
-            <SummaryItem label={t('reportCard_rank')} value={card.rank !== undefined ? `#${card.rank}` : '—'} />
-          </Row>
-        </CustomCard>
+        {result.status === 'GRADED' ? (
+          <CustomCard>
+            <Row justify="space-between" align="center">
+              <AppText variant="h2">
+                {result.marksObtained} / {exam.maxMarks}
+              </AppText>
+              {result.grade ? <Badge label={result.grade} tone={examResultStatusTone(result.status)} /> : null}
+            </Row>
+            {result.remarks ? (
+              <>
+                <Spacer size={12} />
+                <Divider />
+                <Spacer size={12} />
+                <AppText variant="caption" color="textSecondary">
+                  {t('examResult_remarks')}
+                </AppText>
+                <AppText variant="body">{result.remarks}</AppText>
+              </>
+            ) : null}
+          </CustomCard>
+        ) : result.status === 'ABSENT' ? (
+          <CustomCard>
+            <Row justify="space-between" align="center">
+              <AppText variant="body" color="textSecondary">
+                {t('reportCard_absentMessage')}
+              </AppText>
+              <Badge label={t('examResult_statusAbsent')} tone={examResultStatusTone(result.status)} />
+            </Row>
+          </CustomCard>
+        ) : (
+          <EmptyState icon="grade" title={t('reportCard_pendingTitle')} message={t('reportCard_pendingMessage')} />
+        )}
         <Spacer size={24} />
       </ScrollView>
     </Screen>

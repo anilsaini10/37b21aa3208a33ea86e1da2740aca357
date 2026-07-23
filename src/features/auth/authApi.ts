@@ -7,8 +7,6 @@ import {generateId} from '../../core/utils/misc';
 import {logger} from '../../core/utils/logger';
 import type {AuthSession, AuthTokens, AuthUser, UserRole} from '../../shared/types';
 
-const DEMO_OTP = '1234';
-
 /** Signup is admin-only — creating an admin account also creates their school. */
 export interface SignupInput {
   schoolName: string;
@@ -68,29 +66,6 @@ function toAuthUser(
   };
 }
 
-function buildSession(role: UserRole, displayName: string, phone: string, schoolId: string, schoolName: string, email?: string): AuthSession {
-  const user: AuthUser = {
-    id: generateId('usr'),
-    name: displayName,
-    email,
-    phone,
-    role,
-    status: 'active',
-    createdAt: new Date().toISOString(),
-    schoolId,
-    schoolName,
-    permissions: permissionsForRole(role),
-  };
-  return {
-    user,
-    tokens: {
-      accessToken: generateId('tok'),
-      refreshToken: generateId('ref'),
-      expiresAt: Date.now() + 60 * 60 * 1000,
-    },
-  };
-}
-
 export const authApi = {
   /** Hits the real Node/Express/Postgres backend (not the mock layer). */
   async signup(input: SignupInput): Promise<AuthSession> {
@@ -112,7 +87,7 @@ export const authApi = {
     }
   },
 
-  /** Hits the real backend. `schoolId` is only relevant for teacher logins —
+  /** Hits the real backend. `schoolId` is only relevant for teacher/parent logins —
    * admins are resolved to the school they created via their own account. */
   async loginWithPassword(
     role: UserRole,
@@ -143,39 +118,11 @@ export const authApi = {
     }
   },
 
-  /**
-   * Parent OTP flow — still mocked. Real SMS delivery/verification needs its
-   * own backend + SMS-gateway integration, out of scope for now.
-   */
-  async requestOtp(phone: string): Promise<{sent: true; hint: string}> {
-    if (!/^\d{10}$/.test(phone)) {
-      return fail('Enter a valid 10-digit mobile number.');
-    }
-    return respond({sent: true, hint: `Demo OTP is ${DEMO_OTP}`});
-  },
-
-  async verifyOtp(phone: string, otp: string, schoolId: string, schoolName: string): Promise<AuthSession> {
-    if (otp !== DEMO_OTP) {
-      return fail('Incorrect OTP. Please try again.');
-    }
-    return respond(buildSession('parent', 'Parent', phone, schoolId, schoolName));
-  },
-
   async forgotPassword(identifier: string): Promise<{sent: true}> {
     if (!identifier.trim()) {
       return fail('Please enter your registered email or mobile.');
     }
     return respond({sent: true});
-  },
-
-  async changePassword(current: string, next: string): Promise<{success: true}> {
-    if (current.length < 6) {
-      return fail('Current password is incorrect.');
-    }
-    if (next.length < 6) {
-      return fail('New password must be at least 6 characters.');
-    }
-    return respond({success: true});
   },
 
   async logout(): Promise<void> {

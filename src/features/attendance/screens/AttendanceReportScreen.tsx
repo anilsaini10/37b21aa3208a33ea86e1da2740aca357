@@ -1,5 +1,5 @@
-/** Attendance report — Teacher tab (summary + per-teacher breakdown) and Students tab (class-wise, drill into a class), for a chosen date range. */
-import React, {useState} from 'react';
+/** Attendance report — Teacher tab (summary + per-teacher breakdown, date range) and Students tab (class-wise, drill into a class, single day), real backend. */
+import React, {useMemo, useState} from 'react';
 import {Pressable, View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -20,19 +20,19 @@ import {
   Spacer,
   Divider,
 } from '../../../shared/components';
-import {
-  useTeacherRangeSummary,
-  useTeacherAttendanceList,
-  useClassAttendanceSummaries,
-  attendanceToday,
-} from '../attendance.service';
+import {useStaffAttendanceList} from '../adminTeacherAttendance.service';
+import {useClassAttendanceSummaries} from '../adminStudentAttendance.service';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {AdminStackParamList} from '../../../navigation/types';
-import type {AttendanceCounts, ClassAttendanceSummary} from '../../../shared/types';
+import type {AttendanceCounts, ClassAttendanceSummary, TeacherAttendanceBreakdown} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
 type Tab = 'teacher' | 'students';
+
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
 
 /** From/To date pickers laid out side by side with a connecting arrow — auto-clamps so the range is never inverted. */
 export function DateRangeFilter({
@@ -245,13 +245,44 @@ export function AttendanceReportScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
   const {t} = useLanguage();
-  const [fromDate, setFromDate] = useState(attendanceToday);
-  const [toDate, setToDate] = useState(attendanceToday);
+  const [fromDate, setFromDate] = useState(todayIso());
+  const [toDate, setToDate] = useState(todayIso());
+  const [singleDate, setSingleDate] = useState(todayIso());
   const [tab, setTab] = useState<Tab>('teacher');
 
-  const {data: teacherSummary, isLoading: teacherSummaryLoading} = useTeacherRangeSummary(fromDate, toDate);
-  const {data: teacherList, isLoading: teacherListLoading} = useTeacherAttendanceList(fromDate, toDate);
-  const {data: classSummaries, isLoading: classSummariesLoading} = useClassAttendanceSummaries(fromDate, toDate);
+  const {data: staffPage, isLoading: staffLoading} = useStaffAttendanceList({from: fromDate, to: toDate, pageSize: 100});
+  const {data: classData, isLoading: classSummariesLoading} = useClassAttendanceSummaries(singleDate);
+
+  const teacherSummary: AttendanceCounts = useMemo(() => {
+    const items = staffPage?.items ?? [];
+    const present = items.filter(r => r.status === 'PRESENT').length;
+    const absent = items.filter(r => r.status === 'ABSENT').length;
+    const late = items.filter(r => r.status === 'LATE').length;
+    const leave = items.filter(r => r.status === 'LEAVE').length;
+    const total = items.length;
+    return {present, absent, late, leave, total, percentage: total > 0 ? Math.round((present / total) * 100) : 0};
+  }, [staffPage]);
+
+  const teacherList: TeacherAttendanceBreakdown[] = useMemo(() => {
+    const items = staffPage?.items ?? [];
+    const byTeacher = new Map<string, TeacherAttendanceBreakdown>();
+    items.forEach(r => {
+      const entry =
+        byTeacher.get(r.teacherId) ??
+        ({teacherId: r.teacherId, teacherName: r.teacherName, present: 0, absent: 0, late: 0, leave: 0, total: 0, percentage: 0} as TeacherAttendanceBreakdown);
+      if (r.status === 'PRESENT') entry.present += 1;
+      else if (r.status === 'ABSENT') entry.absent += 1;
+      else if (r.status === 'LATE') entry.late += 1;
+      else if (r.status === 'LEAVE') entry.leave += 1;
+      entry.total += 1;
+      byTeacher.set(r.teacherId, entry);
+    });
+    return Array.from(byTeacher.values())
+      .map(entry => ({...entry, percentage: entry.total > 0 ? Math.round((entry.present / entry.total) * 100) : 0}))
+      .sort((a, b) => a.teacherName.localeCompare(b.teacherName));
+  }, [staffPage]);
+
+  const classSummaries = classData?.classes;
 
   const styles = useThemedStyles(t2 => ({
     scrollContent: {
@@ -269,21 +300,27 @@ export function AttendanceReportScreen(): React.JSX.Element {
     {label: t('attendanceReport_tabStudents'), value: 'students'},
   ];
 
-  const isTeacherLoading = teacherSummaryLoading || teacherListLoading || !teacherSummary || !teacherList;
+  const isTeacherLoading = staffLoading || !staffPage;
   const isStudentsLoading = classSummariesLoading || !classSummaries;
 
   return (
     <Screen padded={false}>
       <CustomHeader title={t('attendanceReport_title')} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <DateRangeFilter
-          fromDate={fromDate}
-          toDate={toDate}
-          onChange={(f, tD) => {
-            setFromDate(f);
-            setToDate(tD);
-          }}
-        />
+        {tab === 'teacher' ? (
+          <DateRangeFilter
+            fromDate={fromDate}
+            toDate={toDate}
+            onChange={(f, tD) => {
+              setFromDate(f);
+              setToDate(tD);
+            }}
+          />
+        ) : (
+          <CustomCard style={{marginBottom: theme.spacing.md}}>
+            <DatePicker label={t('attendanceReport_dateLabel')} value={singleDate} onChange={setSingleDate} />
+          </CustomCard>
+        )}
 
         <Row gap={theme.spacing.sm} style={styles.tabsRow}>
           {TABS.map(tabOption => (
@@ -331,7 +368,7 @@ export function AttendanceReportScreen(): React.JSX.Element {
           <EmptyState
             icon="students"
             title={t('attendanceReport_noClassRecords')}
-            message={t('attendanceReport_noRecordsMessage')}
+            message={t('attendanceReport_noRecordsMessageDay')}
           />
         ) : (
           classSummaries.map(cls => (
@@ -342,8 +379,7 @@ export function AttendanceReportScreen(): React.JSX.Element {
                 navigation.navigate(ScreenNames.ClassAttendance, {
                   classId: cls.classId,
                   className: cls.className,
-                  fromDate,
-                  toDate,
+                  date: singleDate,
                 })
               }
             />

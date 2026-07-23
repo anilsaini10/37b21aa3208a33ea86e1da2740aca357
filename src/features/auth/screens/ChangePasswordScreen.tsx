@@ -1,4 +1,15 @@
-/** Change password — reused from Teacher & Parent profile stacks. */
+/**
+ * Change password — one form reused across Admin/Teacher/Parent profile stacks,
+ * pointed at that role's own endpoint (never a shared hardcoded URL):
+ *   admin   -> POST /api/auth/reset-password
+ *   teacher -> POST /api/teacher/reset-password
+ *   parent  -> POST /api/students/reset-password
+ *
+ * All three revoke every OTHER session's refresh token on success — this
+ * device stays logged in — and return a wrong current password as a 401 with
+ * `code: "INVALID_CURRENT_PASSWORD"`, which is what the field-level error below
+ * branches on.
+ */
 import React, {useState} from 'react';
 import {View} from 'react-native';
 import {useThemedStyles} from '../../../core/theme';
@@ -11,7 +22,13 @@ import {
   CustomHeader,
   Spacer,
 } from '../../../shared/components';
-import {authApi} from '../authApi';
+import {useAuthStore} from '../authStore';
+import {useChangeAdminPassword} from '../../admin/adminAuth.service';
+import {useChangeTeacherPassword} from '../../teacher/teacherAuth.service';
+import {useChangeParentPassword} from '../../parent/parentAuth.service';
+
+const MIN_PASSWORD_LENGTH = 6;
+const NAVIGATE_BACK_DELAY_MS = 1200;
 
 export function ChangePasswordScreen({navigation}: {navigation: {goBack: () => void}}): React.JSX.Element {
   const {t} = useLanguage();
@@ -21,28 +38,58 @@ export function ChangePasswordScreen({navigation}: {navigation: {goBack: () => v
       padding: theme.spacing.lg,
     },
   }));
+  const role = useAuthStore(s => s.user?.role);
+
+  const adminMutation = useChangeAdminPassword();
+  const teacherMutation = useChangeTeacherPassword();
+  const parentMutation = useChangeParentPassword();
+  const mutation = role === 'admin' ? adminMutation : role === 'teacher' ? teacherMutation : parentMutation;
+
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [confirm, setConfirm] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [currentError, setCurrentError] = useState('');
+  const [newError, setNewError] = useState('');
+  const [confirmError, setConfirmError] = useState('');
+  const [generalError, setGeneralError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
-  const submit = async () => {
-    setError('');
-    if (next !== confirm) {
-      setError(t('changePasswordScreen_passwordMismatch'));
+  const submit = (): void => {
+    setCurrentError('');
+    setNewError('');
+    setConfirmError('');
+    setGeneralError('');
+    setSuccessMessage('');
+
+    if (!current) {
+      setCurrentError(t('common_fieldRequired', {field: t('changePasswordScreen_currentPasswordLabel')}));
       return;
     }
-    setLoading(true);
-    try {
-      await authApi.changePassword(current, next);
-      setSuccess(true);
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setLoading(false);
+    if (next.length < MIN_PASSWORD_LENGTH) {
+      setNewError(t('changePasswordScreen_newPasswordTooShort', {min: MIN_PASSWORD_LENGTH}));
+      return;
     }
+    if (next !== confirm) {
+      setConfirmError(t('changePasswordScreen_passwordMismatch'));
+      return;
+    }
+
+    mutation.mutate(
+      {currentPassword: current, newPassword: next},
+      {
+        onSuccess: () => {
+          setSuccessMessage(t('changePasswordScreen_devicesLoggedOutMessage'));
+          setTimeout(() => navigation.goBack(), NAVIGATE_BACK_DELAY_MS);
+        },
+        onError: (e: Error & {code?: string}) => {
+          if (e.code === 'INVALID_CURRENT_PASSWORD') {
+            setCurrentError(t('changePasswordScreen_currentPasswordIncorrect'));
+          } else {
+            setGeneralError(e.message);
+          }
+        },
+      },
+    );
   };
 
   return (
@@ -50,21 +97,54 @@ export function ChangePasswordScreen({navigation}: {navigation: {goBack: () => v
       <CustomHeader title={t('changePasswordScreen_title')} onBack={navigation.goBack} />
       <View style={styles.container}>
         <Spacer size={12} />
-        <CustomInput label={t('changePasswordScreen_currentPasswordLabel')} secure iconLeft="lock" value={current} onChangeText={setCurrent} required />
-        <CustomInput label={t('changePasswordScreen_newPasswordLabel')} secure iconLeft="lock" value={next} onChangeText={setNext} required />
-        <CustomInput label={t('changePasswordScreen_confirmNewPasswordLabel')} secure iconLeft="lock" value={confirm} onChangeText={setConfirm} required />
-        {error ? (
+        <CustomInput
+          label={t('changePasswordScreen_currentPasswordLabel')}
+          secure
+          iconLeft="lock"
+          value={current}
+          onChangeText={val => {
+            setCurrent(val);
+            setCurrentError('');
+          }}
+          error={currentError}
+          required
+        />
+        <CustomInput
+          label={t('changePasswordScreen_newPasswordLabel')}
+          secure
+          iconLeft="lock"
+          value={next}
+          onChangeText={val => {
+            setNext(val);
+            setNewError('');
+          }}
+          error={newError}
+          required
+        />
+        <CustomInput
+          label={t('changePasswordScreen_confirmNewPasswordLabel')}
+          secure
+          iconLeft="lock"
+          value={confirm}
+          onChangeText={val => {
+            setConfirm(val);
+            setConfirmError('');
+          }}
+          error={confirmError}
+          required
+        />
+        {generalError ? (
           <AppText variant="caption" color="error">
-            {error}
+            {generalError}
           </AppText>
         ) : null}
-        {success ? (
+        {successMessage ? (
           <AppText variant="caption" color="success">
-            {t('changePasswordScreen_successMessage')}
+            {successMessage}
           </AppText>
         ) : null}
         <Spacer size={8} />
-        <CustomButton title={t('changePasswordScreen_updatePassword')} onPress={submit} loading={loading} />
+        <CustomButton title={t('changePasswordScreen_updatePassword')} onPress={submit} loading={mutation.isPending} />
       </View>
     </Screen>
   );

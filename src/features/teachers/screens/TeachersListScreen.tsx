@@ -12,6 +12,7 @@ import {
   ListRow,
   Badge,
   Select,
+  AppText,
   Pagination,
   EmptyState,
   Loader,
@@ -22,6 +23,7 @@ import {statusTone, capitalize} from '../../../shared/helpers';
 import {useTeachers} from '../teachers.service';
 import {useSubjects} from '../../subjects/subjects.service';
 import {useClasses} from '../../classes/classes.service';
+import {useIsTodayStaffAttendanceMarked} from '../../attendance/adminTeacherAttendance.service';
 import type {AdminStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {Teacher} from '../../../shared/types';
@@ -62,6 +64,7 @@ export function TeachersListScreen(): React.JSX.Element {
 
   const {data: subjects} = useSubjects();
   const {data: classes} = useClasses();
+  const {isMarked: isTodayMarked} = useIsTodayStaffAttendanceMarked();
 
   // Debounce the search box so we don't refetch on every keystroke.
   useEffect(() => {
@@ -98,8 +101,13 @@ export function TeachersListScreen(): React.JSX.Element {
     <Screen padded={false}>
       <CustomHeader
         title={t('teachersList_headerTitle')}
-        onBack={() => navigation.goBack()}
-        actions={[{icon: 'add', onPress: () => navigation.navigate(ScreenNames.TeacherForm)}]}
+        actions={[
+          ...(isTodayMarked
+            ? []
+            : [{icon: 'attendance', onPress: () => navigation.navigate(ScreenNames.MarkStaffAttendance)}]),
+          {icon: 'calendar', onPress: () => navigation.navigate(ScreenNames.StaffAttendanceRegister)},
+          {icon: 'add', onPress: () => navigation.navigate(ScreenNames.TeacherForm)},
+        ]}
       />
       <View style={styles.searchBarWrap}>
         <SearchBar
@@ -159,10 +167,20 @@ export function TeachersListScreen(): React.JSX.Element {
               avatarUri={item.avatarUrl}
               title={item.name}
               subtitle={t('teachersList_rowSubtitle', {
-                subjects: item.subjects.map(s => `${s.name} — ${s.className}`).join(', '),
+                subjects: item.subjectsTaught.join(', '),
                 employeeId: item.employeeId,
               })}
-              right={<Badge label={capitalize(item.status)} tone={statusTone(item.status)} />}
+              right={
+                <View style={{alignItems: 'flex-end'}}>
+                  <Badge label={capitalize(item.status)} tone={statusTone(item.status)} />
+                  <AppText variant="label" color="textMuted" style={{marginTop: 4}}>
+                    {t('teacherDetail_experienceValue', {
+                      years: item.experienceYears,
+                      months: item.experienceMonths,
+                    })}
+                  </AppText>
+                </View>
+              }
               onPress={() => navigation.navigate(ScreenNames.TeacherDetail, {teacherId: item.id, initial: item})}
             />
           )}

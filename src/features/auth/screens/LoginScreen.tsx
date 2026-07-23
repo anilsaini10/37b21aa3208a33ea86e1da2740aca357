@@ -30,8 +30,13 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
   const [password, setPassword] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
-  const title = role === 'admin' ? t('loginScreen_adminTitle') : t('loginScreen_teacherTitle');
-  const roleIcon = role === 'admin' ? 'settings' : 'teacher';
+  const title =
+    role === 'admin'
+      ? t('loginScreen_adminTitle')
+      : role === 'teacher'
+        ? t('loginScreen_teacherTitle')
+        : t('loginScreen_parentTitle');
+  const roleIcon = role === 'admin' ? 'settings' : role === 'teacher' ? 'teacher' : 'parent';
 
   const clearFieldError = (field: keyof FieldErrors) => {
     if (error) {

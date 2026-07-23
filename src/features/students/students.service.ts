@@ -20,6 +20,15 @@ export interface StudentInput {
   address?: string;
 }
 
+/**
+ * Any subset of the create fields, plus `status`. `classId`/`sectionId` must be sent
+ * together (a section belongs to one class) — omit both to leave the student in place,
+ * or send both to transfer. `rollNo` is optional even during a transfer: the backend
+ * tries to carry over the student's current roll number into the target section, and
+ * only errors (`ROLL_NO_TAKEN`) if that number is already taken there.
+ */
+export type UpdateStudentInput = Partial<StudentInput> & {status?: Extract<Status, 'active' | 'inactive'>};
+
 export interface ParentAccountResult {
   isNew: boolean;
   email: string;
@@ -32,8 +41,8 @@ export interface CreateStudentResult {
   parentAccount: ParentAccountResult;
 }
 
-/** Raw shapes the real backend responds with — gender/status come back upper-case. */
-interface StudentApi {
+/** Raw shape the real backend responds with — gender/status come back upper-case. Exported so other roles' student endpoints (e.g. teacher-scoped) can reuse the same normalisation. */
+export interface StudentApi {
   id: string;
   admissionNo: string;
   name: string;
@@ -53,7 +62,7 @@ interface StudentApi {
   attendancePercentage: number;
 }
 
-function toStudent(raw: StudentApi): Student {
+export function toStudent(raw: StudentApi): Student {
   return {
     id: raw.id,
     admissionNo: raw.admissionNo,
@@ -113,9 +122,16 @@ export const studentsApi = {
     }
   },
 
-  update: async (id: string, input: Partial<StudentInput>): Promise<Student> => {
+  update: async (id: string, input: UpdateStudentInput): Promise<Student> => {
     try {
-      const {data} = await axiosClient.put<StudentApi>(Endpoints.admin.students_byId(id), input);
+      const body: Record<string, unknown> = {...input};
+      if (input.gender) {
+        body.gender = input.gender.toUpperCase();
+      }
+      if (input.status) {
+        body.status = input.status.toUpperCase();
+      }
+      const {data} = await axiosClient.patch<StudentApi>(Endpoints.admin.students_byId(id), body);
       return toStudent(data);
     } catch (e) {
       console.error('studentsApi.update failed', e);
@@ -156,9 +172,11 @@ export const useCreateStudent = () => {
 export const useUpdateStudent = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({id, input}: {id: string; input: Partial<StudentInput>}) =>
-      studentsApi.update(id, input),
-    onSuccess: () => qc.invalidateQueries({queryKey: ['students']}),
+    mutationFn: ({id, input}: {id: string; input: UpdateStudentInput}) => studentsApi.update(id, input),
+    onSuccess: (updated, {id}) => {
+      qc.setQueryData(['student', id], updated);
+      qc.invalidateQueries({queryKey: ['students']});
+    },
   });
 };
 

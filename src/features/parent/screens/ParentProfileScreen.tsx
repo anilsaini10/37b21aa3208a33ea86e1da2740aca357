@@ -23,12 +23,13 @@ import {ScreenNames} from '../../../navigation/ScreenNames';
 
 type Nav = NativeStackNavigationProp<ParentStackParamList>;
 
-type MenuRoute = 'ChildProfile' | 'Results' | 'Timetable' | 'Announcements' | 'Chat' | 'Leave' | 'ChangePassword';
+type MenuRoute = 'ChildProfile' | 'ChildTimetable' | 'Results' | 'Fees' | 'Announcements' | 'Chat' | 'Leave' | 'ChangePassword';
 
 const MENU: {labelKey: TranslationKey; icon: string; route: MenuRoute}[] = [
   {labelKey: 'parentProfile_childProfile', icon: 'student', route: ScreenNames.ChildProfile},
   {labelKey: 'parentProfile_results', icon: 'grade', route: ScreenNames.Results},
-  {labelKey: 'teacherProfile_timetable', icon: 'timetable', route: ScreenNames.Timetable},
+  {labelKey: 'teacherProfile_timetable', icon: 'timetable', route: ScreenNames.ChildTimetable},
+  {labelKey: 'parentFees_headerTitle', icon: 'fee', route: ScreenNames.Fees},
   {labelKey: 'teacherProfile_announcements', icon: 'announcement', route: ScreenNames.Announcements},
   {labelKey: 'parentProfile_chatWithTeacher', icon: 'chat', route: ScreenNames.Chat},
   {labelKey: 'parentProfile_leaveApplication', icon: 'calendar', route: ScreenNames.Leave},

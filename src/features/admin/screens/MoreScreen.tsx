@@ -14,13 +14,17 @@ type Nav = NativeStackNavigationProp<AdminStackParamList>;
 /** Modules reached from here — all take no route params. */
 type NoParamRoute =
   | 'Profile'
-  | 'Teachers'
+  | 'Fees'
   | 'ClassesManage'
   | 'SubjectsManage'
   | 'ClassSchedule'
+  | 'TeacherSchedule'
+  | 'Staff'
   | 'Attendance'
   | 'Exams'
   | 'Announcements'
+  | 'Leave'
+  | 'TeacherLeaveRequests'
   | 'Events'
   | 'Transport'
   | 'Library'
@@ -37,13 +41,17 @@ interface ModuleItem {
 
 const MODULES: ModuleItem[] = [
   {labelKey: 'teacherProfile_profile', icon: 'profile', route: ScreenNames.Profile},
-  {labelKey: 'moreScreen_teachers', icon: 'teacher', route: ScreenNames.Teachers},
+  {labelKey: 'feesList_headerTitle', icon: 'fee', route: ScreenNames.Fees},
   {labelKey: 'moreScreen_classes', icon: 'class', route: ScreenNames.ClassesManage},
   {labelKey: 'moreScreen_subjects', icon: 'homework', route: ScreenNames.SubjectsManage},
   {labelKey: 'moreScreen_classSchedule', icon: 'timetable', route: ScreenNames.ClassSchedule},
+  {labelKey: 'moreScreen_teacherSchedule', icon: 'timetable', route: ScreenNames.TeacherSchedule},
+  {labelKey: 'moreScreen_staff', icon: 'staff', route: ScreenNames.Staff},
   {labelKey: 'moreScreen_attendance', icon: 'attendance', route: ScreenNames.Attendance},
   {labelKey: 'moreScreen_exams', icon: 'exam', route: ScreenNames.Exams},
   {labelKey: 'moreScreen_announcements', icon: 'announcement', route: ScreenNames.Announcements},
+  {labelKey: 'moreScreen_leave', icon: 'calendar', route: ScreenNames.Leave},
+  {labelKey: 'moreScreen_teacherLeave', icon: 'calendar', route: ScreenNames.TeacherLeaveRequests},
   {labelKey: 'moreScreen_events', icon: 'event', route: ScreenNames.Events},
   {labelKey: 'moreScreen_transport', icon: 'transport', route: ScreenNames.Transport},
   // {labelKey: 'moreScreen_library', icon: 'library', route: ScreenNames.Library},

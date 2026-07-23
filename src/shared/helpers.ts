@@ -1,6 +1,6 @@
 /** Small view-model helpers shared across feature screens. */
 import type {BadgeTone} from './components/Badge';
-import type {AttendanceStatus, FeeStatus, Status} from './types';
+import type {AttendanceStatus, ExamResultStatus, FeeStatus, Status} from './types';
 
 export function feeStatusTone(status: FeeStatus): BadgeTone {
   switch (status) {
@@ -43,6 +43,29 @@ export function statusTone(status: Status): BadgeTone {
     default:
       return 'neutral';
   }
+}
+
+export function examResultStatusTone(status: ExamResultStatus): BadgeTone {
+  switch (status) {
+    case 'GRADED':
+      return 'success';
+    case 'PENDING':
+      return 'warning';
+    case 'ABSENT':
+      return 'error';
+    default:
+      return 'neutral';
+  }
+}
+
+export function attendancePercentageTone(percentage: number): BadgeTone {
+  if (percentage >= 90) {
+    return 'success';
+  }
+  if (percentage >= 75) {
+    return 'warning';
+  }
+  return 'error';
 }
 
 export function capitalize(s: string): string {

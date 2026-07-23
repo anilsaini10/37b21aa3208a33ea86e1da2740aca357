@@ -53,6 +53,10 @@ const STATUS_TONE: Record<AnnouncementStatus, BadgeTone> = {
   EXPIRED: 'neutral',
 };
 
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 function AnnouncementMessage({message}: {message: string}): React.JSX.Element {
   const {t} = useLanguage();
   const [expanded, setExpanded] = useState(false);
@@ -100,6 +104,9 @@ export function AnnouncementsScreen(): React.JSX.Element {
     search: debouncedSearch || undefined,
     // Only admin's endpoint supports filtering by audience — teacher/parent feeds are already server-scoped.
     audience: isAdmin ? audienceFilter || undefined : undefined,
+    // Teacher/parent feeds default to today's + upcoming announcements — general (undated) notices
+    // still always show. Admin's own management list stays unfiltered so past ones stay visible.
+    from: isAdmin ? undefined : todayIso(),
   });
   const deleteMutation = useDeleteAnnouncement();
 

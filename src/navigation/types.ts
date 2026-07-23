@@ -12,12 +12,13 @@ import type {
   AdminEvent,
   AdminExam,
   ExamResult,
+  ScheduleDay,
+  ScheduleEntry,
+  Staff,
   Student,
   Teacher,
   TeacherHomework,
-  TimetablePeriod,
   UserRole,
-  WeekDay,
 } from '../shared/types';
 
 // ---- Root -----------------------------------------------------------------
@@ -32,9 +33,8 @@ export type RootStackParamList = {
 export type AuthStackParamList = {
   RoleSelect: undefined;
   SelectSchool: {role: Extract<UserRole, 'teacher' | 'parent'>};
-  Login: {role: Extract<UserRole, 'admin' | 'teacher'>; schoolId?: string; schoolName?: string};
+  Login: {role: UserRole; schoolId?: string; schoolName?: string};
   SignUp: undefined;
-  ParentLogin: {schoolId: string; schoolName: string};
   ForgotPassword: undefined;
 };
 
@@ -42,7 +42,7 @@ export type AuthStackParamList = {
 export type AdminTabParamList = {
   Dashboard: undefined;
   Students: undefined;
-  Fees: undefined;
+  Teachers: undefined;
   More: undefined;
 };
 
@@ -58,11 +58,12 @@ export type AdminStackParamList = {
   };
   StudentDetail: {id: string; initial?: Student};
   StudentForm: {id?: string};
-  Teachers: undefined;
+  Fees: undefined;
   TeacherForm: undefined;
   TeacherDetail: {teacherId: string; initial?: Teacher};
+  TeacherEdit: {teacherId: string; initial: Teacher};
   Attendance: undefined;
-  ClassAttendance: {classId: string; className: string; fromDate: string; toDate: string};
+  ClassAttendance: {classId: string; className: string; date: string};
   Exams: undefined;
   ExamForm: {examId?: string; initial?: AdminExam};
   ExamClasses: {examId: string; examName?: string};
@@ -93,7 +94,15 @@ export type AdminStackParamList = {
   ClassesManage: undefined;
   SubjectsManage: undefined;
   ClassSchedule: undefined;
-  PeriodForm: {classId: string; sectionId: string; day: WeekDay; periodId?: string; initial?: TimetablePeriod};
+  PeriodForm: {classId: string; sectionId: string; day: ScheduleDay; scheduleId?: string; initial?: ScheduleEntry};
+  TeacherSchedule: undefined;
+  Leave: undefined;
+  TeacherLeaveRequests: undefined;
+  MarkStaffAttendance: undefined;
+  StaffAttendanceRegister: {teacherId?: string; teacherName?: string} | undefined;
+  Staff: undefined;
+  StaffForm: {staffId?: string; initial?: Staff} | undefined;
+  StaffDetail: {staffId: string; initial?: Staff};
 };
 
 // ---- Teacher --------------------------------------------------------------
@@ -110,9 +119,14 @@ export type TeacherStackParamList = {
   HomeworkForm: {homeworkId?: string; initial?: TeacherHomework};
   Timetable: undefined;
   ClassStudents: {classId: string; className: string; sectionId?: string; sectionName?: string};
-  StudentDetail: {id: string};
+  /** No teacher-facing student-by-id endpoint exists — the roster row already has everything a basic detail view needs. */
+  StudentDetail: {student: Student};
   StudentAttendanceHistory: {studentId: string; studentName?: string};
+  MySchedule: undefined;
   Leave: undefined;
+  MyLeave: undefined;
+  MyLeaveApply: undefined;
+  MyAttendance: undefined;
   Chat: undefined;
   Announcements: undefined;
   Notifications: undefined;
@@ -123,20 +137,22 @@ export type TeacherStackParamList = {
 export type ParentTabParamList = {
   Dashboard: undefined;
   Attendance: undefined;
-  Fees: undefined;
+  Homework: undefined;
   Profile: undefined;
 };
 
 export type ParentStackParamList = {
   Tabs: undefined;
   ChildProfile: undefined;
+  ChildTimetable: undefined;
   Results: undefined;
-  ReportCard: {examId: string};
-  Homework: undefined;
+  ReportCard: {examId: string; studentId: string};
+  Fees: undefined;
   Timetable: undefined;
   Announcements: undefined;
   Chat: undefined;
   Leave: undefined;
+  LeaveApply: {studentId: string; studentName: string};
   Notifications: undefined;
   ChangePassword: undefined;
   FeeReceipt: {invoiceId: string};

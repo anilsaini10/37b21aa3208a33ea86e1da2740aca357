@@ -34,11 +34,7 @@ export function SelectSchoolScreen({route, navigation}: AuthScreenProps<'SelectS
   }));
 
   const onSelect = (school: SchoolSummary): void => {
-    if (role === 'teacher') {
-      navigation.navigate(ScreenNames.Login, {role: 'teacher', schoolId: school.id, schoolName: school.name});
-    } else {
-      navigation.navigate(ScreenNames.ParentLogin, {schoolId: school.id, schoolName: school.name});
-    }
+    navigation.navigate(ScreenNames.Login, {role, schoolId: school.id, schoolName: school.name});
   };
 
   return (

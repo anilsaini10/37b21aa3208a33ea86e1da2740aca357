@@ -16,11 +16,9 @@ import {
   Row,
   Spacer,
   SectionTitle,
-  Loader,
 } from '../../../shared/components';
 import {statusTone, capitalize} from '../../../shared/helpers';
 import {formatDate} from '../../../core/utils/format';
-import {useStudent} from '../../students/students.service';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {TeacherStackParamList} from '../../../navigation/types';
 
@@ -56,13 +54,7 @@ export function StudentDetailScreen(): React.JSX.Element {
   const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
   const route = useRoute<RouteProp<TeacherStackParamList, 'StudentDetail'>>();
-  const {id} = route.params;
-
-  const {data: student, isLoading} = useStudent(id);
-
-  if (isLoading || !student) {
-    return <Loader message={t('studentDetail_loadingStudent')} />;
-  }
+  const {student} = route.params;
 
   return (
     <Screen padded={false}>
@@ -116,6 +108,7 @@ export function StudentDetailScreen(): React.JSX.Element {
         <CustomCard>
           <InfoRow label={t('common_name')} value={student.parentName} />
           <InfoRow label={t('common_phone')} value={student.parentPhone} />
+          <InfoRow label={t('common_email')} value={student.parentEmail} />
         </CustomCard>
 
         <Spacer size={24} />

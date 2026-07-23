@@ -29,7 +29,6 @@ interface AuthState {
     password: string,
     schoolId?: string,
   ) => Promise<boolean>;
-  verifyOtp: (phone: string, otp: string, schoolId: string, schoolName: string) => Promise<boolean>;
   logout: () => Promise<void>;
   /** Clears the session locally without calling the logout endpoint — used when the
    * backend itself has already invalidated the session (e.g. a 401 on any request). */
@@ -96,20 +95,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const message = (e as {message?: string}).message ?? 'Login failed. Please try again.';
       const code = (e as {code?: string}).code ?? null;
       set({isLoading: false, error: message, errorCode: code});
-      return false;
-    }
-  },
-
-  verifyOtp: async (phone, otp, schoolId, schoolName) => {
-    set({isLoading: true, error: null, errorCode: null});
-    try {
-      const session = await authApi.verifyOtp(phone, otp, schoolId, schoolName);
-      persistSession(session);
-      set({user: session.user, isAuthenticated: true, isLoading: false});
-      return true;
-    } catch (e) {
-      const message = (e as {message?: string}).message ?? 'Verification failed. Please try again.';
-      set({isLoading: false, error: message, errorCode: null});
       return false;
     }
   },

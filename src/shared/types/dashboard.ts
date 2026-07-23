@@ -16,11 +16,9 @@ export interface AdminDashboardData {
 }
 
 export interface TeacherDashboardData {
-  todayClasses: number;
   pendingHomework: number;
   upcomingExams: number;
   attendanceMarkedToday: boolean;
-  schedule: {periodNo: number; time: string; subject: string; className: string}[];
   classPerformance: ChartSeries;
 }
 

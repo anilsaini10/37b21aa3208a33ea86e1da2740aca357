@@ -46,16 +46,9 @@ function adminDashboard(): AdminDashboardData {
 
 function teacherDashboard(): TeacherDashboardData {
   return {
-    todayClasses: 5,
     pendingHomework: db.homework.filter(h => h.status === 'pending').length,
     upcomingExams: db.exams.filter(e => e.status !== 'completed').length,
     attendanceMarkedToday: false,
-    schedule: [
-      {periodNo: 1, time: '09:00 - 09:45', subject: 'Mathematics', className: 'Class 6 - A'},
-      {periodNo: 2, time: '09:45 - 10:30', subject: 'Mathematics', className: 'Class 7 - B'},
-      {periodNo: 3, time: '11:00 - 11:45', subject: 'Science', className: 'Class 8 - A'},
-      {periodNo: 4, time: '11:45 - 12:30', subject: 'Mathematics', className: 'Class 6 - B'},
-    ],
     classPerformance: {
       labels: ['A+', 'A', 'B', 'C', 'D'],
       values: [8, 14, 10, 5, 2],

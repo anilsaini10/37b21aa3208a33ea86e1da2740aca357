@@ -121,7 +121,7 @@ export function FeesListScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader title={t('feesList_headerTitle')} />
+      <CustomHeader title={t('feesList_headerTitle')} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Row gap={theme.spacing.md} align="stretch">
           {tiles.map(tile => (

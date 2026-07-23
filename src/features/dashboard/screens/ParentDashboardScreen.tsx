@@ -59,7 +59,10 @@ export function ParentDashboardScreen(): React.JSX.Element {
     <Screen padded={false}>
       <CustomHeader
         title={t('parentDashboard_greeting', {name: user?.name?.split(' ')[0] ?? 'Parent'})}
-        actions={[{icon: 'notification', onPress: () => navigation.navigate(ScreenNames.Notifications), badgeCount: 2}]}
+        actions={[
+          {icon: 'announcement', onPress: () => navigation.navigate(ScreenNames.Announcements)},
+          {icon: 'notification', onPress: () => navigation.navigate(ScreenNames.Notifications), badgeCount: 2},
+        ]}
       />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -85,7 +88,7 @@ export function ParentDashboardScreen(): React.JSX.Element {
             <CustomButton title={t('parentDashboard_results')} variant="outline" onPress={() => navigation.navigate(ScreenNames.Results)} />
           </View>
           <View style={styles.flexOne}>
-            <CustomButton title={t('parentDashboard_timetable')} variant="outline" onPress={() => navigation.navigate(ScreenNames.Timetable)} />
+            <CustomButton title={t('parentDashboard_timetable')} variant="outline" onPress={() => navigation.navigate(ScreenNames.ChildTimetable)} />
           </View>
         </Row>
 

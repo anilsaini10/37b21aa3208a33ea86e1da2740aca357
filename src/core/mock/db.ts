@@ -118,11 +118,17 @@ const teachers: Teacher[] = Array.from({length: 12}, (_, i) => {
     subjects: [
       {subjectId: subject.id, name: subject.name, classId: teachingClass.id, className: teachingClass.name},
     ],
-    classTeacherOf: i < classes.length ? classes[i].name : undefined,
+    // Only `.length` is read anywhere (admin dashboard's total-teachers stat) —
+    // real homeroom assignment goes through `/api/admin/teachers/:id`, not this mock array.
+    classTeacherOf: [],
     joiningDate: isoDate(2018 + (i % 6), int(1, 12), int(1, 28)),
     salary: int(30000, 65000),
     status: 'active',
     performanceScore: int(70, 98),
+    qualification: 'B.Ed',
+    experienceYears: int(1, 15),
+    experienceMonths: int(0, 11),
+    subjectsTaught: [subject.name],
   };
 });
 
@@ -180,15 +186,24 @@ classes.forEach(cls => {
   cls.totalStudents = cls.sections.reduce((sum, s) => sum + s.studentCount, 0);
 });
 
-// ---- Staff ----------------------------------------------------------------
+// ---- Staff ------------------------------------------------------------
+// Only `.length` is read (admin dashboard's total-staff stat) — real CRUD for
+// this domain goes through `/api/admin/staff`, not this mock array.
 const staff: Staff[] = Array.from({length: 8}, (_, i) => ({
   id: `stf_${i + 1}`,
+  employeeId: `STF${String(i + 1).padStart(4, '0')}`,
   name: name(),
-  role: pick(['Accountant', 'Librarian', 'Clerk', 'Security', 'Peon', 'Nurse']),
   phone: phone(),
-  department: pick(['Administration', 'Finance', 'Support', 'Health']),
+  gender: gender(),
+  designation: pick(['Accountant', 'Librarian', 'Clerk', 'Security', 'Peon', 'Nurse']),
   salary: int(18000, 40000),
+  qualification: pick(['B.Com', '12th Pass', 'Diploma', 'B.A.']),
+  experienceYears: int(1, 10),
+  experienceMonths: int(0, 11),
+  joiningDate: isoDate(2019 + (i % 5), int(1, 12), int(1, 28)),
   status: 'active',
+  createdAt: isoDate(2024, 1, 1),
+  updatedAt: isoDate(2024, 1, 1),
 }));
 
 // ---- Timetable --------------------------------------------------------------

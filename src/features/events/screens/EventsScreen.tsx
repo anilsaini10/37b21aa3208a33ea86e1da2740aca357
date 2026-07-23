@@ -59,6 +59,12 @@ function isSameDay(a: string, b: string): boolean {
   return a.slice(0, 10) === b.slice(0, 10);
 }
 
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+type ViewFilter = 'upcoming' | 'past';
+
 export function EventsScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
@@ -67,6 +73,7 @@ export function EventsScreen(): React.JSX.Element {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'' | EventType>(ALL_FILTER_VALUE);
+  const [viewFilter, setViewFilter] = useState<ViewFilter>('upcoming');
   const [page, setPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState<AdminEvent | null>(null);
 
@@ -78,11 +85,14 @@ export function EventsScreen(): React.JSX.Element {
     return () => clearTimeout(handle);
   }, [search]);
 
+  const today = todayIso();
   const {data, isLoading, isRefetching, isError, error, refetch} = useAdminEvents({
     page,
     pageSize: 15,
     search: debouncedSearch || undefined,
     eventType: typeFilter || undefined,
+    from: viewFilter === 'upcoming' ? today : undefined,
+    to: viewFilter === 'past' ? today : undefined,
   });
   const deleteMutation = useDeleteEvent();
 
@@ -139,8 +149,18 @@ export function EventsScreen(): React.JSX.Element {
     OTHER: t('eventForm_typeOther'),
   };
 
+  const VIEW_TABS: {label: string; value: ViewFilter}[] = [
+    {label: t('eventsManage_viewUpcoming'), value: 'upcoming'},
+    {label: t('eventsManage_viewPast'), value: 'past'},
+  ];
+
   const selectTab = (value: '' | EventType): void => {
     setTypeFilter(value);
+    setPage(1);
+  };
+
+  const selectView = (value: ViewFilter): void => {
+    setViewFilter(value);
     setPage(1);
   };
 
@@ -171,6 +191,13 @@ export function EventsScreen(): React.JSX.Element {
           onChangeText={setSearch}
           placeholder={t('eventsManage_searchPlaceholder')}
         />
+      </View>
+      <View style={styles.tabsRow}>
+        {VIEW_TABS.map(tab => (
+          <Pressable key={tab.value} onPress={() => selectView(tab.value)}>
+            <Badge label={tab.label} tone={viewFilter === tab.value ? 'primary' : 'neutral'} />
+          </Pressable>
+        ))}
       </View>
       <View style={styles.tabsRow}>
         {TYPE_TABS.map(tab => (

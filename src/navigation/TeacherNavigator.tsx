@@ -7,6 +7,7 @@ import {useTheme} from '../core/theme';
 import {Icon} from '../shared/components';
 import type {TeacherStackParamList, TeacherTabParamList} from './types';
 import {ScreenNames} from './ScreenNames';
+import {floatingTabBarStyle} from './floatingTabBar';
 
 import {TeacherDashboardScreen} from '../features/dashboard/screens/TeacherDashboardScreen';
 import {HomeworkListScreen} from '../features/homework/screens/HomeworkListScreen';
@@ -18,7 +19,11 @@ import {StudentAttendanceHistoryScreen} from '../features/attendance/screens/Stu
 import {TeacherProfileScreen} from '../features/teacher/screens/TeacherProfileScreen';
 import {MarkAttendanceScreen} from '../features/attendance/screens/MarkAttendanceScreen';
 import {TimetableScreen} from '../features/timetable/screens/TimetableScreen';
-import {LeaveScreen} from '../features/communication/screens/LeaveScreen';
+import {MyScheduleScreen} from '../features/timetable/screens/MyScheduleScreen';
+import {TeacherLeaveScreen} from '../features/leave/screens/TeacherLeaveScreen';
+import {MyLeaveScreen} from '../features/leave/screens/MyLeaveScreen';
+import {MyLeaveApplyScreen} from '../features/leave/screens/MyLeaveApplyScreen';
+import {MyAttendanceScreen} from '../features/attendance/screens/MyAttendanceScreen';
 import {ChatScreen} from '../features/communication/screens/ChatScreen';
 import {AnnouncementsScreen} from '../features/communication/screens/AnnouncementsScreen';
 import {NotificationsScreen} from '../features/communication/screens/NotificationsScreen';
@@ -43,13 +48,7 @@ function TeacherTabs(): React.JSX.Element {
         headerShown: false,
         tabBarActiveTintColor: theme.colors.tabActive,
         tabBarInactiveTintColor: theme.colors.tabInactive,
-        tabBarStyle: {
-          backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.divider,
-          height: theme.components.tab.height + insets.bottom,
-          paddingBottom: Math.max(insets.bottom, 6),
-          paddingTop: 6,
-        },
+        tabBarStyle: floatingTabBarStyle(theme, insets),
         tabBarIcon: ({color}) => <Icon name={TAB_ICON[route.name]} size={22} color={color} />,
       })}>
       <Tab.Screen name={ScreenNames.Dashboard} component={TeacherDashboardScreen} />
@@ -67,10 +66,14 @@ export function TeacherNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.MarkAttendance} component={MarkAttendanceScreen} />
       <Stack.Screen name={ScreenNames.HomeworkForm} component={HomeworkFormScreen} />
       <Stack.Screen name={ScreenNames.Timetable} component={TimetableScreen} />
+      <Stack.Screen name={ScreenNames.MySchedule} component={MyScheduleScreen} />
       <Stack.Screen name={ScreenNames.ClassStudents} component={ClassStudentsScreen} />
       <Stack.Screen name={ScreenNames.StudentDetail} component={StudentDetailScreen} />
       <Stack.Screen name={ScreenNames.StudentAttendanceHistory} component={StudentAttendanceHistoryScreen} />
-      <Stack.Screen name={ScreenNames.Leave} component={LeaveScreen} />
+      <Stack.Screen name={ScreenNames.Leave} component={TeacherLeaveScreen} />
+      <Stack.Screen name={ScreenNames.MyLeave} component={MyLeaveScreen} />
+      <Stack.Screen name={ScreenNames.MyLeaveApply} component={MyLeaveApplyScreen} />
+      <Stack.Screen name={ScreenNames.MyAttendance} component={MyAttendanceScreen} />
       <Stack.Screen name={ScreenNames.Chat} component={ChatScreen} />
       <Stack.Screen name={ScreenNames.Announcements} component={AnnouncementsScreen} />
       <Stack.Screen name={ScreenNames.Notifications} component={NotificationsScreen} />

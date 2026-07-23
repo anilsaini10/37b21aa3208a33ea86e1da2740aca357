@@ -76,7 +76,7 @@ export function ParentFeesScreen(): React.JSX.Element {
   if (!invoice) {
     return (
       <Screen padded={false}>
-        <CustomHeader title={t('parentFees_headerTitle')} />
+        <CustomHeader title={t('parentFees_headerTitle')} onBack={() => navigation.goBack()} />
         <EmptyState
           title={t('parentFees_noFeeRecord')}
           message={t('parentFees_noFeeRecordMessage')}

@@ -24,6 +24,7 @@ export const ScreenNames = {
   Announcements: 'Announcements',
   Chat: 'Chat',
   Leave: 'Leave',
+  LeaveApply: 'LeaveApply',
   Notifications: 'Notifications',
   ChangePassword: 'ChangePassword',
   FeeReceipt: 'FeeReceipt',
@@ -35,7 +36,6 @@ export const ScreenNames = {
   SelectSchool: 'SelectSchool',
   Login: 'Login',
   SignUp: 'SignUp',
-  ParentLogin: 'ParentLogin',
   ForgotPassword: 'ForgotPassword',
 
   // Admin
@@ -47,6 +47,7 @@ export const ScreenNames = {
   Teachers: 'Teachers',
   TeacherForm: 'TeacherForm',
   TeacherDetail: 'TeacherDetail',
+  TeacherEdit: 'TeacherEdit',
   Exams: 'Exams',
   ExamForm: 'ExamForm',
   ExamClasses: 'ExamClasses',
@@ -64,15 +65,27 @@ export const ScreenNames = {
   SubjectsManage: 'SubjectsManage',
   ClassSchedule: 'ClassSchedule',
   PeriodForm: 'PeriodForm',
+  TeacherSchedule: 'TeacherSchedule',
+  TeacherLeaveRequests: 'TeacherLeaveRequests',
+  MarkStaffAttendance: 'MarkStaffAttendance',
+  StaffAttendanceRegister: 'StaffAttendanceRegister',
+  Staff: 'Staff',
+  StaffForm: 'StaffForm',
+  StaffDetail: 'StaffDetail',
 
   // Teacher
   Classes: 'Classes',
   MarkAttendance: 'MarkAttendance',
   HomeworkForm: 'HomeworkForm',
   ClassStudents: 'ClassStudents',
+  MySchedule: 'MySchedule',
+  MyLeave: 'MyLeave',
+  MyLeaveApply: 'MyLeaveApply',
+  MyAttendance: 'MyAttendance',
 
   // Parent
   ChildProfile: 'ChildProfile',
+  ChildTimetable: 'ChildTimetable',
   Results: 'Results',
   ReportCard: 'ReportCard',
 } as const;

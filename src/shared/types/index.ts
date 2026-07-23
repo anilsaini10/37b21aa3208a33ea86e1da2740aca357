@@ -5,6 +5,7 @@ export * from './attendance';
 export * from './fee';
 export * from './exam';
 export * from './communication';
+export * from './leave';
 export * from './operations';
 export * from './dashboard';
 export * from './school';

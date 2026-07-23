@@ -37,21 +37,6 @@ export interface MarkEntry {
   grade: string;
 }
 
-export interface ReportCard {
-  id: ID;
-  examId: ID;
-  examName: string;
-  studentId: ID;
-  studentName: string;
-  className: string;
-  subjects: {subjectName: string; marks: number; maxMarks: number; grade: string}[];
-  totalMarks: number;
-  totalMaxMarks: number;
-  percentage: number;
-  overallGrade: string;
-  rank?: number;
-}
-
 export interface GradeBand {
   grade: string;
   minPercentage: number;
@@ -124,4 +109,28 @@ export interface ExamResultDetail {
   status: ExamResultStatus;
   createdAt: string;
   updatedAt: string;
+}
+
+// ---- Parent's own child's exams (real backend, /api/students/exams) -------
+// Read-only, always scoped to one child (`studentId`) — schedule/details only;
+// marks live in `result` on the detail endpoint, never on the list.
+
+export interface ParentExam {
+  examId: ID;
+  title: string;
+  description: string | null;
+  startDate: string;
+  endDate: string;
+  maxMarks: number;
+}
+
+export interface ParentExamResult {
+  marksObtained: number | null;
+  grade: string | null;
+  remarks: string | null;
+  status: ExamResultStatus;
+}
+
+export interface ParentExamDetail extends ParentExam {
+  result: ParentExamResult;
 }

@@ -50,6 +50,27 @@ export interface TeacherHomework {
   updatedAt: string;
 }
 
+// ---- Parent's child homework (real backend, /api/students/homework) -------
+// Read-only — no submission/upload flow exists for parents, just visibility
+// into what's assigned to the child's class + section.
+
+export interface ParentHomeworkItem {
+  id: ID;
+  classId: ID;
+  className: string;
+  sectionId: ID;
+  sectionName: string;
+  subjectId: ID;
+  subjectName: string;
+  title: string;
+  description: string | null;
+  type: HomeworkType;
+  dueDate: string;
+  teacherName: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type AnnouncementAudience = 'ALL' | 'TEACHER' | 'PARENT';
 
 /** Derived server-side from publishAt/expiresAt vs now — only ever present on admin GET responses. */
@@ -130,14 +151,3 @@ export interface AppNotification {
   read: boolean;
 }
 
-export interface LeaveApplication {
-  id: ID;
-  applicantId: ID;
-  applicantName: string;
-  applicantRole: UserRole;
-  fromDate: string;
-  toDate: string;
-  reason: string;
-  status: 'pending' | 'approved' | 'rejected';
-  appliedAt: string;
-}
