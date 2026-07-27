@@ -1,26 +1,24 @@
-/** Teacher profile — identity card, quick links, and logout. */
+/** Teacher profile — photo hero identity, quick links, and logout. */
 import React from 'react';
 import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme, useThemedStyles} from '../../../core/theme';
+import type {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
+import {useThemedStyles} from '../../../core/theme';
 import {useLanguage, type TranslationKey} from '../../../core/i18n';
 import {
   Screen,
   AppText,
-  CustomHeader,
   CustomCard,
   CustomButton,
-  Avatar,
-  Badge,
+  ProfileHero,
   ListRow,
   SectionTitle,
-  Row,
   Spacer,
 } from '../../../shared/components';
 import {capitalize} from '../../../shared/helpers';
 import {useAuthStore} from '../../auth/authStore';
-import type {TeacherStackParamList} from '../../../navigation/types';
+import type {TeacherStackParamList, TeacherTabParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 
 type Nav = NativeStackNavigationProp<TeacherStackParamList>;
@@ -28,11 +26,13 @@ type Nav = NativeStackNavigationProp<TeacherStackParamList>;
 const MENU: {
   icon: string;
   titleKey: TranslationKey;
-  route: 'MySchedule' | 'Announcements' | 'Chat' | 'Leave' | 'MyLeave' | 'MyAttendance' | 'ChangePassword';
+  route: 'MyProfile' | 'MySchedule' | 'Announcements' | 'Events' | 'Chat' | 'Leave' | 'MyLeave' | 'MyAttendance' | 'ChangePassword';
 }[] = [
+  {icon: 'profile', titleKey: 'teacherMyProfile_title', route: ScreenNames.MyProfile},
   {icon: 'timetable', titleKey: 'teacherProfile_timetable', route: ScreenNames.MySchedule},
   {icon: 'attendance', titleKey: 'teacherProfile_myAttendance', route: ScreenNames.MyAttendance},
   {icon: 'announcement', titleKey: 'teacherProfile_announcements', route: ScreenNames.Announcements},
+  {icon: 'event', titleKey: 'eventsManage_headerTitle', route: ScreenNames.Events},
   {icon: 'chat', titleKey: 'teacherProfile_chat', route: ScreenNames.Chat},
   {icon: 'calendar', titleKey: 'teacherProfile_myLeave', route: ScreenNames.MyLeave},
   {icon: 'calendar', titleKey: 'teacherProfile_leaveManagement', route: ScreenNames.Leave},
@@ -40,68 +40,50 @@ const MENU: {
 ];
 
 export function TeacherProfileScreen(): React.JSX.Element {
-  const {theme} = useTheme();
   const styles = useThemedStyles(t2 => ({
-    scrollContent: {
+    content: {
       padding: t2.spacing.lg,
-    },
-    nameBlock: {
-      flex: 1,
     },
     menuCard: {
       paddingHorizontal: t2.spacing.lg,
     },
   }));
   const navigation = useNavigation<Nav>();
+  const tabNavigation = useNavigation<BottomTabNavigationProp<TeacherTabParamList>>();
   const {t} = useLanguage();
   const user = useAuthStore(s => s.user);
   const logout = useAuthStore(s => s.logout);
 
   return (
     <Screen padded={false}>
-      <CustomHeader title={t('teacherProfile_profile')} />
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
-        <CustomCard>
-          <Row gap={theme.spacing.md}>
-            <Avatar name={user?.name ?? t('teacherProfile_teacher')} size={64} />
-            <View style={styles.nameBlock}>
-              <AppText variant="h2" numberOfLines={1}>
-                {user?.name ?? t('teacherProfile_teacher')}
-              </AppText>
-              {user?.email ? (
-                <AppText variant="caption" color="textSecondary" numberOfLines={1}>
-                  {user.email}
-                </AppText>
-              ) : null}
-              {user?.phone ? (
-                <AppText variant="caption" color="textSecondary" numberOfLines={1}>
-                  {user.phone}
-                </AppText>
-              ) : null}
-              <Spacer size={6} />
-              <Badge label={capitalize(user?.role ?? 'teacher')} tone="primary" />
-            </View>
-          </Row>
-        </CustomCard>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <ProfileHero
+          name={user?.name ?? t('teacherProfile_teacher')}
+          avatarUri={user?.avatarUrl}
+          lines={[user?.email, user?.phone]}
+          badgeLabel={capitalize(user?.role ?? 'teacher')}
+          onBack={() => tabNavigation.navigate(ScreenNames.Dashboard)}
+          title={t('teacherProfile_profile')}
+        />
 
-        <SectionTitle title={t('teacherProfile_manage')} />
-        <CustomCard padded={false} style={styles.menuCard}>
-          {MENU.map(item => (
-            <ListRow
-              key={item.route}
-              icon={item.icon}
-              title={t(item.titleKey)}
-              right={<AppText color="textMuted">›</AppText>}
-              onPress={() => navigation.navigate(item.route)}
-            />
-          ))}
-        </CustomCard>
+        <View style={styles.content}>
+          <SectionTitle title={t('teacherProfile_manage')} />
+          <CustomCard padded={false} style={styles.menuCard}>
+            {MENU.map(item => (
+              <ListRow
+                key={item.route}
+                icon={item.icon}
+                title={t(item.titleKey)}
+                right={<AppText color="textMuted">›</AppText>}
+                onPress={() => navigation.navigate(item.route)}
+              />
+            ))}
+          </CustomCard>
 
-        <Spacer size={24} />
-        <CustomButton title={t('common_logout')} variant="danger" iconLeft="logout" onPress={() => logout()} />
-        <Spacer size={24} />
+          <Spacer size={24} />
+          <CustomButton title={t('common_logout')} variant="danger" iconLeft="logout" onPress={() => logout()} />
+          <Spacer size={24} />
+        </View>
       </ScrollView>
     </Screen>
   );

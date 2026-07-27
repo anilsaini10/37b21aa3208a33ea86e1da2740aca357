@@ -25,6 +25,10 @@ export const Endpoints = {
   schools: {
     search: '/api/schools',
   },
+  notifications: {
+    register: '/api/notifications/register',
+    unregister: '/api/notifications/unregister',
+  },
   classes: {
     list: '/api/classes',
     create: '/api/classes',
@@ -88,12 +92,14 @@ export const Endpoints = {
     schedule_today: '/api/teacher/schedule/today',
     schedule_week: '/api/teacher/schedule/week',
     announcements: '/api/teacher/announcements',
+    events: '/api/teacher/events',
     leave: '/api/teacher/leave',
     leave_byId: (leaveId: string) => `/api/teacher/leave/${leaveId}`,
     myLeave: '/api/teacher/my-leave',
     myLeave_byId: (leaveId: string) => `/api/teacher/my-leave/${leaveId}`,
     myAttendance: '/api/teacher/my-attendance',
     resetPassword: '/api/teacher/reset-password',
+    profile: '/api/teacher/profile',
   },
   parent: {
     dashboard: '/api/parent/dashboard',
@@ -113,6 +119,8 @@ export const Endpoints = {
     homework: '/api/students/homework',
     homework_byId: (homeworkId: string) => `/api/students/homework/${homeworkId}`,
     announcements: '/api/students/announcements',
+    events: '/api/students/events',
+    dashboard: '/api/students/dashboard',
     resetPassword: '/api/students/reset-password',
   },
 } as const;

@@ -31,7 +31,7 @@ export function StatGrid({stats}: {stats: StatCard[]}): React.JSX.Element {
           style={[styles.row, i !== 0 && styles.rowSpacing]}>
           {row.map(s => (
             <View key={s.key} style={styles.tileWrapper}>
-              <StatTile stat={s} />
+              <StatTile stat={s} onPress={s.onPress} />
             </View>
           ))}
         </View>

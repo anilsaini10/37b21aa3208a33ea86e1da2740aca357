@@ -1,4 +1,4 @@
-/** Child profile — personal + academic details of the parent's ward(s). Switch between children when there's more than one. */
+/** Child profile — photo hero identity, personal + academic details of the parent's ward(s). Switch between children when there's more than one. */
 import React, {useState} from 'react';
 import {Pressable, View, ScrollView, StyleSheet} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
@@ -10,8 +10,7 @@ import {
   AppText,
   CustomHeader,
   CustomCard,
-  Avatar,
-  Badge,
+  ProfileHero,
   SectionTitle,
   Row,
   Spacer,
@@ -20,7 +19,7 @@ import {
   EmptyState,
 } from '../../../shared/components';
 import {formatDate} from '../../../core/utils/format';
-import {statusTone, capitalize, attendancePercentageTone} from '../../../shared/helpers';
+import {capitalize} from '../../../shared/helpers';
 import {useParentProfile} from '../parentStudents.service';
 import type {ParentStackParamList} from '../../../navigation/types';
 import type {ParentChild} from '../../../shared/types';
@@ -64,15 +63,11 @@ export function ChildProfileScreen(): React.JSX.Element {
   const [activeChildId, setActiveChildId] = useState<string | null>(null);
 
   const styles = useThemedStyles(t2 => ({
-    scrollContent: {
+    content: {
       padding: t2.spacing.lg,
     },
-    avatarBlock: {
-      flex: 1,
-    },
     switcherWrap: {
-      paddingHorizontal: t2.spacing.lg,
-      paddingTop: t2.spacing.md,
+      marginBottom: t2.spacing.md,
     },
     switcherContent: {
       columnGap: t2.spacing.sm,
@@ -99,7 +94,12 @@ export function ChildProfileScreen(): React.JSX.Element {
         </Screen>
       );
     }
-    return <Loader message={t('childProfile_loading')} />;
+    return (
+      <Screen padded={false}>
+        <CustomHeader title={t('childProfile_childProfile')} onBack={() => navigation.goBack()} />
+        <Loader message={t('childProfile_loading')} />
+      </Screen>
+    );
   }
 
   const {children} = data;
@@ -121,82 +121,70 @@ export function ChildProfileScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader title={t('childProfile_childProfile')} onBack={() => navigation.goBack()} />
-      {children.length > 1 ? (
-        <View style={styles.switcherWrap}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.switcherContent}>
-            {children.map(c => {
-              const active = c.id === child.id;
-              return (
-                <Pressable
-                  key={c.id}
-                  onPress={() => setActiveChildId(c.id)}
-                  style={[
-                    styles.childPill,
-                    {backgroundColor: active ? theme.colors.primary : theme.colors.surfaceVariant},
-                  ]}>
-                  <AppText variant="label" style={{color: active ? theme.colors.onPrimary : theme.colors.textSecondary}}>
-                    {c.name}
-                  </AppText>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-        </View>
-      ) : null}
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
-        <CustomCard>
-          <Row gap={theme.spacing.md}>
-            <Avatar name={child.name} size={72} />
-            <View style={styles.avatarBlock}>
-              <AppText variant="h2">{child.name}</AppText>
-              <AppText variant="caption" color="textSecondary">
-                {child.admissionNo}
-              </AppText>
-              <Spacer size={6} />
-              <Row gap={theme.spacing.sm}>
-                <Badge label={capitalize(child.status)} tone={statusTone(child.status)} />
-                <Badge
-                  label={`${child.attendancePercentage}%`}
-                  tone={attendancePercentageTone(child.attendancePercentage)}
-                />
-              </Row>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <ProfileHero
+          name={child.name}
+          lines={[child.admissionNo]}
+          badgeLabel={capitalize(child.status)}
+          onBack={() => navigation.goBack()}
+          title={t('childProfile_childProfile')}
+        />
+
+        <View style={styles.content}>
+          {children.length > 1 ? (
+            <View style={styles.switcherWrap}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.switcherContent}>
+                {children.map(c => {
+                  const active = c.id === child.id;
+                  return (
+                    <Pressable
+                      key={c.id}
+                      onPress={() => setActiveChildId(c.id)}
+                      style={[
+                        styles.childPill,
+                        {backgroundColor: active ? theme.colors.primary : theme.colors.surfaceVariant},
+                      ]}>
+                      <AppText variant="label" style={{color: active ? theme.colors.onPrimary : theme.colors.textSecondary}}>
+                        {c.name}
+                      </AppText>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
             </View>
-          </Row>
-        </CustomCard>
-
-        <SectionTitle title={t('childProfile_personalDetails')} />
-        <CustomCard>
-          <DetailRow label={t('childProfile_gender')} value={capitalize(child.gender)} />
-          <Divider />
-          <DetailRow label={t('childProfile_dateOfBirth')} value={formatDate(child.dateOfBirth)} />
-          {child.bloodGroup ? (
-            <>
-              <Divider />
-              <DetailRow label={t('childProfile_bloodGroup')} value={child.bloodGroup} />
-            </>
           ) : null}
-          {child.address ? (
-            <>
-              <Divider />
-              <DetailRow label={t('common_address')} value={child.address} />
-            </>
-          ) : null}
-        </CustomCard>
 
-        <SectionTitle title={t('childProfile_academicDetails')} />
-        <CustomCard>
-          <DetailRow label={t('childProfile_class')} value={child.className} />
-          <Divider />
-          <DetailRow label={t('childProfile_section')} value={child.sectionName} />
-          <Divider />
-          <DetailRow label={t('childProfile_rollNo')} value={String(child.rollNo)} />
-          <Divider />
-          <DetailRow label={t('childProfile_attendance')} value={`${child.attendancePercentage}%`} />
-        </CustomCard>
-        <Spacer size={24} />
+          <SectionTitle title={t('childProfile_personalDetails')} />
+          <CustomCard>
+            <DetailRow label={t('childProfile_gender')} value={capitalize(child.gender)} />
+            <Divider />
+            <DetailRow label={t('childProfile_dateOfBirth')} value={formatDate(child.dateOfBirth)} />
+            {child.bloodGroup ? (
+              <>
+                <Divider />
+                <DetailRow label={t('childProfile_bloodGroup')} value={child.bloodGroup} />
+              </>
+            ) : null}
+            {child.address ? (
+              <>
+                <Divider />
+                <DetailRow label={t('common_address')} value={child.address} />
+              </>
+            ) : null}
+          </CustomCard>
+
+          <SectionTitle title={t('childProfile_academicDetails')} />
+          <CustomCard>
+            <DetailRow label={t('childProfile_class')} value={child.className} />
+            <Divider />
+            <DetailRow label={t('childProfile_section')} value={child.sectionName} />
+            <Divider />
+            <DetailRow label={t('childProfile_rollNo')} value={String(child.rollNo)} />
+            <Divider />
+            <DetailRow label={t('childProfile_attendance')} value={`${child.attendancePercentage}%`} />
+          </CustomCard>
+          <Spacer size={24} />
+        </View>
       </ScrollView>
     </Screen>
   );

@@ -1,14 +1,27 @@
 /**
- * Events service — real backend (Express + Prisma), admin-only CRUD.
- *
- * A school event is a fixed-date occurrence (holiday/exam/meeting/activity) with an
- * `audience` filter that has the same semantics as Announcements' audience.
+ * Events service — real backend (Express + Prisma). Create/update/delete are
+ * admin-only (`/api/admin/events`). Reading the feed is role-aware: admin/
+ * teacher/parent each hit a different, role-scoped endpoint that's already
+ * filtered server-side by audience (teacher only ever sees ALL/TEACHER
+ * events, parent only ALL/PARENT) — the client never filters by audience itself.
  */
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {axiosClient} from '../../core/api/axiosClient';
 import {Endpoints} from '../../core/api/apiConfig';
 import {rethrowApiError} from '../../core/api/apiError';
-import type {AdminEvent, AnnouncementAudience, EventType, Paginated, QueryParams} from '../../shared/types';
+import type {AdminEvent, AnnouncementAudience, EventType, Paginated, QueryParams, UserRole} from '../../shared/types';
+
+function feedEndpointForRole(role: UserRole): string {
+  switch (role) {
+    case 'teacher':
+      return Endpoints.teacher.events;
+    case 'parent':
+      return Endpoints.students.events;
+    case 'admin':
+    default:
+      return Endpoints.admin.events;
+  }
+}
 
 export interface CreateEventInput {
   title: string;
@@ -26,12 +39,24 @@ export interface CreateEventInput {
 export type UpdateEventInput = Partial<CreateEventInput>;
 
 export const eventsApi = {
+  /** Admin's own management list — same endpoint create/update/delete act on. */
   list: async (params?: QueryParams): Promise<Paginated<AdminEvent>> => {
     try {
       const {data} = await axiosClient.get<Paginated<AdminEvent>>(Endpoints.admin.events, {params});
       return data;
     } catch (e) {
       console.error('eventsApi.list failed', e);
+      rethrowApiError(e, 'Failed to load events.');
+    }
+  },
+
+  /** Role-scoped read-only feed — teacher/parent only ever see ALL + their own audience, filtered server-side. */
+  feed: async (role: UserRole, params?: QueryParams): Promise<Paginated<AdminEvent>> => {
+    try {
+      const {data} = await axiosClient.get<Paginated<AdminEvent>>(feedEndpointForRole(role), {params});
+      return data;
+    } catch (e) {
+      console.error('eventsApi.feed failed', e);
       rethrowApiError(e, 'Failed to load events.');
     }
   },
@@ -78,6 +103,14 @@ export const eventsApi = {
 
 export const useAdminEvents = (params?: QueryParams) =>
   useQuery({queryKey: ['adminEvents', params], queryFn: () => eventsApi.list(params)});
+
+/** Single hook for the common Events screen — one `useQuery` call regardless of role, so it never violates the rules of hooks. */
+export const useEventsFeed = (role: UserRole, params?: QueryParams) =>
+  useQuery({
+    queryKey: ['eventsFeed', role, params],
+    queryFn: () => eventsApi.feed(role, params),
+    enabled: !!role,
+  });
 
 /** `initial` (e.g. the row already shown in the list) renders instantly while a fresh copy refetches in the background. */
 export const useAdminEvent = (id: string, initial?: AdminEvent) =>

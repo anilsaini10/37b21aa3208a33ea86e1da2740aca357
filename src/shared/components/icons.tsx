@@ -248,11 +248,12 @@ export const ICONS: Record<string, IconRenderer> = {
       <Line x1={19} y1={5} x2={5} y2={19} />
     </Frame>
   ),
-  back: p => (
-    <Frame {...p}>
-      <Polyline points="15 5 8 12 15 19" />
-    </Frame>
-  ),
+ back: p => (
+  <Frame {...p}>
+    <Polyline points="16 6 8 12 16 18" />
+    <Polyline points="8 12 70 12" />
+  </Frame>
+),
   forward: p => (
     <Frame {...p}>
       <Polyline points="9 5 16 12 9 19" />

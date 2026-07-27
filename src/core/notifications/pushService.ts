@@ -17,6 +17,19 @@ import {logger} from '../utils/logger';
 
 export type RemoteMessage = FirebaseMessagingTypes.RemoteMessage;
 
+export type DevicePlatform = 'ANDROID' | 'IOS' | 'WEB';
+
+/** This device's platform, in the shape the backend's device-token API expects. */
+export function currentDevicePlatform(): DevicePlatform {
+  if (Platform.OS === 'ios') {
+    return 'IOS';
+  }
+  if (Platform.OS === 'android') {
+    return 'ANDROID';
+  }
+  return 'WEB';
+}
+
 function isAuthorized(status: FirebaseMessagingTypes.AuthorizationStatus): boolean {
   return status === AuthorizationStatus.AUTHORIZED || status === AuthorizationStatus.PROVISIONAL;
 }

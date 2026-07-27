@@ -14,6 +14,8 @@ import {
   onDeviceTokenRefresh,
   registerForegroundHandler,
   registerNotificationOpenedHandlers,
+  deviceTokenApi,
+  currentDevicePlatform,
 } from '../core/notifications';
 import {useAuthStore} from '../features/auth/authStore';
 import {setUnauthorizedHandler} from '../core/api/sessionEvents';
@@ -28,6 +30,20 @@ let done = false;
  * Permission is only requested, and a device token only fetched, after that
  * succeeds.
  */
+/**
+ * Best-effort — only registers with the backend while a session is active
+ * (login/signup register their own token right away; this covers app-start
+ * with an already-hydrated session, and FCM rotating the token later).
+ */
+function registerDeviceTokenIfLoggedIn(token: string): void {
+  if (!useAuthStore.getState().isAuthenticated) {
+    return;
+  }
+  deviceTokenApi.register(token, currentDevicePlatform()).catch(e => {
+    logger.warn('Failed to register device token with backend', e);
+  });
+}
+
 function setupPushNotifications(): void {
   try {
     registerForegroundHandler();
@@ -37,6 +53,7 @@ function setupPushNotifications(): void {
     onDeviceTokenRefresh(token => {
       storage.set(StorageKeys.PUSH_DEVICE_TOKEN, token);
       logger.info('FCM device token refreshed');
+      registerDeviceTokenIfLoggedIn(token);
     });
   } catch (e) {
     logger.warn('Push notification listeners unavailable', e);
@@ -54,6 +71,7 @@ function setupPushNotifications(): void {
       if (token) {
         storage.set(StorageKeys.PUSH_DEVICE_TOKEN, token);
         logger.info('FCM device token', token);
+        registerDeviceTokenIfLoggedIn(token);
       }
     })
     .catch(e => logger.warn('Push permission/token setup failed', e));

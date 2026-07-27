@@ -11,6 +11,8 @@ import {authApi, type SignupInput} from './authApi';
 import type {AuthSession, AuthUser, UserRole} from '../../shared/types';
 import type {PermissionKey} from '../../core/config/permissions';
 import {hasPermission} from '../../core/config/permissions';
+import {deviceTokenApi, getDeviceToken, currentDevicePlatform} from '../../core/notifications';
+import {logger} from '../../core/utils/logger';
 
 interface AuthState {
   user: AuthUser | null;
@@ -49,6 +51,13 @@ function clearSession(): void {
   storage.delete(StorageKeys.AUTH_USER);
 }
 
+/** Best-effort — a failed push registration shouldn't block or fail login/signup. */
+function registerDeviceTokenBestEffort(): void {
+  getDeviceToken()
+    .then(token => (token ? deviceTokenApi.register(token, currentDevicePlatform()) : undefined))
+    .catch(e => logger.warn('Failed to register device token', e));
+}
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   isAuthenticated: false,
@@ -67,6 +76,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setSession: (session: AuthSession) => {
     persistSession(session);
     set({user: session.user, isAuthenticated: true, error: null, errorCode: null});
+    registerDeviceTokenBestEffort();
   },
 
   signup: async (input: SignupInput) => {
@@ -75,6 +85,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const session = await authApi.signup(input);
       persistSession(session);
       set({user: session.user, isAuthenticated: true, isLoading: false});
+      registerDeviceTokenBestEffort();
       return true;
     } catch (e) {
       const message = (e as {message?: string}).message ?? 'Signup failed. Please try again.';
@@ -90,6 +101,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const session = await authApi.loginWithPassword(role, identifier, password, schoolId);
       persistSession(session);
       set({user: session.user, isAuthenticated: true, isLoading: false});
+      registerDeviceTokenBestEffort();
       return true;
     } catch (e) {
       const message = (e as {message?: string}).message ?? 'Login failed. Please try again.';
@@ -100,6 +112,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: async () => {
+    const deviceToken = storage.getString(StorageKeys.PUSH_DEVICE_TOKEN);
+    if (deviceToken) {
+      try {
+        await deviceTokenApi.unregister(deviceToken);
+      } catch (e) {
+        logger.warn('Failed to unregister device token', e);
+      }
+    }
     await authApi.logout();
     clearSession();
     set({user: null, isAuthenticated: false, error: null, errorCode: null});

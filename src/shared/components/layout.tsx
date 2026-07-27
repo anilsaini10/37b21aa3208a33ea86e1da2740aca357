@@ -107,14 +107,21 @@ export function Spacer({size = 8, horizontal}: {size?: number; horizontal?: bool
   return <View style={horizontal ? {width: size} : {height: size}} />;
 }
 
-export function Divider({inset = 0}: {inset?: number}): React.JSX.Element {
+export function Divider({inset = 0, dashed = false}: {inset?: number; dashed?: boolean}): React.JSX.Element {
   const styles = useThemedStyles(theme => ({
     divider: {
       height: 1,
       backgroundColor: theme.colors.divider,
       marginVertical: theme.spacing.sm,
     },
+    dashedDivider: {
+      height: 0,
+      borderBottomWidth: 1,
+      borderStyle: 'dashed',
+      borderColor: theme.colors.divider,
+      marginVertical: theme.spacing.sm,
+    },
   }));
   // `inset` varies per call site, so marginHorizontal stays inline.
-  return <View style={[styles.divider, {marginHorizontal: inset}]} />;
+  return <View style={[dashed ? styles.dashedDivider : styles.divider, {marginHorizontal: inset}]} />;
 }

@@ -24,8 +24,10 @@ import {TeacherLeaveScreen} from '../features/leave/screens/TeacherLeaveScreen';
 import {MyLeaveScreen} from '../features/leave/screens/MyLeaveScreen';
 import {MyLeaveApplyScreen} from '../features/leave/screens/MyLeaveApplyScreen';
 import {MyAttendanceScreen} from '../features/attendance/screens/MyAttendanceScreen';
+import {MyProfileScreen} from '../features/teacher/screens/MyProfileScreen';
 import {ChatScreen} from '../features/communication/screens/ChatScreen';
 import {AnnouncementsScreen} from '../features/communication/screens/AnnouncementsScreen';
+import {EventsScreen} from '../features/events/screens/EventsScreen';
 import {NotificationsScreen} from '../features/communication/screens/NotificationsScreen';
 import {ChangePasswordScreen} from '../features/auth/screens/ChangePasswordScreen';
 
@@ -74,8 +76,10 @@ export function TeacherNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.MyLeave} component={MyLeaveScreen} />
       <Stack.Screen name={ScreenNames.MyLeaveApply} component={MyLeaveApplyScreen} />
       <Stack.Screen name={ScreenNames.MyAttendance} component={MyAttendanceScreen} />
+      <Stack.Screen name={ScreenNames.MyProfile} component={MyProfileScreen} />
       <Stack.Screen name={ScreenNames.Chat} component={ChatScreen} />
       <Stack.Screen name={ScreenNames.Announcements} component={AnnouncementsScreen} />
+      <Stack.Screen name={ScreenNames.Events} component={EventsScreen} />
       <Stack.Screen name={ScreenNames.Notifications} component={NotificationsScreen} />
       <Stack.Screen name={ScreenNames.ChangePassword} component={ChangePasswordScreen} />
     </Stack.Navigator>

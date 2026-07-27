@@ -1,7 +1,6 @@
 /** Admin dashboard — KPIs, charts, upcoming events. */
 import React from 'react';
 import {View, ScrollView, RefreshControl} from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
@@ -9,20 +8,19 @@ import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
-  CustomHeader,
+  DashboardGreetingHeader,
   CustomCard,
   CustomButton,
   StatGrid,
   SectionTitle,
   Loader,
   ListRow,
-  Avatar,
   Icon,
   Divider,
+  DashboardProfileCard,
   Row,
   Spacer,
 } from '../../../shared/components';
-import type {TranslationKey} from '../../../core/i18n';
 import {formatDate} from '../../../core/utils/format';
 import {capitalize} from '../../../shared/helpers';
 import {useAuthStore} from '../../auth/authStore';
@@ -37,16 +35,6 @@ import type {AdminAnnouncement, StatCard} from '../../../shared/types';
 
 const MAX_UPCOMING_EVENTS = 3;
 const MAX_UPCOMING_ANNOUNCEMENTS = 3;
-
-const DAY_KEYS: TranslationKey[] = [
-  'common_daySun', 'common_dayMon', 'common_dayTue', 'common_dayWed',
-  'common_dayThu', 'common_dayFri', 'common_daySat',
-];
-const MONTH_KEYS: TranslationKey[] = [
-  'common_monthJan', 'common_monthFeb', 'common_monthMar', 'common_monthApr',
-  'common_monthMay', 'common_monthJun', 'common_monthJul', 'common_monthAug',
-  'common_monthSep', 'common_monthOct', 'common_monthNov', 'common_monthDec',
-];
 
 /** Undated (general) announcements always count as relevant; dated ones only count once their day arrives, soonest first. */
 function compareUpcomingAnnouncements(a: AdminAnnouncement, b: AdminAnnouncement): number {
@@ -64,17 +52,6 @@ function compareUpcomingAnnouncements(a: AdminAnnouncement, b: AdminAnnouncement
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
-}
-
-/** Time-of-day greeting — before noon/before evening/otherwise. */
-function greetingKey(hour: number): TranslationKey {
-  if (hour < 12) {
-    return 'adminDashboard_goodMorning';
-  }
-  if (hour < 17) {
-    return 'adminDashboard_goodAfternoon';
-  }
-  return 'adminDashboard_goodEvening';
 }
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
@@ -117,9 +94,6 @@ export function AdminDashboardScreen(): React.JSX.Element {
     .sort(compareUpcomingAnnouncements)
     .slice(0, MAX_UPCOMING_ANNOUNCEMENTS);
 
-  const now = new Date();
-  const todayLabel = `${t(DAY_KEYS[now.getDay()])}, ${now.getDate()} ${t(MONTH_KEYS[now.getMonth()])} ${now.getFullYear()}`;
-
   const stats: StatCard[] = [
     {key: 'students', label: t('adminDashboard_students'), value: statsData.studentsCount ?? 0, icon: 'students', accent: 'primary'},
     {key: 'teachers', label: t('adminDashboard_teachers'), value: statsData.teachersCount ?? 0, icon: 'teacher', accent: 'info'},
@@ -129,9 +103,9 @@ export function AdminDashboardScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader
-        title={t(greetingKey(now.getHours()), {name: user?.name?.split(' ')[0] ?? 'Admin'})}
-        subtitle={t('adminDashboard_subtitle', {schoolName: user?.schoolName ?? ''})}
+      <DashboardGreetingHeader
+        name={user?.name?.split(' ')[0] ?? 'Admin'}
+        schoolName={user?.schoolName}
         actions={[
           {icon: 'announcement', onPress: () => navigation.navigate(ScreenNames.Announcements)},
           {icon: 'notification', onPress: () => navigation.navigate(ScreenNames.Notifications), badgeCount: 3},
@@ -150,100 +124,44 @@ export function AdminDashboardScreen(): React.JSX.Element {
             }}
           />
         }>
-        <LinearGradient
-          colors={[theme.colors.primary + '08', theme.colors.primary + '24']}
-          start={{x: 0, y: 0}}
-          end={{x: 1, y: 1}}
-          style={{
-            marginBottom: theme.spacing.md,
-            borderRadius: theme.components.card.radius,
-            borderWidth: 1,
-            borderColor: theme.colors.primary + '2A',
-            padding: theme.components.card.padding,
-          }}>
-          <Row gap={theme.spacing.md} align="flex-start">
-            <Avatar name={user?.name ?? 'Admin'} uri={user?.avatarUrl} size={56} />
-            <View style={{flex: 1}}>
-              <Row justify="space-between" align="flex-start" gap={theme.spacing.sm}>
-                <View style={{flex: 1}}>
-                  <AppText variant="h3" numberOfLines={1}>
-                    {user?.name ?? 'Admin'}
-                  </AppText>
-                  <Spacer size={2} />
-                  <Row gap={4} align="center">
-                    <Icon name="home" size={13} color={theme.colors.textMuted} />
-                    <AppText variant="caption" color="textSecondary" numberOfLines={1} style={{flex: 1}}>
-                      {user?.schoolName}
-                    </AppText>
-                  </Row>
-                </View>
-                <View
-                  style={{
-                    backgroundColor: theme.colors.primary,
-                    paddingHorizontal: theme.spacing.sm,
-                    paddingVertical: 3,
-                    borderRadius: theme.radius.pill,
-                  }}>
-                  <AppText variant="label" color="onPrimary" style={{fontWeight: '700'}}>
-                    {capitalize(user?.role ?? 'admin')}
-                  </AppText>
-                </View>
-              </Row>
-            </View>
-          </Row>
-          <Divider />
-          <Row justify="space-between" align="center">
-            <Row gap={4} align="center">
-              <Icon name="calendar" size={14} color={theme.colors.textMuted} />
-              <AppText variant="caption" color="textSecondary">
-                {todayLabel}
-              </AppText>
-            </Row>
-            {user?.email ? (
-              <Row gap={4} align="center" style={{flexShrink: 1, marginLeft: theme.spacing.sm}}>
-                <Icon name="email" size={14} color={theme.colors.textMuted} />
-                <AppText variant="caption" color="textMuted" numberOfLines={1} style={{flexShrink: 1}}>
-                  {user.email}
-                </AppText>
-              </Row>
-            ) : null}
-          </Row>
-        </LinearGradient>
+        <DashboardProfileCard
+          name={user?.name ?? 'Admin'}
+          avatarUri={user?.avatarUrl}
+          schoolName={user?.schoolName}
+          roleLabel={capitalize(user?.role ?? 'admin')}
+          email={user?.email}
+        />
 
         <StatGrid stats={stats} />
 
-        {/* <SectionTitle title={t('adminDashboard_todaysAttendance')} />
-        <CustomCard>
-          <Row justify="space-between">
-            <View>
-              <AppText variant="display" color="primary">
-                {data.todayAttendancePercentage}%
-              </AppText>
-              <AppText variant="caption" color="textSecondary">
-                {t('adminDashboard_presentTodayAcrossSchool')}
-              </AppText>
-            </View>
-            <Icon name="attendance" size={40} />
-          </Row>
-          <Spacer size={12} />
-          <BarChart series={data.attendanceTrend} height={130} valueFormatter={v => `${v}%`} />
-        </CustomCard> */}
-
         {!isTodayMarked ? (
-          <CustomCard
-          style={{marginTop:12}}
-          >
-            <Row justify="space-between" align="center">
-              <View style={{flex: 1}}>
-                <AppText variant="bodyBold">{t('staffAttendance_dashboardReminderTitle')}</AppText>
-                <AppText variant="caption" color="textSecondary">
-                  {t('staffAttendance_dashboardReminderMessage')}
-                </AppText>
-              </View>
+          <CustomCard 
+          style={{marginTop: theme.spacing.md}}>
+            <Row justify="space-between" align="center" gap={theme.spacing.sm}>
+              <Row gap={theme.spacing.md} align="center" style={{flex: 1}}>
+                <View
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: theme.radius.md,
+                    backgroundColor: theme.colors.primary + '22',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <Icon name="attendance" size={20} color={theme.colors.primary} />
+                </View>
+                <View style={{flex: 1}}>
+                  <AppText variant="bodyBold">{t('staffAttendance_dashboardReminderTitle')}</AppText>
+                  <AppText variant="caption" color="textSecondary">
+                    {t('staffAttendance_dashboardReminderMessage')}
+                  </AppText>
+                </View>
+              </Row>
               <CustomButton
                 title={t('staffAttendance_markNowButton')}
                 size="sm"
                 fullWidth={false}
+                iconRight="forward"
                 onPress={() => navigation.navigate(ScreenNames.MarkStaffAttendance)}
               />
             </Row>

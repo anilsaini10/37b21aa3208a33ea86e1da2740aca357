@@ -24,6 +24,7 @@ import {ParentLeaveScreen} from '../features/leave/screens/ParentLeaveScreen';
 import {ParentApplyLeaveScreen} from '../features/leave/screens/ParentApplyLeaveScreen';
 import {ChatScreen} from '../features/communication/screens/ChatScreen';
 import {AnnouncementsScreen} from '../features/communication/screens/AnnouncementsScreen';
+import {EventsScreen} from '../features/events/screens/EventsScreen';
 import {NotificationsScreen} from '../features/communication/screens/NotificationsScreen';
 import {ChangePasswordScreen} from '../features/auth/screens/ChangePasswordScreen';
 
@@ -68,6 +69,7 @@ export function ParentNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.Fees} component={ParentFeesScreen} />
       <Stack.Screen name={ScreenNames.Timetable} component={TimetableScreen} />
       <Stack.Screen name={ScreenNames.Announcements} component={AnnouncementsScreen} />
+      <Stack.Screen name={ScreenNames.Events} component={EventsScreen} />
       <Stack.Screen name={ScreenNames.Chat} component={ChatScreen} />
       <Stack.Screen name={ScreenNames.Leave} component={ParentLeaveScreen} />
       <Stack.Screen name={ScreenNames.LeaveApply} component={ParentApplyLeaveScreen} />

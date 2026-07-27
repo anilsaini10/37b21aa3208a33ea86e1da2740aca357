@@ -82,6 +82,7 @@ export const ScreenNames = {
   MyLeave: 'MyLeave',
   MyLeaveApply: 'MyLeaveApply',
   MyAttendance: 'MyAttendance',
+  MyProfile: 'MyProfile',
 
   // Parent
   ChildProfile: 'ChildProfile',

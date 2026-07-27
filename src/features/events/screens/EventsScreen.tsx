@@ -1,8 +1,13 @@
-/** Events — admin-managed school calendar (holidays, exams, meetings, activities). */
+/**
+ * Events — common screen reused across Admin/Teacher/Parent stacks.
+ *
+ * Role decides everything: which endpoint the feed hits (`useEventsFeed` already
+ * branches internally), and whether create/edit/delete controls show at all.
+ * Teacher and Parent only ever get a read-only feed — admin manages.
+ */
 import React, {useEffect, useState} from 'react';
 import {FlatList, Pressable, RefreshControl, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
@@ -23,12 +28,14 @@ import {
 } from '../../../shared/components';
 import type {BadgeTone} from '../../../shared/components';
 import {formatDate} from '../../../core/utils/format';
-import {useAdminEvents, useDeleteEvent} from '../events.service';
+import {useEventsFeed, useDeleteEvent} from '../events.service';
+import {useAuthStore} from '../../auth/authStore';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {AdminEvent, AnnouncementAudience, EventType} from '../../../shared/types';
-import type {AdminStackParamList} from '../../../navigation/types';
 
-type Nav = NativeStackNavigationProp<AdminStackParamList>;
+/** Loosely typed on purpose — this screen is registered in three differently-typed
+ * stacks (Admin/Teacher/Parent); only Admin's stack actually has `EventForm`. */
+type LooseNav = {navigate: (route: string, params?: object) => void; goBack: () => void};
 
 const ALL_FILTER_VALUE = '';
 const SEARCH_DEBOUNCE_MS = 350;
@@ -68,7 +75,9 @@ type ViewFilter = 'upcoming' | 'past';
 export function EventsScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
-  const navigation = useNavigation<Nav>();
+  const navigation = useNavigation<LooseNav>();
+  const role = useAuthStore(s => s.user?.role) ?? 'parent';
+  const isAdmin = role === 'admin';
 
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -86,7 +95,7 @@ export function EventsScreen(): React.JSX.Element {
   }, [search]);
 
   const today = todayIso();
-  const {data, isLoading, isRefetching, isError, error, refetch} = useAdminEvents({
+  const {data, isLoading, isRefetching, isError, error, refetch} = useEventsFeed(role, {
     page,
     pageSize: 15,
     search: debouncedSearch || undefined,
@@ -183,7 +192,7 @@ export function EventsScreen(): React.JSX.Element {
       <CustomHeader
         title={t('eventsManage_headerTitle')}
         onBack={() => navigation.goBack()}
-        actions={[{icon: 'add', onPress: () => navigation.navigate(ScreenNames.EventForm, {})}]}
+        actions={isAdmin ? [{icon: 'add', onPress: () => navigation.navigate(ScreenNames.EventForm, {})}] : []}
       />
       <View style={styles.searchBarWrap}>
         <SearchBar
@@ -236,7 +245,11 @@ export function EventsScreen(): React.JSX.Element {
           renderItem={({item}) => (
             <CustomCard
               style={styles.card}
-              onPress={() => navigation.navigate(ScreenNames.EventForm, {id: item.id, initial: item})}>
+              onPress={
+                isAdmin
+                  ? () => navigation.navigate(ScreenNames.EventForm, {id: item.id, initial: item})
+                  : undefined
+              }>
               <Row justify="space-between" align="flex-start">
                 <Row gap={theme.spacing.xs} wrap>
                   <Badge label={TYPE_LABEL[item.eventType]} tone={EVENT_TYPE_TONE[item.eventType]} />
@@ -244,9 +257,11 @@ export function EventsScreen(): React.JSX.Element {
                     <Badge label={AUDIENCE_LABEL[item.audience]} tone={AUDIENCE_TONE[item.audience]} />
                   ) : null}
                 </Row>
-                <Pressable onPress={() => setDeleteTarget(item)} hitSlop={8}>
-                  <Icon name="delete" size={18} color={theme.colors.error} />
-                </Pressable>
+                {isAdmin ? (
+                  <Pressable onPress={() => setDeleteTarget(item)} hitSlop={8}>
+                    <Icon name="delete" size={18} color={theme.colors.error} />
+                  </Pressable>
+                ) : null}
               </Row>
               <Spacer size={theme.spacing.sm} />
               <Row gap={theme.spacing.sm} align="center">
@@ -274,8 +289,8 @@ export function EventsScreen(): React.JSX.Element {
               icon="event"
               title={t('eventsManage_emptyTitle')}
               message={t('eventsManage_emptyMessage')}
-              actionLabel={t('eventsManage_addEvent')}
-              onAction={() => navigation.navigate(ScreenNames.EventForm, {})}
+              actionLabel={isAdmin ? t('eventsManage_addEvent') : undefined}
+              onAction={isAdmin ? () => navigation.navigate(ScreenNames.EventForm, {}) : undefined}
             />
           }
           ListFooterComponent={
@@ -289,28 +304,30 @@ export function EventsScreen(): React.JSX.Element {
         />
       )}
 
-      <CustomModal
-        visible={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
-        title={t('eventsManage_deleteTitle')}>
-        <AppText variant="body" color="textSecondary">
-          {t('eventsManage_deleteConfirm', {title: deleteTarget?.title ?? ''})}
-        </AppText>
-        <Spacer size={16} />
-        <Row gap={theme.spacing.md}>
-          <View style={styles.modalButtonWrap}>
-            <CustomButton title={t('common_cancel')} variant="outline" onPress={() => setDeleteTarget(null)} />
-          </View>
-          <View style={styles.modalButtonWrap}>
-            <CustomButton
-              title={t('common_delete')}
-              variant="danger"
-              loading={deleteMutation.isPending}
-              onPress={onDelete}
-            />
-          </View>
-        </Row>
-      </CustomModal>
+      {isAdmin ? (
+        <CustomModal
+          visible={!!deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          title={t('eventsManage_deleteTitle')}>
+          <AppText variant="body" color="textSecondary">
+            {t('eventsManage_deleteConfirm', {title: deleteTarget?.title ?? ''})}
+          </AppText>
+          <Spacer size={16} />
+          <Row gap={theme.spacing.md}>
+            <View style={styles.modalButtonWrap}>
+              <CustomButton title={t('common_cancel')} variant="outline" onPress={() => setDeleteTarget(null)} />
+            </View>
+            <View style={styles.modalButtonWrap}>
+              <CustomButton
+                title={t('common_delete')}
+                variant="danger"
+                loading={deleteMutation.isPending}
+                onPress={onDelete}
+              />
+            </View>
+          </Row>
+        </CustomModal>
+      ) : null}
     </Screen>
   );
 }

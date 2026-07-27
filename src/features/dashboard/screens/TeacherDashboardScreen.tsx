@@ -1,37 +1,69 @@
-/** Teacher dashboard — daily KPIs, quick actions, schedule + class performance. */
+/** Teacher dashboard — daily KPIs, quick actions, class-teacher attendance status, schedule, announcements + class performance. */
 import React from 'react';
-import {View, ScrollView, RefreshControl} from 'react-native';
+import {Pressable, View, ScrollView, RefreshControl} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useThemedStyles} from '../../../core/theme';
+import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
-  CustomHeader,
+  DashboardGreetingHeader,
   CustomCard,
   CustomButton,
   StatGrid,
   SectionTitle,
   BarChart,
   Loader,
+  ListRow,
+  Badge,
+  Row,
   Spacer,
   Divider,
+  DashboardProfileCard,
 } from '../../../shared/components';
+import {formatDate} from '../../../core/utils/format';
+import {capitalize} from '../../../shared/helpers';
 import {useAuthStore} from '../../auth/authStore';
 import {useTeacherDashboard} from '../dashboard.service';
+import {useTeacherDashboardStats} from '../teacherDashboard.service';
 import {useTodaySchedule} from '../../timetable/teacherSchedule.service';
+import {useAnnouncementsFeed} from '../../communication/announcements.service';
+import {useEventsFeed} from '../../events/events.service';
 import type {TeacherStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {StatCard} from '../../../shared/types';
 
+const MAX_UPCOMING_EVENTS = 3;
+
 type Nav = NativeStackNavigationProp<TeacherStackParamList>;
 
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 export function TeacherDashboardScreen(): React.JSX.Element {
+  const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
   const user = useAuthStore(s => s.user);
   const {data, isLoading} = useTeacherDashboard();
+  const {
+    data: dashboardStats,
+    isLoading: statsLoading,
+    isRefetching: statsRefetching,
+    refetch: refetchStats,
+  } = useTeacherDashboardStats();
   const {data: todaySchedule, isLoading: isScheduleLoading, isRefetching, refetch} = useTodaySchedule();
+  const {
+    data: announcementsPage,
+    isLoading: announcementsLoading,
+    refetch: refetchAnnouncements,
+  } = useAnnouncementsFeed('teacher', {page: 1, pageSize: 3, from: todayIso()});
+  const {
+    data: eventsPage,
+    isLoading: eventsLoading,
+    refetch: refetchEvents,
+  } = useEventsFeed('teacher', {page: 1, pageSize: 10, from: todayIso()});
   const {t} = useLanguage();
   const styles = useThemedStyles(t2 => ({
     scrollContent: {
@@ -39,15 +71,28 @@ export function TeacherDashboardScreen(): React.JSX.Element {
     },
   }));
 
-  if (isLoading || !data) {
+  if (
+    isLoading ||
+    !data ||
+    statsLoading ||
+    !dashboardStats ||
+    announcementsLoading ||
+    !announcementsPage ||
+    eventsLoading ||
+    !eventsPage
+  ) {
     return <Loader message={t('teacherDashboard_loadingDashboard')} />;
   }
+
+  const upcomingEvents = [...eventsPage.items]
+    .sort((a, b) => a.startDate.localeCompare(b.startDate))
+    .slice(0, MAX_UPCOMING_EVENTS);
 
   const stats: StatCard[] = [
     {
       key: 'classes',
       label: t('teacherDashboard_todaysClasses'),
-      value: todaySchedule?.periods.length ?? 0,
+      value: dashboardStats.todayClassesCount,
       icon: 'class',
       accent: 'primary',
     },
@@ -64,9 +109,9 @@ export function TeacherDashboardScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader
-        title={t('teacherDashboard_greeting', {name: user?.name?.split(' ')[0] ?? 'Teacher'})}
-        subtitle={user?.schoolName}
+      <DashboardGreetingHeader
+        name={user?.name?.split(' ')[0] ?? 'Teacher'}
+        schoolName={user?.schoolName}
         actions={[
           {icon: 'announcement', onPress: () => navigation.navigate(ScreenNames.Announcements)},
           {icon: 'notification', onPress: () => navigation.navigate(ScreenNames.Notifications), badgeCount: 2},
@@ -75,8 +120,68 @@ export function TeacherDashboardScreen(): React.JSX.Element {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}>
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching || statsRefetching}
+            onRefresh={() => {
+              refetch();
+              refetchStats();
+              refetchAnnouncements();
+              refetchEvents();
+            }}
+          />
+        }>
+        <DashboardProfileCard
+          name={user?.name ?? 'Teacher'}
+          avatarUri={user?.avatarUrl}
+          schoolName={user?.schoolName}
+          roleLabel={capitalize(user?.role ?? 'teacher')}
+          email={user?.email}
+        />
+
         <StatGrid stats={stats} />
+
+        {dashboardStats.attendance.length > 0 ? (
+          <>
+            <SectionTitle title={t('teacherDashboard_classAttendanceStatus')} />
+            <CustomCard padded={false} style={{paddingHorizontal: theme.spacing.lg}}>
+              {dashboardStats.attendance.map((section, i) => (
+                <React.Fragment key={section.sectionId}>
+                  {i > 0 ? <Divider /> : null}
+                  <Pressable
+                    onPress={
+                      section.isMarked
+                        ? undefined
+                        : () =>
+                            navigation.navigate(ScreenNames.MarkAttendance, {
+                              classId: section.classId,
+                              className: section.className,
+                              sectionId: section.sectionId,
+                              sectionName: section.sectionName,
+                            })
+                    }>
+                    <Row justify="space-between" align="center" style={{paddingVertical: theme.spacing.sm}}>
+                      <View style={{flex: 1}}>
+                        <AppText variant="bodyBold">
+                          {section.className} - {section.sectionName}
+                        </AppText>
+                        {!section.isMarked ? (
+                          <AppText variant="caption" color="textSecondary">
+                            {t('teacherDashboard_markedCount', {marked: section.markedCount, total: section.totalStudents})}
+                          </AppText>
+                        ) : null}
+                      </View>
+                      <Badge
+                        label={section.isMarked ? t('teacherDashboard_attendanceMarked') : t('teacherDashboard_attendancePending')}
+                        tone={section.isMarked ? 'success' : 'warning'}
+                      />
+                    </Row>
+                  </Pressable>
+                </React.Fragment>
+              ))}
+            </CustomCard>
+          </>
+        ) : null}
 
         <SectionTitle title={t('teacherDashboard_quickActions')} />
         <CustomButton
@@ -107,6 +212,46 @@ export function TeacherDashboardScreen(): React.JSX.Element {
                   {`${period.subjectName} — ${period.className} - ${period.sectionName}`}
                 </AppText>
               </View>
+            ))
+          )}
+        </CustomCard>
+
+        <SectionTitle
+          title={t('teacherDashboard_upcomingEvents')}
+          actionLabel={t('common_seeAll')}
+          onAction={() => navigation.navigate(ScreenNames.Events)}
+        />
+        <CustomCard padded={false} style={{paddingHorizontal: theme.spacing.lg}}>
+          {upcomingEvents.length === 0 ? (
+            <AppText variant="caption" color="textMuted" style={{paddingVertical: theme.spacing.md}}>
+              {t('teacherDashboard_noUpcomingEvents')}
+            </AppText>
+          ) : (
+            upcomingEvents.map((ev, i) => (
+              <React.Fragment key={ev.id}>
+                {i > 0 ? <Divider /> : null}
+                <ListRow icon="event" title={ev.title} subtitle={`${formatDate(ev.startDate)} · ${ev.eventType}`} />
+              </React.Fragment>
+            ))
+          )}
+        </CustomCard>
+
+        <SectionTitle
+          title={t('teacherDashboard_announcements')}
+          actionLabel={t('common_seeAll')}
+          onAction={() => navigation.navigate(ScreenNames.Announcements)}
+        />
+        <CustomCard padded={false} style={{paddingHorizontal: theme.spacing.lg}}>
+          {announcementsPage.items.length === 0 ? (
+            <AppText variant="caption" color="textMuted" style={{paddingVertical: theme.spacing.md}}>
+              {t('teacherDashboard_noAnnouncements')}
+            </AppText>
+          ) : (
+            announcementsPage.items.map((item, i) => (
+              <React.Fragment key={item.id}>
+                {i > 0 ? <Divider /> : null}
+                <ListRow icon="announcement" title={item.title} subtitle={item.message} />
+              </React.Fragment>
             ))
           )}
         </CustomCard>

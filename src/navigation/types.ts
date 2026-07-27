@@ -127,8 +127,10 @@ export type TeacherStackParamList = {
   MyLeave: undefined;
   MyLeaveApply: undefined;
   MyAttendance: undefined;
+  MyProfile: undefined;
   Chat: undefined;
   Announcements: undefined;
+  Events: undefined;
   Notifications: undefined;
   ChangePassword: undefined;
 };
@@ -150,6 +152,7 @@ export type ParentStackParamList = {
   Fees: undefined;
   Timetable: undefined;
   Announcements: undefined;
+  Events: undefined;
   Chat: undefined;
   Leave: undefined;
   LeaveApply: {studentId: string; studentName: string};

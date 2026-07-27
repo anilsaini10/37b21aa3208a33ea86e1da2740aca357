@@ -1,12 +1,62 @@
 /** Dashboard KPI tile. */
 import React from 'react';
 import {View} from 'react-native';
+import Svg, {Path} from 'react-native-svg';
 import {useTheme, useThemedStyles} from '../../core/theme';
 import {CustomCard} from './CustomCard';
 import {AppText} from './AppText';
 import {Icon} from './Icon';
 import {Row, Spacer} from './layout';
 import type {StatCard} from '../types';
+
+/** Purely decorative wave accent along the tile's bottom edge, tinted to the stat's accent color. */
+function TileSparkle({ color }: { color: string }): React.JSX.Element {
+  return (
+    <Svg
+      width="100%"
+      height={34}
+      viewBox="0 0 150 34"
+      preserveAspectRatio="none"
+      style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+      }}
+      pointerEvents="none"
+    >
+      {/* Bottom filled area */}
+      <Path
+        d="
+      M0 32
+      C20 32, 30 31, 45 28
+      C60 25, 75 30, 90 20
+      C105 10, 115 12, 125 22
+      C135 32, 142 8, 150 12
+      L150 34
+      L0 34
+      Z
+    "
+        fill={color}
+      />
+
+      {/* Top wave line */}
+      <Path
+        d="
+      M0 32
+      C20 32, 30 31, 45 28
+      C60 25, 75 30, 90 20
+      C105 10, 115 12, 125 22
+      C135 32, 142 8, 150 12
+    "
+        stroke="#B794F4"
+        strokeWidth={1.5}
+        fill={"none"}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
 
 const ACCENTS: Record<StatCard['accent'], keyof import('../../core/theme').ThemeColors> = {
   primary: 'primary',
@@ -22,6 +72,8 @@ export function StatTile({stat, onPress}: {stat: StatCard; onPress?: () => void}
   const styles = useThemedStyles(t => ({
     card: {
       minWidth: 150,
+      overflow: 'hidden',
+      borderColor: 'transparent',
     },
     iconCircle: {
       width: 40,
@@ -57,6 +109,7 @@ export function StatTile({stat, onPress}: {stat: StatCard; onPress?: () => void}
 
   return (
     <CustomCard onPress={onPress} style={styles.card}>
+      <TileSparkle color={accent + '26'} />
       <Row justify="space-between" align="flex-start">
         {/* backgroundColor is derived at runtime from the stat's accent key
             (one of 5 theme colors) so it stays inline rather than a static style */}
@@ -84,6 +137,7 @@ export function StatTile({stat, onPress}: {stat: StatCard; onPress?: () => void}
       <AppText variant="caption" color="textSecondary">
         {stat.label}
       </AppText>
+
     </CustomCard>
   );
 }

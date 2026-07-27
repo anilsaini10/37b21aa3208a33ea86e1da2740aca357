@@ -1,26 +1,24 @@
-/** Admin profile — identity card, school info, quick links, and logout. */
+/** Admin profile — photo hero identity, quick links, and logout. */
 import React from 'react';
 import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme, useThemedStyles} from '../../../core/theme';
+import type {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
+import {useThemedStyles} from '../../../core/theme';
 import {useLanguage, type TranslationKey} from '../../../core/i18n';
 import {
   Screen,
   AppText,
-  CustomHeader,
   CustomCard,
   CustomButton,
-  Avatar,
-  Badge,
+  ProfileHero,
   ListRow,
   SectionTitle,
-  Row,
   Spacer,
 } from '../../../shared/components';
 import {capitalize} from '../../../shared/helpers';
 import {useAuthStore} from '../../auth/authStore';
-import type {AdminStackParamList} from '../../../navigation/types';
+import type {AdminStackParamList, AdminTabParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
@@ -36,81 +34,50 @@ const MENU: {
 ];
 
 export function AdminProfileScreen(): React.JSX.Element {
-  const {theme} = useTheme();
   const styles = useThemedStyles(t2 => ({
-    scrollContent: {
+    content: {
       padding: t2.spacing.lg,
-    },
-    nameBlock: {
-      flex: 1,
     },
     menuCard: {
       paddingHorizontal: t2.spacing.lg,
     },
   }));
   const navigation = useNavigation<Nav>();
+  const tabNavigation = useNavigation<BottomTabNavigationProp<AdminTabParamList>>();
   const {t} = useLanguage();
   const user = useAuthStore(s => s.user);
   const logout = useAuthStore(s => s.logout);
 
   return (
     <Screen padded={false}>
-      <CustomHeader title={t('teacherProfile_profile')} />
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
-        <CustomCard>
-          <Row gap={theme.spacing.md}>
-            <Avatar name={user?.name ?? t('adminProfile_admin')} size={64} />
-            <View style={styles.nameBlock}>
-              <AppText variant="h2" numberOfLines={1}>
-                {user?.name ?? t('adminProfile_admin')}
-              </AppText>
-              {user?.email ? (
-                <AppText variant="caption" color="textSecondary" numberOfLines={1}>
-                  {user.email}
-                </AppText>
-              ) : null}
-              {user?.phone ? (
-                <AppText variant="caption" color="textSecondary" numberOfLines={1}>
-                  {user.phone}
-                </AppText>
-              ) : null}
-              <Spacer size={6} />
-              <Badge label={capitalize(user?.role ?? 'admin')} tone="primary" />
-            </View>
-          </Row>
-          {user?.schoolName ? (
-            <>
-              <Spacer size={theme.spacing.md} />
-              <Row gap={theme.spacing.sm}>
-                <AppText variant="caption" color="textSecondary">
-                  {t('adminProfile_school')}
-                </AppText>
-                <AppText variant="caption" style={{fontWeight: '700'}}>
-                  {user.schoolName}
-                </AppText>
-              </Row>
-            </>
-          ) : null}
-        </CustomCard>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <ProfileHero
+          name={user?.name ?? t('adminProfile_admin')}
+          avatarUri={user?.avatarUrl}
+          lines={[user?.email, user?.phone, user?.schoolName]}
+          badgeLabel={capitalize(user?.role ?? 'admin')}
+          onBack={() => tabNavigation.goBack}
+          title={t('teacherProfile_profile')}
+        />
 
-        <SectionTitle title={t('teacherProfile_manage')} />
-        <CustomCard padded={false} style={styles.menuCard}>
-          {MENU.map(item => (
-            <ListRow
-              key={item.route}
-              icon={item.icon}
-              title={t(item.titleKey)}
-              right={<AppText color="textMuted">›</AppText>}
-              onPress={() => navigation.navigate(item.route)}
-            />
-          ))}
-        </CustomCard>
+        <View style={styles.content}>
+          <SectionTitle title={t('teacherProfile_manage')} />
+          <CustomCard padded={false} style={styles.menuCard}>
+            {MENU.map(item => (
+              <ListRow
+                key={item.route}
+                icon={item.icon}
+                title={t(item.titleKey)}
+                right={<AppText color="textMuted">›</AppText>}
+                onPress={() => navigation.navigate(item.route)}
+              />
+            ))}
+          </CustomCard>
 
-        <Spacer size={24} />
-        <CustomButton title={t('common_logout')} variant="danger" iconLeft="logout" onPress={() => logout()} />
-        <Spacer size={24} />
+          <Spacer size={24} />
+          <CustomButton title={t('common_logout')} variant="danger" iconLeft="logout" onPress={() => logout()} />
+          <Spacer size={24} />
+        </View>
       </ScrollView>
     </Screen>
   );

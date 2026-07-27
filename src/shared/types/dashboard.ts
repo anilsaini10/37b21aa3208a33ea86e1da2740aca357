@@ -45,4 +45,5 @@ export interface StatCard {
   icon: string;
   accent: 'primary' | 'success' | 'warning' | 'error' | 'info';
   delta?: number;
+  onPress?: () => void;
 }

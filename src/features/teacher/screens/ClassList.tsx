@@ -8,11 +8,11 @@ import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   CustomHeader,
-  CustomCard,
-  ListRow,
-  SectionTitle,
+  ClassCard,
+  classCardAccent,
   AppText,
   Icon,
+  Row,
   Divider,
   EmptyState,
   Loader,
@@ -31,22 +31,11 @@ export function ClassListScreen(): React.JSX.Element {
       padding: theme2.spacing.lg,
       flexGrow: 1,
     },
-    card: {
-      marginBottom: theme2.spacing.sm,
-      padding: theme2.spacing.sm,
-      borderWidth: 0,
-      shadowOpacity: theme2.dark ? 0.4 : 0.12,
-      shadowRadius: 10,
-      shadowOffset: {width: 0, height: 4},
-      elevation: 6,
-    },
-    subjectsLine: {
-      paddingHorizontal: theme2.spacing.sm,
-      paddingTop: theme2.spacing.xs,
-      paddingBottom: theme2.spacing.sm,
-    },
     attendanceButton: {
       padding: theme2.spacing.xs,
+    },
+    sectionRow: {
+      paddingVertical: theme2.spacing.xs,
     },
   }));
   const {t} = useLanguage();
@@ -103,56 +92,56 @@ export function ClassListScreen(): React.JSX.Element {
             message={t('classList_teacherEmptyMessage')}
           />
         ) : (
-          classes.map(cls => {
+          classes.map((cls, classIndex) => {
             const subjectsLabel = cls.mySubjects.map(s => s.subjectName).join(', ');
             const singleSection = cls.sections.length === 1 ? cls.sections[0] : null;
+            const subtitle = subjectsLabel
+              ? `${t('classList_studentCount', {count: cls.totalStudents})} · ${t('classList_subjectsTaught', {subjects: subjectsLabel})}`
+              : t('classList_studentCount', {count: cls.totalStudents});
+
+            if (singleSection) {
+              return (
+                <ClassCard
+                  key={cls.classId}
+                  name={cls.className}
+                  subtitle={subtitle}
+                  accent={classCardAccent(classIndex)}
+                  onPress={() => openSection(cls, singleSection)}
+                  rightSlot={
+                    <Pressable
+                      onPress={() => takeAttendance(cls, singleSection)}
+                      hitSlop={8}
+                      style={styles.attendanceButton}>
+                      <Icon name="attendance" size={22} color={theme.colors.primary} />
+                    </Pressable>
+                  }
+                />
+              );
+            }
+
             return (
-              <View key={cls.classId}>
-                <SectionTitle title={cls.className} />
-                <CustomCard style={styles.card}>
-                  {subjectsLabel ? (
-                    <AppText variant="caption" color="textSecondary" style={styles.subjectsLine}>
-                      {t('classList_subjectsTaught', {subjects: subjectsLabel})}
-                    </AppText>
-                  ) : null}
-                  {singleSection ? (
-                    <ListRow
-                      icon="class"
-                      title={cls.className}
-                      subtitle={t('classList_studentCount', {count: cls.totalStudents})}
-                      onPress={() => openSection(cls, singleSection)}
-                      right={
-                        <Pressable
-                          onPress={() => takeAttendance(cls, singleSection)}
-                          hitSlop={8}
-                          style={styles.attendanceButton}>
-                          <Icon name="attendance" size={22} color={theme.colors.primary} />
-                        </Pressable>
-                      }
-                    />
-                  ) : (
-                    cls.sections.map((section, index) => (
-                      <View key={section.sectionId}>
-                        {index > 0 ? <Divider /> : null}
-                        <ListRow
-                          icon="class"
-                          title={t('classList_sectionLabel', {name: section.sectionName})}
-                          subtitle={t('classList_studentCount', {count: section.studentCount})}
-                          onPress={() => openSection(cls, section)}
-                          right={
-                            <Pressable
-                              onPress={() => takeAttendance(cls, section)}
-                              hitSlop={8}
-                              style={styles.attendanceButton}>
-                              <Icon name="attendance" size={22} color={theme.colors.primary} />
-                            </Pressable>
-                          }
-                        />
-                      </View>
-                    ))
-                  )}
-                </CustomCard>
-              </View>
+              <ClassCard key={cls.classId} name={cls.className} subtitle={subtitle} accent={classCardAccent(classIndex)}>
+                <Divider dashed />
+                {cls.sections.map((section, index) => (
+                  <View key={section.sectionId}>
+                    {index > 0 ? <Divider /> : null}
+                    <Row justify="space-between" align="center" style={styles.sectionRow}>
+                      <Pressable onPress={() => openSection(cls, section)} style={{flex: 1}}>
+                        <AppText variant="bodyBold">{t('classList_sectionLabel', {name: section.sectionName})}</AppText>
+                        <AppText variant="caption" color="textSecondary">
+                          {t('classList_studentCount', {count: section.studentCount})}
+                        </AppText>
+                      </Pressable>
+                      <Pressable
+                        onPress={() => takeAttendance(cls, section)}
+                        hitSlop={8}
+                        style={styles.attendanceButton}>
+                        <Icon name="attendance" size={22} color={theme.colors.primary} />
+                      </Pressable>
+                    </Row>
+                  </View>
+                ))}
+              </ClassCard>
             );
           })
         )}

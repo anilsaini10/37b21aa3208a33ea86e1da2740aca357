@@ -62,8 +62,8 @@ export type UpdateTeacherInput = Partial<{
   classTeacherSectionId: string;
 }>;
 
-/** Raw shape the real backend responds with — gender/status come back upper-case. */
-interface TeacherApi {
+/** Raw shape the real backend responds with — gender/status come back upper-case. Exported so the teacher's own-profile endpoint (identical shape) can reuse this normalisation. */
+export interface TeacherApi {
   id: string;
   employeeId: string;
   name: string;
@@ -82,7 +82,7 @@ interface TeacherApi {
   subjectsTaught: string[];
 }
 
-function toTeacher(raw: TeacherApi): Teacher {
+export function toTeacher(raw: TeacherApi): Teacher {
   return {
     id: raw.id,
     employeeId: raw.employeeId,
