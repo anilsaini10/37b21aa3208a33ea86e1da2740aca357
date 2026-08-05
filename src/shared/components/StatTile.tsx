@@ -133,8 +133,8 @@ export function StatTile({stat, onPress}: {stat: StatCard; onPress?: () => void}
         ) : null}
       </Row>
       <Spacer size={theme.spacing.sm} />
-      <AppText variant="h2">{stat.value}</AppText>
-      <AppText variant="caption" color="textSecondary">
+      <AppText variant="bodyBold">{stat.value}</AppText>
+      <AppText  color="textSecondary">
         {stat.label}
       </AppText>
 

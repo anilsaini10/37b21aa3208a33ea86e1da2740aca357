@@ -8,6 +8,7 @@ import {SelectSchoolScreen} from '../features/auth/screens/SelectSchoolScreen';
 import {LoginScreen} from '../features/auth/screens/LoginScreen';
 import {SignUpScreen} from '../features/auth/screens/SignUpScreen';
 import {ForgotPasswordScreen} from '../features/auth/screens/ForgotPasswordScreen';
+import {ResetPasswordScreen} from '../features/auth/screens/ResetPasswordScreen';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
@@ -19,6 +20,7 @@ export function AuthNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.Login} component={LoginScreen} />
       <Stack.Screen name={ScreenNames.SignUp} component={SignUpScreen} />
       <Stack.Screen name={ScreenNames.ForgotPassword} component={ForgotPasswordScreen} />
+      <Stack.Screen name={ScreenNames.ResetPassword} component={ResetPasswordScreen} />
     </Stack.Navigator>
   );
 }

@@ -111,7 +111,7 @@ export function ProfileHero({
               <Icon name="back" size={20} color={'white'} />
             </Pressable>
             {title ? (
-              <AppText variant="bodyBold" style={styles.title}>
+              <AppText variant="headerTitle" style={styles.title}>
                 {title}
               </AppText>
             ) : null}

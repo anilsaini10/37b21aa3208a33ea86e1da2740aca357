@@ -9,17 +9,14 @@ import {
   Screen,
   CustomHeader,
   SearchBar,
-  ListRow,
-  Badge,
   Select,
-  AppText,
   Pagination,
   EmptyState,
   Loader,
   Row,
   Spacer,
 } from '../../../shared/components';
-import {statusTone, capitalize} from '../../../shared/helpers';
+import {TeacherCard} from '../components/TeacherCard';
 import {useTeachers} from '../teachers.service';
 import {useSubjects} from '../../subjects/subjects.service';
 import {useClasses} from '../../classes/classes.service';
@@ -46,6 +43,10 @@ export function TeachersListScreen(): React.JSX.Element {
     },
     filterItem: {
       flex: 1,
+    },
+    filterSelectBorder: {
+      borderColor: theme.colors.primary + '40',
+      borderWidth: 1,
     },
     listContent: {
       padding: theme.spacing.lg,
@@ -106,7 +107,7 @@ export function TeachersListScreen(): React.JSX.Element {
             ? []
             : [{icon: 'attendance', onPress: () => navigation.navigate(ScreenNames.MarkStaffAttendance)}]),
           {icon: 'calendar', onPress: () => navigation.navigate(ScreenNames.StaffAttendanceRegister)},
-          {icon: 'add', onPress: () => navigation.navigate(ScreenNames.TeacherForm)},
+          {icon: 'add', onPress: () => navigation.navigate(ScreenNames.TeacherForm), circle: true},
         ]}
       />
       <View style={styles.searchBarWrap}>
@@ -124,6 +125,7 @@ export function TeachersListScreen(): React.JSX.Element {
               value={subjectFilter}
               options={subjectOptions}
               onChange={onFilterChange(setSubjectFilter)}
+              style={styles.filterSelectBorder}
             />
           </View>
           <View style={styles.filterItem}>
@@ -132,6 +134,7 @@ export function TeachersListScreen(): React.JSX.Element {
               value={classFilter}
               options={classOptions}
               onChange={onFilterChange(setClassFilter)}
+              style={styles.filterSelectBorder}
             />
           </View>
         </Row>
@@ -161,26 +164,18 @@ export function TeachersListScreen(): React.JSX.Element {
               }}
             />
           }
-          renderItem={({item}) => (
-            <ListRow
-              avatarName={item.name}
-              avatarUri={item.avatarUrl}
-              title={item.name}
+          renderItem={({item, index}) => (
+            <TeacherCard
+              teacher={item}
+              index={index}
               subtitle={t('teachersList_rowSubtitle', {
                 subjects: item.subjectsTaught.join(', '),
                 employeeId: item.employeeId,
               })}
-              right={
-                <View style={{alignItems: 'flex-end'}}>
-                  <Badge label={capitalize(item.status)} tone={statusTone(item.status)} />
-                  <AppText variant="label" color="textMuted" style={{marginTop: 4}}>
-                    {t('teacherDetail_experienceValue', {
-                      years: item.experienceYears,
-                      months: item.experienceMonths,
-                    })}
-                  </AppText>
-                </View>
-              }
+              experienceLabel={t('teacherDetail_experienceValue', {
+                years: item.experienceYears,
+                months: item.experienceMonths,
+              })}
               onPress={() => navigation.navigate(ScreenNames.TeacherDetail, {teacherId: item.id, initial: item})}
             />
           )}

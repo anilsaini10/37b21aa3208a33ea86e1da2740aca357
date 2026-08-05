@@ -19,6 +19,7 @@ export const Endpoints = {
     otpVerify: '/api/auth/otp/verify',
     forgotPassword: '/api/auth/forgot-password',
     resetPassword: '/api/auth/reset-password',
+    resetPasswordConfirm: '/api/auth/reset-password/confirm',
     refresh: '/api/auth/refresh',
     logout: '/api/auth/logout',
   },

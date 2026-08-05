@@ -36,6 +36,7 @@ export type AuthStackParamList = {
   Login: {role: UserRole; schoolId?: string; schoolName?: string};
   SignUp: undefined;
   ForgotPassword: undefined;
+  ResetPassword: {email: string};
 };
 
 // ---- Admin ----------------------------------------------------------------

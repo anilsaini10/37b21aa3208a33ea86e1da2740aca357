@@ -13,6 +13,7 @@ export type TextVariant =
   | 'h1'
   | 'h2'
   | 'h3'
+  | 'headerTitle'
   | 'body'
   | 'bodyBold'
   | 'caption'
@@ -55,6 +56,9 @@ export function AppText({
       case 'h2':
         return {fontSize: fontSize.xxl, lineHeight: lineHeight.xxl, fontFamily: fontFamily.semibold, fontWeight: fontWeight.semibold};
       case 'h3':
+        return {fontSize: fontSize.xl, lineHeight: lineHeight.xl, fontFamily: fontFamily.semibold, fontWeight: fontWeight.semibold};
+      case 'headerTitle':
+        // Single common size/family for every screen header's title across the app — dynamic (theme.typography scale-aware), not a hardcoded literal.
         return {fontSize: fontSize.xl, lineHeight: lineHeight.xl, fontFamily: fontFamily.semibold, fontWeight: fontWeight.semibold};
       case 'bodyBold':
         return {fontSize: fontSize.md, lineHeight: lineHeight.md, fontFamily: fontFamily.semibold, fontWeight: fontWeight.semibold};

@@ -56,7 +56,7 @@ export function AdminProfileScreen(): React.JSX.Element {
           avatarUri={user?.avatarUrl}
           lines={[user?.email, user?.phone, user?.schoolName]}
           badgeLabel={capitalize(user?.role ?? 'admin')}
-          onBack={() => tabNavigation.goBack}
+          onBack={tabNavigation.goBack}
           title={t('teacherProfile_profile')}
         />
 

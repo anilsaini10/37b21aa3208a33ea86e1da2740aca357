@@ -9,6 +9,8 @@ export interface HeaderAction {
   icon: string;
   onPress: () => void;
   badgeCount?: number;
+  /** Renders this action inside a filled circular button (theme primary color) instead of a plain icon — e.g. a prominent "add" action. */
+  circle?: boolean;
 }
 
 export interface CustomHeaderProps {
@@ -39,6 +41,15 @@ export function CustomHeader({
     backButton: {paddingRight: t.spacing.xs},
     titleBlock: {flex: 1},
     actionButton: {padding: t.spacing.xs},
+    actionButtonCircle: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      padding: 0,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: t.colors.primary,
+    },
     actionBadge: {
       position: 'absolute',
       top: -2,
@@ -62,7 +73,7 @@ export function CustomHeader({
       ) : null}
 
       <View style={styles.titleBlock}>
-        <AppText variant="h3" numberOfLines={1}>
+        <AppText variant="headerTitle" numberOfLines={1}>
           {title}
         </AppText>
         {subtitle ? (
@@ -73,8 +84,16 @@ export function CustomHeader({
       </View>
 
       {actions.map((action, i) => (
-        <Pressable key={i} onPress={action.onPress} hitSlop={10} style={styles.actionButton}>
-          <Icon name={action.icon} size={22} color={theme.colors.text} />
+        <Pressable
+          key={i}
+          onPress={action.onPress}
+          hitSlop={10}
+          style={[styles.actionButton, action.circle && styles.actionButtonCircle]}>
+          <Icon
+            name={action.icon}
+            size={action.circle ? 18 : 22}
+            color={action.circle ? theme.colors.onPrimary : theme.colors.text}
+          />
           {action.badgeCount && action.badgeCount > 0 ? (
             <View style={styles.actionBadge}>
               <AppText style={styles.actionBadgeText}>

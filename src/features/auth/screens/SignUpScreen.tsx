@@ -119,7 +119,7 @@ export function SignUpScreen({navigation}: AuthScreenProps<'SignUp'>): React.JSX
               <Pressable onPress={() => navigation.goBack()} hitSlop={10} style={styles.backButton}>
                 <Icon name="back" size={20} color={theme.colors.text} />
               </Pressable>
-              <AppText variant="bodyBold" style={styles.headerTitle}>
+              <AppText variant="headerTitle" style={styles.headerTitle}>
                 {title}
               </AppText>
             </Row>

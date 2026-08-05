@@ -98,7 +98,7 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
               <Pressable onPress={() => navigation.goBack()} hitSlop={10} style={styles.backButton}>
                 <Icon name="back" size={20} color={theme.colors.text} />
               </Pressable>
-              <AppText variant="bodyBold" style={{marginLeft: 12}}>
+              <AppText variant="headerTitle" style={{marginLeft: 12}}>
                 {title}
               </AppText>
             </Row>

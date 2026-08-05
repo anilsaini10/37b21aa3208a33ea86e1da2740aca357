@@ -37,6 +37,7 @@ export const ScreenNames = {
   Login: 'Login',
   SignUp: 'SignUp',
   ForgotPassword: 'ForgotPassword',
+  ResetPassword: 'ResetPassword',
 
   // Admin
   Students: 'Students',

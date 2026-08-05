@@ -1,6 +1,7 @@
-/** Teacher detail — profile, contact, employment info, and subject/class assignments. */
+/** Teacher detail — gradient hero profile, floating contact card, employment info, and subject/class assignments. */
 import React, {useState} from 'react';
-import {Pressable, RefreshControl, ScrollView, View, StyleSheet} from 'react-native';
+import {Pressable, RefreshControl, ScrollView, View, StyleSheet, type StyleProp, type ViewStyle} from 'react-native';
+import Svg, {Defs, LinearGradient, Rect, Stop} from 'react-native-svg';
 import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme, useThemedStyles} from '../../../core/theme';
@@ -9,7 +10,6 @@ import {
   Screen,
   AppText,
   CustomHeader,
-  CustomCard,
   CustomModal,
   CustomButton,
   Select,
@@ -28,7 +28,7 @@ import {useTeacher, useAssignTeacherSubject, useRemoveTeacherSubject} from '../t
 import {useClasses} from '../../classes/classes.service';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {AdminStackParamList} from '../../../navigation/types';
-import type {TeacherSubjectAssignment} from '../../../shared/types';
+import type {Teacher, TeacherSubjectAssignment} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
@@ -39,13 +39,207 @@ const infoRowStyles = StyleSheet.create({
 });
 
 function InfoRow({label, value}: {label: string; value: string}): React.JSX.Element {
+  const {theme} = useTheme();
   return (
-    <Row justify="space-between" style={infoRowStyles.row}>
-      <AppText variant="body" color="textSecondary">
+    <Row justify="space-between" align="flex-start" style={infoRowStyles.row}>
+      <AppText variant="body" color="textSecondary" style={{flex: 1, paddingRight: theme.spacing.sm}}>
         {label}
       </AppText>
-      <AppText variant="body">{value}</AppText>
+      <AppText variant="body" style={{flexShrink: 1, textAlign: 'right', fontWeight: '600'}}>
+        {value}
+      </AppText>
     </Row>
+  );
+}
+
+function ContactItem({icon, value}: {icon: string; value: string}): React.JSX.Element {
+  const {theme} = useTheme();
+  const styles = useThemedStyles(t => ({
+    wrap: {flex: 1, alignItems: 'center'},
+    iconCircle: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      backgroundColor: theme.colors.primary + '14',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: t.spacing.xs,
+    },
+  }));
+
+  return (
+    <View style={styles.wrap}>
+      <View style={styles.iconCircle}>
+        <Icon name={icon} size={16} color={theme.colors.primary} />
+      </View>
+      <AppText variant="caption" color="textSecondary" numberOfLines={1} ellipsizeMode="tail">
+        {value}
+      </AppText>
+    </View>
+  );
+}
+
+/**
+ * Level-2 card — a near-flat surface with an optional barely-visible
+ * primary-tinted wash, shared by Contact/Employment/Subjects Taught/Subject
+ * cards so they read as one consistent family, distinct from the hero's
+ * bolder gradient.
+ *
+ * Split into two layers on purpose: Android's `elevation` renders as an ugly
+ * rectangular grey block when combined with `overflow: 'hidden'` + rounded
+ * corners on the SAME view, so the shadow lives on an unclipped OUTER
+ * wrapper and the clipping/gradient/border live on an INNER view with no
+ * shadow of its own.
+ */
+function SubtleGradientCard({
+  children,
+  style,
+  variant = 'subtleGradient',
+}: {
+  children: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
+  /** 'surface' renders a plain theme.colors.card surface (no gradient) — for content that must stay maximally clean/readable, e.g. the floating contact card. */
+  variant?: 'surface' | 'subtleGradient';
+}): React.JSX.Element {
+  const {theme} = useTheme();
+  const gradientId = React.useId();
+  const styles = useThemedStyles(t => ({
+    shadowWrapper: {
+      borderRadius: t.radius.lg,
+      backgroundColor: theme.colors.card,
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: theme.dark ? 0.16 : 0.06,
+      shadowRadius: 6,
+      shadowOffset: {width: 0, height: 2},
+      elevation: 2,
+    },
+    innerCard: {
+      borderRadius: t.radius.lg,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      padding: t.components.card.padding,
+      backgroundColor: theme.colors.card,
+    },
+  }));
+
+  return (
+    <View style={[styles.shadowWrapper, style]}>
+      <View style={styles.innerCard}>
+        {variant === 'subtleGradient' ? (
+          <Svg pointerEvents="none" style={StyleSheet.absoluteFill} width="100%" height="100%">
+            <Defs>
+              <LinearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
+                <Stop offset="0%" stopColor={theme.colors.card} stopOpacity={1} />
+                <Stop offset="100%" stopColor={theme.colors.primary} stopOpacity={theme.dark ? 0.08 : 0.03} />
+              </LinearGradient>
+            </Defs>
+            <Rect x={0} y={0} width="100%" height="100%" fill={`url(#${gradientId})`} />
+          </Svg>
+        ) : null}
+        {children}
+      </View>
+    </View>
+  );
+}
+
+/** Level-1 gradient — the visually prominent identity hero, primary → primaryVariant (a tonal shift of the SAME theme hue, so it never introduces an off-theme colour). */
+function TeacherHero({teacher}: {teacher: Teacher}): React.JSX.Element {
+  const {theme} = useTheme();
+  const {t} = useLanguage();
+  const gradientId = React.useId();
+  const styles = useThemedStyles(t2 => ({
+    hero: {
+      marginHorizontal: t2.spacing.lg,
+      marginTop: t2.spacing.md,
+      borderRadius: 22,
+      overflow: 'hidden',
+      paddingHorizontal: t2.spacing.lg,
+      paddingTop: t2.spacing.lg,
+      paddingBottom: 52,
+      backgroundColor: theme.colors.primary,
+    },
+    blobOne: {position: 'absolute', width: 140, height: 140, borderRadius: 70, top: -40, right: -30},
+    blobTwo: {position: 'absolute', width: 90, height: 90, borderRadius: 45, bottom: -20, left: -20},
+    nameBlock: {flex: 1},
+  }));
+  const blobColor = {backgroundColor: theme.colors.onPrimary, opacity: theme.dark ? 0.05 : 0.08};
+
+  return (
+    <View style={styles.hero}>
+      <Svg pointerEvents="none" style={StyleSheet.absoluteFill} width="100%" height="100%">
+        <Defs>
+          <LinearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0%" stopColor={theme.colors.primary} stopOpacity={1} />
+            <Stop offset="100%" stopColor={theme.colors.primaryVariant} stopOpacity={1} />
+          </LinearGradient>
+        </Defs>
+        <Rect x={0} y={0} width="100%" height="100%" fill={`url(#${gradientId})`} />
+      </Svg>
+      <View style={[styles.blobOne, blobColor]} pointerEvents="none" />
+      <View style={[styles.blobTwo, blobColor]} pointerEvents="none" />
+      <Row gap={theme.spacing.md} align="center">
+        <Avatar name={teacher.name} uri={teacher.avatarUrl} size={76} color={theme.colors.onPrimary} />
+        <View style={styles.nameBlock}>
+          <AppText variant="h2" color="onPrimary" numberOfLines={1}>
+            {teacher.name}
+          </AppText>
+          <AppText variant="caption" color="onPrimary" style={{opacity: 0.85}}>
+            {t('teacherDetail_employeeId')} · {teacher.employeeId}
+          </AppText>
+          <Spacer size={6} />
+          <Badge label={capitalize(teacher.status)} tone={statusTone(teacher.status)} />
+        </View>
+      </Row>
+    </View>
+  );
+}
+
+/** Floats over the hero's lower edge via a negative marginTop — same overlap technique as ProfileHero's avatar. */
+function ContactInfoCard({teacher}: {teacher: Teacher}): React.JSX.Element {
+  const styles = useThemedStyles(t => ({
+    card: {
+      marginHorizontal: 20,
+      marginTop: -40,
+      marginBottom: t.spacing.md
+    },
+  }));
+
+  return (
+    <SubtleGradientCard style={styles.card} variant="surface">
+      <Row justify="space-between">
+        <ContactItem icon="email" value={teacher.email} />
+        <ContactItem icon="phone" value={teacher.phone ?? '—'} />
+        <ContactItem icon="profile" value={capitalize(teacher.gender)} />
+      </Row>
+    </SubtleGradientCard>
+  );
+}
+
+function SubjectCard({
+  subject,
+  onDelete,
+}: {
+  subject: TeacherSubjectAssignment;
+  onDelete: () => void;
+}): React.JSX.Element {
+  const {theme} = useTheme();
+  const styles = useThemedStyles(t => ({card: {marginBottom: t.spacing.sm}}));
+
+  return (
+    <SubtleGradientCard style={styles.card}>
+      <Row justify="space-between" align="center">
+        <View style={{flex: 1}}>
+          <AppText variant="body">{subject.name}</AppText>
+          <AppText variant="caption" color="textSecondary">
+            {subject.className}
+          </AppText>
+        </View>
+        <Pressable onPress={onDelete} hitSlop={8}>
+          <Icon name="delete" size={18} color={theme.colors.error} />
+        </Pressable>
+      </Row>
+    </SubtleGradientCard>
   );
 }
 
@@ -68,10 +262,10 @@ export function TeacherDetailScreen(): React.JSX.Element {
   const [removeError, setRemoveError] = useState<string | undefined>();
   const styles = useThemedStyles(t2 => ({
     scrollContent: {
-      padding: t2.spacing.lg,
+      paddingBottom: t2.spacing.lg,
     },
-    avatarBlock: {
-      flex: 1,
+    contentWrap: {
+      marginHorizontal: t2.spacing.lg,
     },
     modalButtonWrap: {
       flex: 1,
@@ -142,92 +336,62 @@ export function TeacherDetailScreen(): React.JSX.Element {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => refetch()} />}>
-        <CustomCard>
-          <Row gap={theme.spacing.md}>
-            <Avatar name={teacher.name} uri={teacher.avatarUrl} size={72} />
-            <View style={styles.avatarBlock}>
-              <AppText variant="h2">{teacher.name}</AppText>
-              <AppText variant="caption" color="textSecondary">
-                {t('teacherDetail_employeeId')} · {teacher.employeeId}
-              </AppText>
-              <Spacer size={6} />
-              <Badge label={capitalize(teacher.status)} tone={statusTone(teacher.status)} />
-            </View>
-          </Row>
-        </CustomCard>
+        <TeacherHero teacher={teacher} />
+        <ContactInfoCard teacher={teacher} />
 
-        <SectionTitle title={t('teacherDetail_contactSection')} />
-        <CustomCard>
-          <InfoRow label={t('common_email')} value={teacher.email} />
-          <InfoRow label={t('common_phone')} value={teacher.phone ?? '—'} />
-          <InfoRow label={t('teacherDetail_gender')} value={capitalize(teacher.gender)} />
-        </CustomCard>
-
-        <SectionTitle title={t('teacherDetail_employmentSection')} />
-        <CustomCard>
-          <InfoRow label={t('teacherForm_joiningDateLabel')} value={formatDate(teacher.joiningDate)} />
-          <InfoRow label={t('teacherForm_salaryLabel')} value={formatCurrency(teacher.salary)} />
-          <InfoRow label={t('teacherDetail_qualification')} value={teacher.qualification} />
-          <InfoRow
-            label={t('teacherDetail_experience')}
-            value={t('teacherDetail_experienceValue', {years: teacher.experienceYears, months: teacher.experienceMonths})}
+        <View style={styles.contentWrap}>
+          <SectionTitle title={t('teacherDetail_employmentSection')} icon="reports" />
+          <SubtleGradientCard>
+            <InfoRow label={t('teacherForm_joiningDateLabel')} value={formatDate(teacher.joiningDate)} />
+            <InfoRow label={t('teacherForm_salaryLabel')} value={formatCurrency(teacher.salary)} />
+            <InfoRow label={t('teacherDetail_qualification')} value={teacher.qualification} />
+            <InfoRow
+              label={t('teacherDetail_experience')}
+              value={t('teacherDetail_experienceValue', {years: teacher.experienceYears, months: teacher.experienceMonths})}
+            />
+            <InfoRow label={t('teacherDetail_performanceScore')} value={String(teacher.performanceScore)} />
+          </SubtleGradientCard>
+          <Spacer size={theme.spacing.sm} />
+          <CustomButton
+            title={t('staffAttendance_viewHistoryButton')}
+            iconLeft="attendance"
+            onPress={() =>
+              navigation.navigate(ScreenNames.StaffAttendanceRegister, {teacherId, teacherName: teacher.name})
+            }
           />
-          <InfoRow label={t('teacherDetail_performanceScore')} value={String(teacher.performanceScore)} />
-        </CustomCard>
-        <CustomButton
-          title={t('staffAttendance_viewHistoryButton')}
-          variant="outline"
-          size="sm"
-          iconLeft="attendance"
-          onPress={() =>
-            navigation.navigate(ScreenNames.StaffAttendanceRegister, {teacherId, teacherName: teacher.name})
-          }
-        />
 
-        <SectionTitle title={t('teacherDetail_subjectsTaughtSection')} />
-        <CustomCard>
-          {teacher.subjectsTaught.length === 0 ? (
-            <AppText variant="caption" color="textMuted">
-              {t('teacherDetail_noSubjectsTaught')}
-            </AppText>
-          ) : (
-            <Row gap={theme.spacing.xs} wrap>
-              {teacher.subjectsTaught.map(s => (
-                <Badge key={s} label={s} tone="primary" />
-              ))}
-            </Row>
-          )}
-        </CustomCard>
+          <SectionTitle title={t('teacherDetail_subjectsTaughtSection')} icon="book" />
+          <SubtleGradientCard>
+            {teacher.subjectsTaught.length === 0 ? (
+              <AppText variant="caption" color="textMuted">
+                {t('teacherDetail_noSubjectsTaught')}
+              </AppText>
+            ) : (
+              <Row gap={theme.spacing.xs} wrap>
+                {teacher.subjectsTaught.map(s => (
+                  <Badge key={s} label={s} tone="primary" />
+                ))}
+              </Row>
+            )}
+          </SubtleGradientCard>
 
-        <SectionTitle
-          title={t('teacherDetail_subjectsSection')}
-          actionLabel={t('teacherDetail_assignSubject')}
-          onAction={openAssignModal}
-        />
-        <CustomCard>
+          <SectionTitle
+            title={t('teacherDetail_subjectsSection')}
+            actionLabel={t('teacherDetail_assignSubject')}
+            onAction={openAssignModal}
+          />
           {teacher.subjects.length === 0 ? (
-            <AppText variant="caption" color="textMuted">
-              {t('teacherDetail_noSubjects')}
-            </AppText>
+            <SubtleGradientCard>
+              <AppText variant="caption" color="textMuted">
+                {t('teacherDetail_noSubjects')}
+              </AppText>
+            </SubtleGradientCard>
           ) : (
-            teacher.subjects.map((s, index) => (
-              <View key={`${s.subjectId}_${s.classId}`}>
-                {index > 0 ? <Spacer size={4} /> : null}
-                <Row justify="space-between" align="center" style={infoRowStyles.row}>
-                  <AppText variant="body" color="textSecondary">
-                    {s.name}
-                  </AppText>
-                  <Row gap={theme.spacing.sm} align="center">
-                    <AppText variant="body">{s.className}</AppText>
-                    <Pressable onPress={() => setRemoveTarget(s)} hitSlop={8}>
-                      <Icon name="delete" size={16} color={theme.colors.error} />
-                    </Pressable>
-                  </Row>
-                </Row>
-              </View>
+            teacher.subjects.map(s => (
+              <SubjectCard key={`${s.subjectId}_${s.classId}`} subject={s} onDelete={() => setRemoveTarget(s)} />
             ))
           )}
-        </CustomCard>
+        </View>
 
         <Spacer size={24} />
       </ScrollView>

@@ -13,6 +13,7 @@ import {
   CustomModal,
   CustomButton,
   Select,
+  DatePicker,
   Badge,
   Pagination,
   Loader,
@@ -22,7 +23,6 @@ import {
   Divider,
 } from '../../../shared/components';
 import type {BadgeTone} from '../../../shared/components';
-import {DateRangeFilter} from './AttendanceReportScreen';
 import {formatDate} from '../../../core/utils/format';
 import {useTeachers} from '../../teachers/teachers.service';
 import {useStaffAttendanceList, useCorrectStaffAttendance} from '../adminTeacherAttendance.service';
@@ -95,15 +95,14 @@ export function StaffAttendanceRegisterScreen(): React.JSX.Element {
     ...(teachersPage?.items ?? []).map(tch => ({label: tch.name, value: tch.id})),
   ];
 
+  const statusOptions = TABS.map(value => ({
+    label: value === 'ALL' ? t('common_all') : STATUS_LABEL[value],
+    value,
+  }));
+
   const styles = useThemedStyles(t2 => ({
-    tabsWrap: {alignItems: 'center', paddingTop: t2.spacing.md},
-    tabsContent: {columnGap: t2.spacing.sm, paddingHorizontal: t2.spacing.lg},
-    tabPill: {
-      paddingHorizontal: t2.spacing.lg,
-      paddingVertical: t2.spacing.sm,
-      borderRadius: t2.radius.pill,
-    },
-    filterRow: {paddingHorizontal: t2.spacing.lg},
+    filterRow: {paddingHorizontal: t2.spacing.lg, paddingTop: t2.spacing.md},
+    filterItem: {flex: 1},
     scrollContent: {padding: t2.spacing.lg},
     recordCard: {marginBottom: t2.spacing.md},
     recordRow: {paddingVertical: t2.spacing.xs},
@@ -143,38 +142,42 @@ export function StaffAttendanceRegisterScreen(): React.JSX.Element {
   return (
     <Screen padded={false}>
       <CustomHeader title={t('staffAttendance_registerTitle')} onBack={() => navigation.goBack()} />
-      <View style={styles.tabsWrap}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsContent}>
-          {TABS.map(value => {
-            const active = value === statusFilter;
-            const label = value === 'ALL' ? t('common_all') : STATUS_LABEL[value];
-            return (
-              <Pressable
-                key={value}
-                onPress={() => {
-                  setStatusFilter(value);
-                  setPage(1);
-                }}
-                style={[styles.tabPill, {backgroundColor: active ? theme.colors.primary : theme.colors.surfaceVariant}]}>
-                <AppText variant="label" style={{color: active ? theme.colors.onPrimary : theme.colors.textSecondary}}>
-                  {label}
-                </AppText>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-      </View>
-
       <View style={styles.filterRow}>
-        <DateRangeFilter
-          fromDate={fromDate}
-          toDate={toDate}
-          onChange={(f, tD) => {
-            setFromDate(f);
-            setToDate(tD);
-            setPage(1);
-          }}
-        />
+        <Row gap={theme.spacing.sm} align="flex-start">
+          <View style={styles.filterItem}>
+            <Select
+              label={t('common_status')}
+              value={statusFilter}
+              options={statusOptions}
+              onChange={val => {
+                setStatusFilter(val as TabValue);
+                setPage(1);
+              }}
+            />
+          </View>
+          <View style={styles.filterItem}>
+            <DatePicker
+              label={t('attendanceReport_fromDate')}
+              value={fromDate}
+              onChange={d => {
+                setFromDate(d);
+                setToDate(prev => (d > prev ? d : prev));
+                setPage(1);
+              }}
+            />
+          </View>
+          <View style={styles.filterItem}>
+            <DatePicker
+              label={t('attendanceReport_toDate')}
+              value={toDate}
+              onChange={d => {
+                setToDate(d);
+                setFromDate(prev => (d < prev ? d : prev));
+                setPage(1);
+              }}
+            />
+          </View>
+        </Row>
         <Select
           label={t('staffAttendance_filterByTeacher')}
           value={teacherFilter}

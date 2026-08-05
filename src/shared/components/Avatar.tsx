@@ -9,17 +9,19 @@ export interface AvatarProps {
   name: string;
   uri?: string;
   size?: number;
+  /** Overrides the default primary-tinted initials circle — e.g. to coordinate with a list item's accent color. */
+  color?: string;
 }
 
-export function Avatar({name, uri, size = 44}: AvatarProps): React.JSX.Element {
+export function Avatar({name, uri, size = 44, color}: AvatarProps): React.JSX.Element {
   const styles = useThemedStyles(theme => ({
     image: {backgroundColor: theme.colors.surfaceVariant},
     circle: {
-      backgroundColor: theme.colors.primary + '22',
+      backgroundColor: (color ?? theme.colors.primary) + '22',
       alignItems: 'center',
       justifyContent: 'center',
     },
-    initials: {color: theme.colors.primary, fontWeight: '700'},
+    initials: {color: color ?? theme.colors.primary, fontWeight: '700'},
   }));
 
   const sizeStyle = {width: size, height: size, borderRadius: size / 2};

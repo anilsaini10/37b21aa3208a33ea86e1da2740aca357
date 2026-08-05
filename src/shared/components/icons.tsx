@@ -250,8 +250,7 @@ export const ICONS: Record<string, IconRenderer> = {
   ),
  back: p => (
   <Frame {...p}>
-    <Polyline points="16 6 8 12 16 18" />
-    <Polyline points="8 12 70 12" />
+    <Polygon points="17 5, 8 12, 17 19" />
   </Frame>
 ),
   forward: p => (

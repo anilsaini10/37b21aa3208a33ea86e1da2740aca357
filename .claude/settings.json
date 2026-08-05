@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(xargs -I{} wc -l {})"
+      "Bash(xargs -I{} wc -l {})",
+      "Bash(echo \"REAL_EXIT=$?\")"
     ]
   }
 }

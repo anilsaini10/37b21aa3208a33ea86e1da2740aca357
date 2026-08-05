@@ -1,5 +1,6 @@
 export * from './AppText';
 export * from './Icon';
+export * from './ChevronRight';
 export * from './layout';
 export * from './Badge';
 export * from './Avatar';

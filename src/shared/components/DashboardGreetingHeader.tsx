@@ -74,7 +74,7 @@ export function DashboardGreetingHeader({name, schoolName, actions = []}: Dashbo
           ))}
         </Row>
       ) : null}
-      <AppText variant="h2">{t(greetingKeyForHour(new Date().getHours()), {name})}</AppText>
+      <AppText variant="headerTitle">{t(greetingKeyForHour(new Date().getHours()), {name})}</AppText>
       {schoolName ? (
         <AppText variant="caption" color="textSecondary">
           {t('adminDashboard_subtitle', {schoolName})}

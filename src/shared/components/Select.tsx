@@ -1,6 +1,6 @@
 /** Dropdown select backed by a bottom sheet. */
 import React, {useState} from 'react';
-import {Pressable, View} from 'react-native';
+import {Pressable, View, type StyleProp, type ViewStyle} from 'react-native';
 import {useTheme, useThemedStyles} from '../../core/theme';
 import {useLanguage} from '../../core/i18n';
 import {AppText} from './AppText';
@@ -19,6 +19,7 @@ export interface SelectProps {
   disabled?: boolean;
   /** Called instead of opening the picker when `disabled` is true — e.g. surface a hint like "select X first". */
   onDisabledPress?: () => void;
+  style?: StyleProp<ViewStyle>;
 }
 
 export function Select({
@@ -31,6 +32,7 @@ export function Select({
   required,
   disabled,
   onDisabledPress,
+  style,
 }: SelectProps): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
@@ -92,6 +94,7 @@ export function Select({
           styles.fieldBase,
           error ? styles.fieldBorderError : styles.fieldBorderNormal,
           disabled ? styles.fieldDisabled : null,
+          style,
         ]}>
         <AppText color={selected ? 'text' : 'textMuted'}>
           {selected?.label ?? placeholder ?? t('common_select')}

@@ -1,4 +1,4 @@
-import {respond, fail} from '../../core/mock/mockApi';
+import {respond} from '../../core/mock/mockApi';
 import {axiosClient} from '../../core/api/axiosClient';
 import {Endpoints} from '../../core/api/apiConfig';
 import {rethrowApiError} from '../../core/api/apiError';
@@ -118,11 +118,38 @@ export const authApi = {
     }
   },
 
-  async forgotPassword(identifier: string): Promise<{sent: true}> {
-    if (!identifier.trim()) {
-      return fail('Please enter your registered email or mobile.');
+  /**
+   * Public — no auth token, no role/schoolId. Always responds 200 (even for
+   * an unknown email) so the UI must never treat "not found" as an error.
+   */
+  async forgotPassword(email: string): Promise<{message: string}> {
+    try {
+      const {data} = await axiosClient.post<{message: string}>(Endpoints.auth.forgotPassword, {email});
+      return data;
+    } catch (e) {
+      logger.warn('authApi.forgotPassword failed', e);
+      rethrowApiError(e, 'Failed to send reset code. Please try again.');
     }
-    return respond({sent: true});
+  },
+
+  /**
+   * Public — completes the OTP flow above. On success the backend revokes
+   * every existing session/refresh token for this user, so callers must
+   * always send the user back to login rather than trying to stay signed in.
+   * Wrong/expired OTP comes back as a 400 with `code: "INVALID_OTP"`.
+   */
+  async resetPasswordConfirm(email: string, otp: string, newPassword: string): Promise<{message: string}> {
+    try {
+      const {data} = await axiosClient.post<{message: string}>(Endpoints.auth.resetPasswordConfirm, {
+        email,
+        otp,
+        newPassword,
+      });
+      return data;
+    } catch (e) {
+      logger.warn('authApi.resetPasswordConfirm failed', e);
+      rethrowApiError(e, 'Failed to reset password. Please try again.');
+    }
   },
 
   async logout(): Promise<void> {
