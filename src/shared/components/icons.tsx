@@ -250,7 +250,7 @@ export const ICONS: Record<string, IconRenderer> = {
   ),
  back: p => (
   <Frame {...p}>
-    <Polygon points="17 5, 8 12, 17 19" />
+    <Path d="M18 12H6M10 8L6 12L10 16" />
   </Frame>
 ),
   forward: p => (

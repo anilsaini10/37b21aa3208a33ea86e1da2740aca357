@@ -4,14 +4,15 @@ import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import type {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
-import {useThemedStyles} from '../../../core/theme';
+import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage, type TranslationKey} from '../../../core/i18n';
 import {
   Screen,
   CustomCard,
   CustomButton,
   ProfileHero,
-  ListRow,
+  MoreMenuItem,
+  moreMenuAccentForIndex,
   Spacer,
 } from '../../../shared/components';
 import {useAuthStore} from '../../auth/authStore';
@@ -35,6 +36,7 @@ const MENU: {labelKey: TranslationKey; icon: string; route: MenuRoute}[] = [
 ];
 
 export function ParentProfileScreen(): React.JSX.Element {
+  const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
   const tabNavigation = useNavigation<BottomTabNavigationProp<ParentTabParamList>>();
   const {t} = useLanguage();
@@ -44,9 +46,9 @@ export function ParentProfileScreen(): React.JSX.Element {
     content: {
       padding: t2.spacing.lg,
     },
-    menuCard: {
-      paddingHorizontal: t2.spacing.lg,
-    },
+    menuCard: theme.dark
+      ? {paddingVertical: t2.spacing.sm}
+      : {paddingVertical: t2.spacing.sm, borderRadius: 22, borderColor: 'rgba(100, 100, 150, 0.08)'},
   }));
 
   return (
@@ -64,11 +66,12 @@ export function ParentProfileScreen(): React.JSX.Element {
         <View style={styles.content}>
           <Spacer size={4} />
           <CustomCard padded={false} style={styles.menuCard}>
-            {MENU.map(item => (
-              <ListRow
+            {MENU.map((item, index) => (
+              <MoreMenuItem
                 key={item.route}
                 icon={item.icon}
                 title={t(item.labelKey)}
+                accentColor={moreMenuAccentForIndex(index)}
                 onPress={() => navigation.navigate(item.route)}
               />
             ))}

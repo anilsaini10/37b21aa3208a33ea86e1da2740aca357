@@ -1,13 +1,34 @@
 /**
- * More-screen menu row — colored left accent bar, pastel icon box (derived
- * from the accent color via alpha blend, so it adapts to light/dark theme
- * automatically), dark title, code-drawn chevron. Purely visual — press and
- * navigation behavior stay fully owned by the caller.
+ * Menu-list row shared by every role's More/Profile screen (Admin More,
+ * Admin/Teacher/Parent Profile) — colored left accent bar, pastel icon box
+ * (derived from the accent color via alpha blend, so it adapts to light/dark
+ * theme automatically), dark title, code-drawn chevron. Purely visual — press
+ * and navigation behavior stay fully owned by the caller.
  */
 import React from 'react';
 import {Pressable, View} from 'react-native';
-import {useTheme, useThemedStyles} from '../../../core/theme';
-import {AppText, Icon, ChevronRight} from '../../../shared/components';
+import {useTheme, useThemedStyles} from '../../core/theme';
+import {AppText} from './AppText';
+import {Icon} from './Icon';
+import {ChevronRight} from './ChevronRight';
+
+/** Soft accent palette for a menu row's left bar + icon tint. */
+const MORE_MENU_TONE_ACCENTS = {
+  purple: '#7C5CFC',
+  green: '#4CCB7F',
+  blue: '#4D8DFF',
+  orange: '#FF9F43',
+  teal: '#35C9A5',
+} as const;
+
+type MoreMenuTone = keyof typeof MORE_MENU_TONE_ACCENTS;
+
+const MORE_MENU_TONE_CYCLE: MoreMenuTone[] = ['purple', 'green', 'blue', 'orange', 'teal'];
+
+/** Deterministic accent for the Nth row in a menu list, so consecutive rows read as visually distinct. */
+export function moreMenuAccentForIndex(index: number): string {
+  return MORE_MENU_TONE_ACCENTS[MORE_MENU_TONE_CYCLE[index % MORE_MENU_TONE_CYCLE.length]];
+}
 
 export interface MoreMenuItemProps {
   title: string;

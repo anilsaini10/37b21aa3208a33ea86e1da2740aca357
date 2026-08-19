@@ -29,6 +29,7 @@ export * from './LineChart';
 export * from './StatTile';
 export * from './StatGrid';
 export * from './ClassCard';
+export * from './MoreMenuItem';
 export * from './SectionTitle';
 export * from './ListRow';
 export * from './LanguageSwitcher';

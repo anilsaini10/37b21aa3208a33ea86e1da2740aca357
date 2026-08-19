@@ -5,8 +5,7 @@ import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage, type TranslationKey} from '../../../core/i18n';
-import {Screen, CustomCard, AppText, Spacer} from '../../../shared/components';
-import {MoreMenuItem} from '../components/MoreMenuItem';
+import {Screen, CustomCard, AppText, Spacer, MoreMenuItem, moreMenuAccentForIndex} from '../../../shared/components';
 import type {AdminStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 
@@ -62,25 +61,6 @@ const MODULES: ModuleItem[] = [
   // {labelKey: 'moreScreen_notifications', icon: 'notification', route: ScreenNames.Notifications},
 ];
 
-/** Soft accent palette for the rows' left bar + icon tint — matches the suggested per-module colors 1:1 for the first 11 modules, then cycles for the rest. */
-const TONE_ACCENTS = {
-  purple: '#7C5CFC',
-  green: '#4CCB7F',
-  blue: '#4D8DFF',
-  orange: '#FF9F43',
-  teal: '#35C9A5',
-} as const;
-
-type Tone = keyof typeof TONE_ACCENTS;
-
-const TONE_SEQUENCE: Tone[] = ['purple', 'green', 'blue', 'orange', 'purple', 'green', 'blue', 'orange', 'purple', 'teal', 'blue'];
-const TONE_CYCLE: Tone[] = ['purple', 'green', 'blue', 'orange', 'teal'];
-
-function accentForIndex(index: number): string {
-  const tone = TONE_SEQUENCE[index] ?? TONE_CYCLE[index % TONE_CYCLE.length];
-  return TONE_ACCENTS[tone];
-}
-
 export function MoreScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
@@ -121,7 +101,7 @@ export function MoreScreen(): React.JSX.Element {
               key={m.route}
               icon={m.icon}
               title={t(m.labelKey)}
-              accentColor={accentForIndex(index)}
+              accentColor={moreMenuAccentForIndex(index)}
               onPress={() => navigation.navigate(m.route)}
             />
           ))}

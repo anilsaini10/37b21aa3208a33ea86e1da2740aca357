@@ -4,15 +4,15 @@ import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import type {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
-import {useThemedStyles} from '../../../core/theme';
+import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage, type TranslationKey} from '../../../core/i18n';
 import {
   Screen,
-  AppText,
   CustomCard,
   CustomButton,
   ProfileHero,
-  ListRow,
+  MoreMenuItem,
+  moreMenuAccentForIndex,
   SectionTitle,
   Spacer,
 } from '../../../shared/components';
@@ -40,13 +40,14 @@ const MENU: {
 ];
 
 export function TeacherProfileScreen(): React.JSX.Element {
+  const {theme} = useTheme();
   const styles = useThemedStyles(t2 => ({
     content: {
       padding: t2.spacing.lg,
     },
-    menuCard: {
-      paddingHorizontal: t2.spacing.lg,
-    },
+    menuCard: theme.dark
+      ? {paddingVertical: t2.spacing.sm}
+      : {paddingVertical: t2.spacing.sm, borderRadius: 22, borderColor: 'rgba(100, 100, 150, 0.08)'},
   }));
   const navigation = useNavigation<Nav>();
   const tabNavigation = useNavigation<BottomTabNavigationProp<TeacherTabParamList>>();
@@ -69,12 +70,12 @@ export function TeacherProfileScreen(): React.JSX.Element {
         <View style={styles.content}>
           <SectionTitle title={t('teacherProfile_manage')} />
           <CustomCard padded={false} style={styles.menuCard}>
-            {MENU.map(item => (
-              <ListRow
+            {MENU.map((item, index) => (
+              <MoreMenuItem
                 key={item.route}
                 icon={item.icon}
                 title={t(item.titleKey)}
-                right={<AppText color="textMuted">›</AppText>}
+                accentColor={moreMenuAccentForIndex(index)}
                 onPress={() => navigation.navigate(item.route)}
               />
             ))}

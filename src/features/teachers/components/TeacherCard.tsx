@@ -131,7 +131,7 @@ export function TeacherCard({teacher, subtitle, experienceLabel, index, onPress}
             <AppText variant="label" color="textSecondary">
               {experienceLabel}
             </AppText>
-            {onPress ? <ChevronRight size={12} color={theme.colors.textMuted} /> : null}
+            {/* {onPress ? <ChevronRight size={12} color={theme.colors.textMuted} /> : null} */}
           </View>
         </View>
       </View>

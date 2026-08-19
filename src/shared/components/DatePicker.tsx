@@ -5,7 +5,7 @@
  * Value + onChange use ISO date strings ("YYYY-MM-DD").
  */
 import React, {useMemo, useState} from 'react';
-import {Pressable, View} from 'react-native';
+import {Pressable, View, type StyleProp, type TextStyle} from 'react-native';
 import {useTheme, useThemedStyles} from '../../core/theme';
 import {useLanguage} from '../../core/i18n';
 import {AppText} from './AppText';
@@ -28,6 +28,8 @@ export interface DatePickerProps {
   onChange: (iso: string) => void;
   minYear?: number;
   maxYear?: number;
+  /** Overrides the displayed value/placeholder text's style — e.g. a smaller fontSize for a denser filter row. */
+  valueStyle?: StyleProp<TextStyle>;
 }
 
 function toParts(iso?: string): {y: number; m: number; d: number} {
@@ -43,6 +45,7 @@ export function DatePicker({
   onChange,
   minYear = 2026,
   maxYear = 2045,
+  valueStyle,
 }: DatePickerProps): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
@@ -99,7 +102,7 @@ export function DatePicker({
         </AppText>
       ) : null}
       <Pressable onPress={() => setOpen(true)} style={styles.field}>
-        <AppText color={value ? 'text' : 'textMuted'}>
+        <AppText color={value ? 'text' : 'textMuted'} style={valueStyle}>
           {value ? formatDate(value) : t('common_selectDate')}
         </AppText>
         <Icon name="calendar" size={18} color={theme.colors.textMuted} />
