@@ -11,6 +11,7 @@ import {
   CustomInput,
   CustomButton,
   Select,
+  SearchBar,
   AppText,
   Badge,
   Icon,
@@ -52,6 +53,7 @@ export function ClassesManageScreen(): React.JSX.Element {
   const deleteSectionMutation = useDeleteSection();
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
 
   const [classModalOpen, setClassModalOpen] = useState(false);
   const [className, setClassName] = useState('');
@@ -82,6 +84,7 @@ export function ClassesManageScreen(): React.JSX.Element {
   const [deleteSectionError, setDeleteSectionError] = useState<string | undefined>();
 
   const styles = useThemedStyles(t2 => ({
+    searchSection: {paddingHorizontal: t2.spacing.lg, paddingTop: t2.spacing.md},
     scrollContent: {padding: t2.spacing.lg, flexGrow: 1},
     card: {marginBottom: t2.spacing.md},
     sectionRow: {paddingVertical: t2.spacing.sm},
@@ -390,6 +393,10 @@ export function ClassesManageScreen(): React.JSX.Element {
     );
   };
 
+  const filteredClasses = (classes ?? []).filter(cls =>
+    cls.name.toLowerCase().includes(search.trim().toLowerCase()),
+  );
+
   return (
     <Screen padded={false}>
       <CustomHeader
@@ -407,19 +414,30 @@ export function ClassesManageScreen(): React.JSX.Element {
       ) : isLoading || !classes ? (
         <Loader message={t('classesManage_loading')} />
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          {classes.length === 0 ? (
-            <EmptyState
-              icon="class"
-              title={t('classesManage_emptyTitle')}
-              message={t('classesManage_emptyMessage')}
-              actionLabel={t('classesManage_addClass')}
-              onAction={openClassModal}
-            />
-          ) : (
-            classes.map(renderClass)
-          )}
-        </ScrollView>
+        <>
+          <View style={styles.searchSection}>
+            <SearchBar value={search} onChangeText={setSearch} placeholder={t('classesManage_searchPlaceholder')} />
+          </View>
+          <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+            {classes.length === 0 ? (
+              <EmptyState
+                icon="class"
+                title={t('classesManage_emptyTitle')}
+                message={t('classesManage_emptyMessage')}
+                actionLabel={t('classesManage_addClass')}
+                onAction={openClassModal}
+              />
+            ) : filteredClasses.length === 0 ? (
+              <EmptyState
+                icon="search"
+                title={t('studentsWiseClassList_noResultsTitle')}
+                message={t('studentsWiseClassList_noResultsMessage')}
+              />
+            ) : (
+              filteredClasses.map(renderClass)
+            )}
+          </ScrollView>
+        </>
       )}
 
       <CustomModal visible={classModalOpen} onClose={() => setClassModalOpen(false)} title={t('classesManage_addClass')}>

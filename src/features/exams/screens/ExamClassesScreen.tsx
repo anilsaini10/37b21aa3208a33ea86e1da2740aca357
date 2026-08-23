@@ -13,6 +13,7 @@ import {
   CustomButton,
   CustomInput,
   Select,
+  SearchBar,
   AppText,
   Icon,
   Row,
@@ -56,12 +57,18 @@ export function ExamClassesScreen(): React.JSX.Element {
 
   const [removeTarget, setRemoveTarget] = useState<ExamClassProgress | null>(null);
   const [removeError, setRemoveError] = useState<string | undefined>();
+  const [search, setSearch] = useState('');
 
   const styles = useThemedStyles(t2 => ({
+    searchSection: {paddingHorizontal: t2.spacing.lg, paddingTop: t2.spacing.lg},
     scrollContent: {padding: t2.spacing.lg, flexGrow: 1},
     card: {marginBottom: t2.spacing.md},
     modalButtonWrap: {flex: 1},
   }));
+
+  const filteredData = (data ?? []).filter(cls =>
+    cls.className.toLowerCase().includes(search.trim().toLowerCase()),
+  );
 
   const assignedClassIds = new Set((data ?? []).map(c => c.classId));
   const availableClassOptions = (allClasses ?? [])
@@ -134,8 +141,19 @@ export function ExamClassesScreen(): React.JSX.Element {
           onAction={openAddModal}
         />
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          {data.map(cls => (
+        <>
+          <View style={styles.searchSection}>
+            <SearchBar value={search} onChangeText={setSearch} placeholder={t('examClasses_searchPlaceholder')} />
+          </View>
+          <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+            {filteredData.length === 0 ? (
+              <EmptyState
+                icon="search"
+                title={t('studentsWiseClassList_noResultsTitle')}
+                message={t('studentsWiseClassList_noResultsMessage')}
+              />
+            ) : (
+              filteredData.map(cls => (
             <CustomCard
               key={cls.classId}
               style={styles.card}
@@ -165,8 +183,10 @@ export function ExamClassesScreen(): React.JSX.Element {
                 {t('examClasses_gradedCount', {graded: cls.gradedCount, total: cls.studentCount})}
               </AppText>
             </CustomCard>
-          ))}
-        </ScrollView>
+              ))
+            )}
+          </ScrollView>
+        </>
       )}
 
       <CustomModal visible={addModalOpen} onClose={() => setAddModalOpen(false)} title={t('examClasses_addClass')}>

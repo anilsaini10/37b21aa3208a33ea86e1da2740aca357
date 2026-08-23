@@ -23,11 +23,11 @@ export function classCardAccent(index: number): ClassCardAccent {
   return ACCENT_CYCLE[index % ACCENT_CYCLE.length];
 }
 
-function CardWave({color}: {color: string}): React.JSX.Element {
+function CardWave({color, height = 64}: {color: string; height?: number}): React.JSX.Element {
   return (
     <Svg
       width="100%"
-      height={64}
+      height={height}
       viewBox="0 0 300 64"
       preserveAspectRatio="none"
       style={{position: 'absolute', bottom: 0, left: 0, right: 0}}
@@ -54,6 +54,10 @@ export interface ClassCardProps {
   /** Renders below the header instead of the auto chip row — for callers that need richer per-section rows (e.g. an attendance button per row) rather than plain tappable chips. */
   children?: React.ReactNode;
   style?: object;
+  /** Compact suffix shown right next to the name (e.g. "(A, B)") instead of a separate chip row — takes priority over `sections`/`children` when set. */
+  titleSuffix?: string;
+  /** Tighter padding/icon/wave sizing for dense lists where the default card reads too tall. */
+  compact?: boolean;
 }
 
 export function ClassCard({
@@ -65,27 +69,28 @@ export function ClassCard({
   rightSlot,
   children,
   style,
+  titleSuffix,
+  compact = false,
 }: ClassCardProps): React.JSX.Element {
   const {theme} = useTheme();
   const accentColor = theme.colors[accent];
   const styles = useThemedStyles(t => ({
     card: {
-      overflow: 'hidden', 
-      borderColor: 'transparent', 
-      marginBottom: t.spacing.md,
-      padding:10,
-      
+      overflow: 'hidden',
+      borderColor: 'transparent',
+      marginBottom: compact ? t.spacing.xs : t.spacing.md,
+      padding: compact ? 6 : 10,
     },
     iconSquare: {
-      width: 36,
-      height: 36,
-      borderRadius: t.radius.sm,
+      width: compact ? 24 : 36,
+      height: compact ? 24 : 36,
+      borderRadius: compact ? t.radius.sm : t.radius.sm,
       alignItems: 'center',
       justifyContent: 'center',
     },
     chevronCircle: {
-      width: 21,
-      height: 21,
+      width: compact ? 18 : 21,
+      height: compact ? 18 : 21,
       borderRadius: 18,
       alignItems: 'center',
       justifyContent: 'center',
@@ -103,19 +108,25 @@ export function ClassCard({
 
   return (
     <CustomCard style={[styles.card, style]} onPress={onPress}>
-      <CardWave color={accentColor + '14'} />
-      <Row gap={theme.spacing.md} align="flex-start">
+      <CardWave color={accentColor + '10'} height={compact ? 28 : 64} />
+      <Row gap={compact ? theme.spacing.sm : theme.spacing.md} align="flex-start">
         <View style={[styles.iconSquare, {backgroundColor: accentColor + '1A'}]}>
-          <Icon name="class" size={16} color={accentColor} />
+          <Icon name="class" size={compact ? 12 : 16} color={accentColor} />
         </View>
         <View style={{flex: 1}}>
           <AppText variant="bodyBold" numberOfLines={1}>
             {name}
+            {titleSuffix ? (
+              <AppText variant="label" color="textSecondary">
+                {' '}
+                {titleSuffix}
+              </AppText>
+            ) : null}
           </AppText>
           <AppText variant="label" color="textSecondary">
             {subtitle}
           </AppText>
-          {children == null && sections.length > 0 ? (
+          {children == null && !titleSuffix && sections.length > 0 ? (
             <Row wrap gap={theme.spacing.xs} style={styles.chipsRow}>
               {sections.map(section => {
                 const chip = (

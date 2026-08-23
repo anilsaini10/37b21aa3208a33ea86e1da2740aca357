@@ -256,14 +256,14 @@ export function TeacherDashboardScreen(): React.JSX.Element {
           )}
         </CustomCard>
 
-        <SectionTitle title={t('teacherDashboard_classPerformance')} />
+        {/* <SectionTitle title={t('teacherDashboard_classPerformance')} />
         <CustomCard>
           <AppText variant="caption" color="textSecondary">
             {t('teacherDashboard_gradeDistribution')}
           </AppText>
           <Spacer size={12} />
           <BarChart series={data.classPerformance} height={150} />
-        </CustomCard>
+        </CustomCard> */}
         <Spacer size={24} />
       </ScrollView>
     </Screen>

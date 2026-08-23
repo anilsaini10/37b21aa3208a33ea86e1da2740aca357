@@ -1,5 +1,5 @@
 /** My Classes — only the classes this teacher actually teaches, grouped by section. */
-import React from 'react';
+import React, {useState} from 'react';
 import {Pressable, ScrollView, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -10,6 +10,7 @@ import {
   CustomHeader,
   ClassCard,
   classCardAccent,
+  SearchBar,
   AppText,
   Icon,
   Row,
@@ -27,6 +28,10 @@ type Nav = NativeStackNavigationProp<TeacherStackParamList>;
 export function ClassListScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const styles = useThemedStyles(theme2 => ({
+    searchSection: {
+      paddingHorizontal: theme2.spacing.lg,
+      paddingTop: theme2.spacing.md,
+    },
     scrollContent: {
       padding: theme2.spacing.lg,
       flexGrow: 1,
@@ -41,6 +46,7 @@ export function ClassListScreen(): React.JSX.Element {
   const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
   const {data: classes, isLoading, isError, error, refetch} = useTeacherClasses();
+  const [search, setSearch] = useState('');
 
   const openSection = (cls: TeacherClassSummary, section: TeacherClassSection): void => {
     navigation.navigate(ScreenNames.ClassStudents, {
@@ -79,9 +85,14 @@ export function ClassListScreen(): React.JSX.Element {
     );
   }
 
+  const filteredClasses = classes.filter(cls => cls.className.toLowerCase().includes(search.trim().toLowerCase()));
+
   return (
     <Screen padded={false}>
       <CustomHeader title={t('classList_headerTitle')} />
+      <View style={styles.searchSection}>
+        <SearchBar value={search} onChangeText={setSearch} placeholder={t('classList_searchPlaceholder')} />
+      </View>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
@@ -91,8 +102,14 @@ export function ClassListScreen(): React.JSX.Element {
             title={t('classList_teacherEmptyTitle')}
             message={t('classList_teacherEmptyMessage')}
           />
+        ) : filteredClasses.length === 0 ? (
+          <EmptyState
+            icon="search"
+            title={t('studentsWiseClassList_noResultsTitle')}
+            message={t('studentsWiseClassList_noResultsMessage')}
+          />
         ) : (
-          classes.map((cls, classIndex) => {
+          filteredClasses.map((cls, classIndex) => {
             const subjectsLabel = cls.mySubjects.map(s => s.subjectName).join(', ');
             const singleSection = cls.sections.length === 1 ? cls.sections[0] : null;
             const subtitle = subjectsLabel

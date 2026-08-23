@@ -1,11 +1,23 @@
-/** More — entry point to secondary admin modules. */
-import React from 'react';
-import {ScrollView, View} from 'react-native';
+/** More — entry point to secondary admin modules, as a searchable 3-column grid. */
+import React, {useMemo, useState} from 'react';
+import {Pressable, ScrollView, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage, type TranslationKey} from '../../../core/i18n';
-import {Screen, CustomCard, AppText, Spacer, MoreMenuItem, moreMenuAccentForIndex} from '../../../shared/components';
+import {
+  Screen,
+  AppText,
+  Avatar,
+  Icon,
+  Row,
+  SearchBar,
+  EmptyState,
+  Spacer,
+  MoreMenuTile,
+  moreMenuAccentForIndex,
+} from '../../../shared/components';
+import {useAuthStore} from '../../auth/authStore';
 import type {AdminStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 
@@ -61,10 +73,22 @@ const MODULES: ModuleItem[] = [
   // {labelKey: 'moreScreen_notifications', icon: 'notification', route: ScreenNames.Notifications},
 ];
 
+const INDEXED_MODULES = MODULES.map((m, index) => ({...m, index}));
+
 export function MoreScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
   const {t} = useLanguage();
+  const user = useAuthStore(s => s.user);
+  const [search, setSearch] = useState('');
+
+  const filteredModules = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) {
+      return INDEXED_MODULES;
+    }
+    return INDEXED_MODULES.filter(m => t(m.labelKey).toLowerCase().includes(query));
+  }, [search, t]);
 
   const styles = useThemedStyles(t2 => ({
     screen: theme.dark ? {} : {backgroundColor: '#F8F7FF'},
@@ -77,35 +101,102 @@ export function MoreScreen(): React.JSX.Element {
     headerTitleColor: {
       color: theme.dark ? t2.colors.text : '#111827',
     },
+    iconButton: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.dark ? t2.colors.surfaceVariant : '#F1EFFE',
+    },
+    searchSection: {
+      paddingHorizontal: 20,
+      paddingTop: t2.spacing.md,
+    },
+    filterButton: {
+      width: 44,
+      height: 44,
+      borderRadius: t2.radius.md,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.dark ? t2.colors.surfaceVariant : '#F1EFFE',
+    },
     scrollContent: {
       paddingHorizontal: 20,
-      paddingTop: 14,
+      paddingTop: t2.spacing.md,
       paddingBottom: t2.spacing.xl,
     },
-    card: theme.dark
-      ? {paddingVertical: 12}
-      : {paddingVertical: 12, borderRadius: 22, borderColor: 'rgba(100, 100, 150, 0.08)'},
+    grid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      marginHorizontal: -t2.spacing.xs,
+    },
+    gridItem: {
+      width: '33.333%',
+      paddingHorizontal: t2.spacing.xs,
+      marginBottom: t2.spacing.sm,
+    },
   }));
 
   return (
     <Screen padded={false} style={styles.screen}>
       <View style={styles.header}>
-        <AppText variant="headerTitle" style={styles.headerTitleColor}>
-          {t('moreScreen_title')}
-        </AppText>
+        <Row justify="space-between" align="flex-start">
+          <View style={{flex: 1}}>
+            <AppText variant="h1" style={styles.headerTitleColor}>
+              {t('moreScreen_title')}
+            </AppText>
+            <AppText variant="caption" color="textSecondary">
+              {t('moreScreen_subtitle')}
+            </AppText>
+          </View>
+          <Row gap={theme.spacing.sm} align="center">
+            <Pressable
+              onPress={() => navigation.navigate(ScreenNames.Notifications)}
+              hitSlop={8}
+              style={styles.iconButton}
+              accessibilityRole="button">
+              <Icon name="notification" size={19} color={theme.colors.primary} />
+            </Pressable>
+            <Pressable onPress={() => navigation.navigate(ScreenNames.Profile)} hitSlop={4} accessibilityRole="button">
+              <Avatar name={user?.name ?? 'Admin'} uri={user?.avatarUrl} size={38} />
+            </Pressable>
+          </Row>
+        </Row>
       </View>
+
+      <View style={styles.searchSection}>
+        <Row gap={theme.spacing.sm} align="center">
+          <View style={{flex: 1}}>
+            <SearchBar value={search} onChangeText={setSearch} placeholder={t('moreScreen_searchPlaceholder')} />
+          </View>
+          <Pressable style={styles.filterButton} accessibilityRole="button">
+            <Icon name="filter" size={18} color={theme.colors.primary} />
+          </Pressable>
+        </Row>
+      </View>
+
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <CustomCard padded={false} style={styles.card}>
-          {MODULES.map((m, index) => (
-            <MoreMenuItem
-              key={m.route}
-              icon={m.icon}
-              title={t(m.labelKey)}
-              accentColor={moreMenuAccentForIndex(index)}
-              onPress={() => navigation.navigate(m.route)}
-            />
-          ))}
-        </CustomCard>
+        {filteredModules.length === 0 ? (
+          <EmptyState
+            icon="search"
+            title={t('moreScreen_noResultsTitle')}
+            message={t('moreScreen_noResultsMessage')}
+          />
+        ) : (
+          <View style={styles.grid}>
+            {filteredModules.map(m => (
+              <View key={m.route} style={styles.gridItem}>
+                <MoreMenuTile
+                  icon={m.icon}
+                  title={t(m.labelKey)}
+                  accentColor={m.route === ScreenNames.Settings ? theme.colors.textMuted : moreMenuAccentForIndex(m.index)}
+                  onPress={() => navigation.navigate(m.route)}
+                />
+              </View>
+            ))}
+          </View>
+        )}
         <Spacer size={24} />
       </ScrollView>
     </Screen>

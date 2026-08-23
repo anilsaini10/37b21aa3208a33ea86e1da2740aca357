@@ -93,12 +93,19 @@ export function MyAttendanceScreen(): React.JSX.Element {
       paddingVertical: t2.spacing.sm,
       borderRadius: t2.radius.pill,
     },
-    modeRow: {paddingHorizontal: t2.spacing.lg, paddingTop: t2.spacing.sm},
+    modeRow: {
+      paddingHorizontal: t2.spacing.lg, 
+      paddingTop: t2.spacing.sm,
+      marginBottom:10
+
+    },
     modePill: {
-      flex: 1,
       alignItems: 'center',
       paddingVertical: t2.spacing.xs,
       borderRadius: t2.radius.sm,
+      width:'25%',
+      height:30,
+      justifyContent:'center'
     },
     filterRow: {paddingHorizontal: t2.spacing.lg},
     scrollContent: {padding: t2.spacing.lg},

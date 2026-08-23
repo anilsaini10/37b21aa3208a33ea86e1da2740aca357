@@ -95,6 +95,8 @@ export function HomeworkListScreen(): React.JSX.Element {
     searchBarWrap: {paddingHorizontal: t2.spacing.lg, paddingTop: t2.spacing.md, paddingBottom: t2.spacing.sm},
     filtersRow: {paddingHorizontal: t2.spacing.lg, columnGap: t2.spacing.sm},
     filterWrap: {flex: 1, marginBottom: 0},
+    filterField: {height: 42},
+    filterValueText: {fontSize: t2.typography.fontSize.sm},
     list: {flex: 1},
     listContent: {padding: t2.spacing.lg, paddingTop: t2.spacing.sm, flexGrow: 1},
     card: {marginBottom: t2.spacing.md},
@@ -125,7 +127,7 @@ export function HomeworkListScreen(): React.JSX.Element {
   const dueDateInfo = (dueDate: string): {label: string; tone: 'error' | 'warning' | 'textMuted'} => {
     const diff = daysUntil(dueDate);
     if (diff < 0) {
-      return {label: t('homeworkList_overdue'), tone: 'error'};
+      return {label: formatDate(dueDate) + ' (' + t('homeworkList_overdue') + ')', tone: 'error'};
     }
     if (diff === 0) {
       return {label: t('homeworkList_dueToday'), tone: 'warning'};
@@ -165,6 +167,8 @@ export function HomeworkListScreen(): React.JSX.Element {
             value={classId}
             options={classOptions}
             onChange={onChangeClass}
+            style={styles.filterField}
+            valueStyle={styles.filterValueText}
           />
         </View>
         <View style={styles.filterWrap}>
@@ -176,6 +180,8 @@ export function HomeworkListScreen(): React.JSX.Element {
               setSectionId(val);
               setPage(1);
             }}
+            style={styles.filterField}
+            valueStyle={styles.filterValueText}
           />
         </View>
         <View style={styles.filterWrap}>
@@ -187,6 +193,8 @@ export function HomeworkListScreen(): React.JSX.Element {
               setSubjectId(val);
               setPage(1);
             }}
+            style={styles.filterField}
+            valueStyle={styles.filterValueText}
           />
         </View>
       </Row>
@@ -221,6 +229,7 @@ export function HomeworkListScreen(): React.JSX.Element {
             const due = dueDateInfo(item.dueDate);
             const typeTone = TYPE_TONE[item.type];
             const typeColor = theme.colors[typeTone === 'neutral' ? 'textMuted' : typeTone];
+            console.log('item => ', JSON.stringify(item))
             return (
               <CustomCard style={styles.card}>
                 <Row justify="space-between" align="flex-start">

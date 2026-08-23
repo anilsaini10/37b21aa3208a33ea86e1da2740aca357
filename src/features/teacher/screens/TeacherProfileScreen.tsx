@@ -4,14 +4,13 @@ import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import type {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
-import {useTheme, useThemedStyles} from '../../../core/theme';
+import {useThemedStyles} from '../../../core/theme';
 import {useLanguage, type TranslationKey} from '../../../core/i18n';
 import {
   Screen,
-  CustomCard,
   CustomButton,
   ProfileHero,
-  MoreMenuItem,
+  MoreMenuTile,
   moreMenuAccentForIndex,
   SectionTitle,
   Spacer,
@@ -33,21 +32,27 @@ const MENU: {
   {icon: 'attendance', titleKey: 'teacherProfile_myAttendance', route: ScreenNames.MyAttendance},
   {icon: 'announcement', titleKey: 'teacherProfile_announcements', route: ScreenNames.Announcements},
   {icon: 'event', titleKey: 'eventsManage_headerTitle', route: ScreenNames.Events},
-  {icon: 'chat', titleKey: 'teacherProfile_chat', route: ScreenNames.Chat},
+  // {icon: 'chat', titleKey: 'teacherProfile_chat', route: ScreenNames.Chat},
   {icon: 'calendar', titleKey: 'teacherProfile_myLeave', route: ScreenNames.MyLeave},
   {icon: 'calendar', titleKey: 'teacherProfile_leaveManagement', route: ScreenNames.Leave},
   {icon: 'lock', titleKey: 'teacherProfile_changePassword', route: ScreenNames.ChangePassword},
 ];
 
 export function TeacherProfileScreen(): React.JSX.Element {
-  const {theme} = useTheme();
   const styles = useThemedStyles(t2 => ({
     content: {
       padding: t2.spacing.lg,
     },
-    menuCard: theme.dark
-      ? {paddingVertical: t2.spacing.sm}
-      : {paddingVertical: t2.spacing.sm, borderRadius: 22, borderColor: 'rgba(100, 100, 150, 0.08)'},
+    grid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      marginHorizontal: -t2.spacing.xs,
+    },
+    gridItem: {
+      width: '33.333%',
+      paddingHorizontal: t2.spacing.xs,
+      marginBottom: t2.spacing.sm,
+    },
   }));
   const navigation = useNavigation<Nav>();
   const tabNavigation = useNavigation<BottomTabNavigationProp<TeacherTabParamList>>();
@@ -69,17 +74,18 @@ export function TeacherProfileScreen(): React.JSX.Element {
 
         <View style={styles.content}>
           <SectionTitle title={t('teacherProfile_manage')} />
-          <CustomCard padded={false} style={styles.menuCard}>
+          <View style={styles.grid}>
             {MENU.map((item, index) => (
-              <MoreMenuItem
-                key={item.route}
-                icon={item.icon}
-                title={t(item.titleKey)}
-                accentColor={moreMenuAccentForIndex(index)}
-                onPress={() => navigation.navigate(item.route)}
-              />
+              <View key={item.route} style={styles.gridItem}>
+                <MoreMenuTile
+                  icon={item.icon}
+                  title={t(item.titleKey)}
+                  accentColor={moreMenuAccentForIndex(index)}
+                  onPress={() => navigation.navigate(item.route)}
+                />
+              </View>
             ))}
-          </CustomCard>
+          </View>
 
           <Spacer size={24} />
           <CustomButton title={t('common_logout')} variant="danger" iconLeft="logout" onPress={() => logout()} />

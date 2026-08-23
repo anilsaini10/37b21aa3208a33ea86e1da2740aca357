@@ -170,7 +170,6 @@ export function TeachersListScreen(): React.JSX.Element {
               index={index}
               subtitle={t('teachersList_rowSubtitle', {
                 subjects: item.subjectsTaught.join(', '),
-                employeeId: item.employeeId,
               })}
               experienceLabel={t('teacherDetail_experienceValue', {
                 years: item.experienceYears,

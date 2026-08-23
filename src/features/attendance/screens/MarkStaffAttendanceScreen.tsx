@@ -12,6 +12,7 @@ import {
   CustomCard,
   CustomButton,
   DatePicker,
+  SearchBar,
   Badge,
   Loader,
   EmptyState,
@@ -49,6 +50,7 @@ export function MarkStaffAttendanceScreen(): React.JSX.Element {
   const [statuses, setStatuses] = useState<Record<string, AttendanceStatusCode>>({});
   const [saved, setSaved] = useState(false);
   const [submitError, setSubmitError] = useState<string | undefined>();
+  const [search, setSearch] = useState('');
 
   const {data: teachersPage, isLoading: teachersLoading, isError, error, refetch} = useTeachers({pageSize: 100});
   const {data: existing, isLoading: existingLoading} = useStaffAttendanceList({
@@ -116,6 +118,11 @@ export function MarkStaffAttendanceScreen(): React.JSX.Element {
     counts[status] += 1;
   });
 
+  const query = search.trim().toLowerCase();
+  const filteredTeachers = query
+    ? teachers.filter(tch => tch.name.toLowerCase().includes(query) || tch.employeeId.toLowerCase().includes(query))
+    : teachers;
+
   const onSave = (): void => {
     setSubmitError(undefined);
     markAttendance.mutate(
@@ -170,46 +177,57 @@ export function MarkStaffAttendanceScreen(): React.JSX.Element {
               })}
             </Row>
 
-            <CustomCard>
-              {teachers.map((tch, i) => (
-                <View key={tch.id}>
-                  {i > 0 ? <Divider /> : null}
-                  <Row justify="space-between" gap={theme.spacing.sm}>
-                    <View style={styles.teacherInfo}>
-                      <AppText variant="bodyBold" numberOfLines={1}>
-                        {tch.name}
-                      </AppText>
-                      <AppText variant="caption" color="textSecondary">
-                        {t('staffAttendance_employeeIdLabel', {employeeId: tch.employeeId})}
-                      </AppText>
-                    </View>
-                    <Row gap={4}>
-                      {STATUS_CODES.map(code => {
-                        const isSelected = statuses[tch.id] === code;
-                        const color = theme.colors[STATUS_TONE[code]];
-                        return (
-                          <Pressable
-                            key={code}
-                            onPress={() => setStatus(tch.id, code)}
-                            style={[
-                              styles.optionButton,
-                              {
-                                backgroundColor: isSelected ? color : color + '18',
-                                borderWidth: isSelected ? 0 : 1.5,
-                                borderColor: color + '55',
-                              },
-                            ]}>
-                            <AppText variant="button" style={{color: isSelected ? theme.colors.onPrimary : color, fontSize: 12}}>
-                              {STATUS_ABBR[code]}
-                            </AppText>
-                          </Pressable>
-                        );
-                      })}
+            <SearchBar value={search} onChangeText={setSearch} placeholder={t('staffAttendance_searchTeachersPlaceholder')} />
+            <Spacer size={theme.spacing.md} />
+
+            {filteredTeachers.length === 0 ? (
+              <EmptyState
+                icon="search"
+                title={t('studentsWiseClassList_noResultsTitle')}
+                message={t('studentsWiseClassList_noResultsMessage')}
+              />
+            ) : (
+              <CustomCard>
+                {filteredTeachers.map((tch, i) => (
+                  <View key={tch.id}>
+                    {i > 0 ? <Divider /> : null}
+                    <Row justify="space-between" gap={theme.spacing.sm}>
+                      <View style={styles.teacherInfo}>
+                        <AppText variant="bodyBold" numberOfLines={1}>
+                          {tch.name}
+                        </AppText>
+                        <AppText variant="caption" color="textSecondary">
+                          {t('staffAttendance_employeeIdLabel', {employeeId: tch.employeeId})}
+                        </AppText>
+                      </View>
+                      <Row gap={4}>
+                        {STATUS_CODES.map(code => {
+                          const isSelected = statuses[tch.id] === code;
+                          const color = theme.colors[STATUS_TONE[code]];
+                          return (
+                            <Pressable
+                              key={code}
+                              onPress={() => setStatus(tch.id, code)}
+                              style={[
+                                styles.optionButton,
+                                {
+                                  backgroundColor: isSelected ? color : color + '18',
+                                  borderWidth: isSelected ? 0 : 1.5,
+                                  borderColor: color + '55',
+                                },
+                              ]}>
+                              <AppText variant="button" style={{color: isSelected ? theme.colors.onPrimary : color, fontSize: 12}}>
+                                {STATUS_ABBR[code]}
+                              </AppText>
+                            </Pressable>
+                          );
+                        })}
+                      </Row>
                     </Row>
-                  </Row>
-                </View>
-              ))}
-            </CustomCard>
+                  </View>
+                ))}
+              </CustomCard>
+            )}
 
             <Spacer size={16} />
             {submitError ? (

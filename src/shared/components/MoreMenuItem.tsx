@@ -85,3 +85,56 @@ export function MoreMenuItem({title, icon, accentColor, onPress}: MoreMenuItemPr
     </Pressable>
   );
 }
+
+export interface MoreMenuTileProps {
+  title: string;
+  icon: string;
+  accentColor: string;
+  onPress: () => void;
+}
+
+/** Grid-tile variant of the same menu row — icon in a pastel circle, short centered label below. Used by grid-style More screens. */
+export function MoreMenuTile({title, icon, accentColor, onPress}: MoreMenuTileProps): React.JSX.Element {
+  const {theme} = useTheme();
+  const titleColor = theme.dark ? theme.colors.text : '#111827';
+  const styles = useThemedStyles(t => ({
+    tile: {
+      backgroundColor: theme.dark ? t.colors.card : '#FFFFFF',
+      borderRadius: 18,
+      paddingVertical: t.spacing.md,
+      paddingHorizontal: t.spacing.xs,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: t.colors.shadow,
+      shadowOpacity: theme.dark ? 0.25 : 0.05,
+      shadowRadius: 8,
+      shadowOffset: {width: 0, height: 2},
+      elevation: 2,
+    },
+    tilePressed: {
+      opacity: 0.85,
+    },
+    iconCircle: {
+      width: 46,
+      height: 46,
+      borderRadius: 14,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: t.spacing.sm,
+    },
+  }));
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({pressed}) => [styles.tile, pressed && styles.tilePressed]}
+      accessibilityRole="button">
+      <View style={[styles.iconCircle, {backgroundColor: accentColor + '1F'}]}>
+        <Icon name={icon} size={22} color={accentColor} />
+      </View>
+      <AppText numberOfLines={2} center style={{color: titleColor, fontSize: 12.5, fontWeight: '600'}}>
+        {title}
+      </AppText>
+    </Pressable>
+  );
+}

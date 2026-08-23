@@ -15,7 +15,12 @@ export interface AppEnv {
 
 export const ENV: AppEnv = {
   API_BASE_URL: 'http://10.0.2.2:5000',
-  API_TIMEOUT_MS: 15000,
+  // A few admin write endpoints (announcements/events create+update, leave
+  // approve/reject) now await a push-notification send server-side before
+  // responding — can take a couple seconds for a large school, occasionally
+  // more. 15s was cutting it close; bumped globally rather than special-casing
+  // six endpoints, since a longer timeout is harmless for the fast ones too.
+  API_TIMEOUT_MS: 20000,
   USE_MOCK_API: true,
   ENABLE_LOGGING: __DEV__,
 };
