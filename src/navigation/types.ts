@@ -118,6 +118,8 @@ export type TeacherStackParamList = {
   Tabs: undefined;
   MarkAttendance: {classId: string; className: string; sectionId: string; sectionName: string};
   HomeworkForm: {homeworkId?: string; initial?: TeacherHomework};
+  HomeworkDetail: {homeworkId: string; initial?: TeacherHomework};
+  HomeworkSubmissions: {homeworkId: string; initial?: TeacherHomework};
   Timetable: undefined;
   ClassStudents: {classId: string; className: string; sectionId?: string; sectionName?: string};
   /** No teacher-facing student-by-id endpoint exists — the roster row already has everything a basic detail view needs. */

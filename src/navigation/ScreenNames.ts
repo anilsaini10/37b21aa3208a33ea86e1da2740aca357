@@ -78,6 +78,8 @@ export const ScreenNames = {
   Classes: 'Classes',
   MarkAttendance: 'MarkAttendance',
   HomeworkForm: 'HomeworkForm',
+  HomeworkDetail: 'HomeworkDetail',
+  HomeworkSubmissions: 'HomeworkSubmissions',
   ClassStudents: 'ClassStudents',
   MySchedule: 'MySchedule',
   MyLeave: 'MyLeave',

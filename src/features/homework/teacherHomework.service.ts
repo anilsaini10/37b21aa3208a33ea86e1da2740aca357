@@ -3,7 +3,14 @@ import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {axiosClient} from '../../core/api/axiosClient';
 import {Endpoints} from '../../core/api/apiConfig';
 import {rethrowApiError} from '../../core/api/apiError';
-import type {HomeworkType, Paginated, QueryParams, TeacherHomework} from '../../shared/types';
+import type {
+  HomeworkType,
+  Paginated,
+  QueryParams,
+  TeacherHomework,
+  HomeworkSubmissions,
+  HomeworkSubmissionRecordInput,
+} from '../../shared/types';
 
 export interface CreateHomeworkInput {
   classId: string;
@@ -112,5 +119,51 @@ export const useDeleteTeacherHomework = () => {
   return useMutation({
     mutationFn: (homeworkId: string) => teacherHomeworkApi.remove(homeworkId),
     onSuccess: () => qc.invalidateQueries({queryKey: ['teacherHomework']}),
+  });
+};
+
+/**
+ * Submission tracking — who submitted a given homework. Marking is a single
+ * batched PATCH (one or many students per call); the response only returns a
+ * count, so a successful mark just invalidates the list to refetch fresh state
+ * rather than trying to hand-merge the response.
+ */
+export const teacherHomeworkSubmissionsApi = {
+  list: async (homeworkId: string): Promise<HomeworkSubmissions> => {
+    try {
+      const {data} = await axiosClient.get<HomeworkSubmissions>(Endpoints.teacher.homework_students(homeworkId));
+      return data;
+    } catch (e) {
+      console.error('teacherHomeworkSubmissionsApi.list failed', e);
+      rethrowApiError(e, 'Failed to load submission tracking.');
+    }
+  },
+
+  mark: async (homeworkId: string, records: HomeworkSubmissionRecordInput[]): Promise<{homeworkId: string; marked: number}> => {
+    try {
+      const {data} = await axiosClient.patch<{homeworkId: string; marked: number}>(
+        Endpoints.teacher.homework_students(homeworkId),
+        {records},
+      );
+      return data;
+    } catch (e) {
+      console.error('teacherHomeworkSubmissionsApi.mark failed', e);
+      rethrowApiError(e, 'Failed to save submission status.');
+    }
+  },
+};
+
+export const useHomeworkSubmissions = (homeworkId: string) =>
+  useQuery({
+    queryKey: ['teacherHomeworkSubmissions', homeworkId],
+    queryFn: () => teacherHomeworkSubmissionsApi.list(homeworkId),
+    enabled: !!homeworkId,
+  });
+
+export const useMarkHomeworkSubmissions = (homeworkId: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (records: HomeworkSubmissionRecordInput[]) => teacherHomeworkSubmissionsApi.mark(homeworkId, records),
+    onSuccess: () => qc.invalidateQueries({queryKey: ['teacherHomeworkSubmissions', homeworkId]}),
   });
 };

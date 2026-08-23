@@ -90,6 +90,7 @@ export const Endpoints = {
     attendance_byId: (recordId: string) => `/api/teacher/attendance/${recordId}`,
     homework: '/api/teacher/homework',
     homework_byId: (homeworkId: string) => `/api/teacher/homework/${homeworkId}`,
+    homework_students: (homeworkId: string) => `/api/teacher/homework/${homeworkId}/students`,
     schedule_today: '/api/teacher/schedule/today',
     schedule_week: '/api/teacher/schedule/week',
     announcements: '/api/teacher/announcements',

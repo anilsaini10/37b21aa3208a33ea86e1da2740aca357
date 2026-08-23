@@ -50,6 +50,37 @@ export interface TeacherHomework {
   updatedAt: string;
 }
 
+// ---- Teacher homework submission tracking (real backend) ------------------
+// `status: null` means the teacher hasn't checked this student yet — distinct
+// from an explicit "NOT_SUBMITTED" mark.
+
+export type HomeworkSubmissionStatus = 'SUBMITTED' | 'NOT_SUBMITTED';
+
+export interface HomeworkSubmissionStudent {
+  studentId: ID;
+  name: string;
+  admissionNo: string;
+  rollNo: number;
+  status: HomeworkSubmissionStatus | null;
+  remarks: string | null;
+  updatedAt: string | null;
+}
+
+export interface HomeworkSubmissions {
+  homeworkId: ID;
+  title: string;
+  dueDate: string;
+  sectionId: ID;
+  sectionName: string;
+  students: HomeworkSubmissionStudent[];
+}
+
+export interface HomeworkSubmissionRecordInput {
+  studentId: ID;
+  status: HomeworkSubmissionStatus;
+  remarks?: string;
+}
+
 // ---- Parent's child homework (real backend, /api/students/homework) -------
 // Read-only — no submission/upload flow exists for parents, just visibility
 // into what's assigned to the child's class + section.

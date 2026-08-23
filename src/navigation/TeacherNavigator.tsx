@@ -12,6 +12,8 @@ import {floatingTabBarStyle} from './floatingTabBar';
 import {TeacherDashboardScreen} from '../features/dashboard/screens/TeacherDashboardScreen';
 import {HomeworkListScreen} from '../features/homework/screens/HomeworkListScreen';
 import {HomeworkFormScreen} from '../features/homework/screens/HomeworkFormScreen';
+import {HomeworkDetailScreen} from '../features/homework/screens/HomeworkDetailScreen';
+import {HomeworkSubmissionsScreen} from '../features/homework/screens/HomeworkSubmissionsScreen';
 import {ClassListScreen} from '../features/teacher/screens/ClassList';
 import {ClassStudentsScreen} from '../features/teacher/screens/ClassStudentsScreen';
 import {StudentDetailScreen} from '../features/teacher/screens/StudentDetailScreen';
@@ -67,6 +69,8 @@ export function TeacherNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.Tabs} component={TeacherTabs} />
       <Stack.Screen name={ScreenNames.MarkAttendance} component={MarkAttendanceScreen} />
       <Stack.Screen name={ScreenNames.HomeworkForm} component={HomeworkFormScreen} />
+      <Stack.Screen name={ScreenNames.HomeworkDetail} component={HomeworkDetailScreen} />
+      <Stack.Screen name={ScreenNames.HomeworkSubmissions} component={HomeworkSubmissionsScreen} />
       <Stack.Screen name={ScreenNames.Timetable} component={TimetableScreen} />
       <Stack.Screen name={ScreenNames.MySchedule} component={MyScheduleScreen} />
       <Stack.Screen name={ScreenNames.ClassStudents} component={ClassStudentsScreen} />
