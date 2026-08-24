@@ -29,6 +29,10 @@ export const Endpoints = {
   notifications: {
     register: '/api/notifications/register',
     unregister: '/api/notifications/unregister',
+    list: '/api/notifications',
+    unreadCount: '/api/notifications/unread-count',
+    markRead: (id: string) => `/api/notifications/${id}/read`,
+    markAllRead: '/api/notifications/read-all',
   },
   classes: {
     list: '/api/classes',

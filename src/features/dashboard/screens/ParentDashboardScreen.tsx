@@ -36,6 +36,7 @@ import {useParentDashboardStats} from '../parentDashboardStats.service';
 import {useParentProfile} from '../../parent/parentStudents.service';
 import {useEventsFeed} from '../../events/events.service';
 import {useAnnouncementsFeed} from '../../communication/announcements.service';
+import {useUnreadNotificationsCount} from '../../communication/notifications.service';
 import type {ParentStackParamList, ParentTabParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {StatCard, ParentChild, AttendanceStatusCode} from '../../../shared/types';
@@ -177,6 +178,7 @@ function ParentDashboardContent({
     isLoading: announcementsLoading,
     refetch: refetchAnnouncements,
   } = useAnnouncementsFeed('parent', {page: 1, pageSize: 3, from: todayIso()});
+  const {data: unreadCount} = useUnreadNotificationsCount();
 
   const styles = useThemedStyles(t2 => ({
     scrollContent: {
@@ -260,7 +262,7 @@ function ParentDashboardContent({
         schoolName={stats.schoolName}
         actions={[
           {icon: 'announcement', onPress: () => navigation.navigate(ScreenNames.Announcements)},
-          {icon: 'notification', onPress: () => navigation.navigate(ScreenNames.Notifications), badgeCount: 2},
+          {icon: 'notification', onPress: () => navigation.navigate(ScreenNames.Notifications), badgeCount: unreadCount},
         ]}
       />
       <ScrollView

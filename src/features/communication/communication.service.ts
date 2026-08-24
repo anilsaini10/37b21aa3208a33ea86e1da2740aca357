@@ -1,14 +1,14 @@
 /**
- * Communication service — events, notifications, chat + hooks.
+ * Communication service — events, chat + hooks.
  *
- * Announcements moved to `announcements.service.ts` (real backend, role-scoped
- * feeds) — this file no longer has an announcements mock.
+ * Announcements moved to `announcements.service.ts` and notifications moved to
+ * `notifications.service.ts` (both real backend) — this file no longer mocks them.
  */
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {db} from '../../core/mock/db';
 import {respond} from '../../core/mock/mockApi';
 import {generateId} from '../../core/utils/misc';
-import type {AppNotification, ChatMessage, ChatThread, SchoolEvent} from '../../shared/types';
+import type {ChatMessage, ChatThread, SchoolEvent} from '../../shared/types';
 
 // In-memory chat messages keyed by thread.
 const chatMessages: Record<string, ChatMessage[]> = {
@@ -20,16 +20,6 @@ const chatMessages: Record<string, ChatMessage[]> = {
 
 export const communicationApi = {
   events: (): Promise<SchoolEvent[]> => respond(db.events),
-
-  notifications: (): Promise<AppNotification[]> => respond(db.notifications),
-
-  markNotificationRead: (id: string): Promise<void> => {
-    const n = db.notifications.find(x => x.id === id);
-    if (n) {
-      n.read = true;
-    }
-    return respond(undefined);
-  },
 
   chatThreads: (): Promise<ChatThread[]> => respond(db.chatThreads),
 
@@ -51,17 +41,6 @@ export const communicationApi = {
 };
 
 export const useEvents = () => useQuery({queryKey: ['events'], queryFn: communicationApi.events});
-
-export const useNotifications = () =>
-  useQuery({queryKey: ['notifications'], queryFn: communicationApi.notifications});
-
-export const useMarkNotificationRead = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: communicationApi.markNotificationRead,
-    onSuccess: () => qc.invalidateQueries({queryKey: ['notifications']}),
-  });
-};
 
 export const useChatThreads = () =>
   useQuery({queryKey: ['chat', 'threads'], queryFn: communicationApi.chatThreads});

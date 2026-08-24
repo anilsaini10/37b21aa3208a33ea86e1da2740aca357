@@ -173,12 +173,18 @@ export interface ChatMessage {
   read: boolean;
 }
 
+/**
+ * Known values so far: 'ANNOUNCEMENT', 'EVENT', 'LEAVE_REQUEST', 'TEACHER_LEAVE_REQUEST', 'GENERAL'.
+ * Kept as `string` (not a literal union) since the backend can add new types without an app update.
+ */
 export interface AppNotification {
   id: ID;
   title: string;
   body: string;
-  type: 'fee' | 'attendance' | 'exam' | 'homework' | 'announcement' | 'general';
+  type: string;
+  data: Record<string, unknown>;
+  isRead: boolean;
+  readAt: string | null;
   createdAt: string;
-  read: boolean;
 }
 

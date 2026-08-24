@@ -30,6 +30,7 @@ import {useTeacherDashboardStats} from '../teacherDashboard.service';
 import {useTodaySchedule} from '../../timetable/teacherSchedule.service';
 import {useAnnouncementsFeed} from '../../communication/announcements.service';
 import {useEventsFeed} from '../../events/events.service';
+import {useUnreadNotificationsCount} from '../../communication/notifications.service';
 import type {TeacherStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {StatCard} from '../../../shared/types';
@@ -64,6 +65,7 @@ export function TeacherDashboardScreen(): React.JSX.Element {
     isLoading: eventsLoading,
     refetch: refetchEvents,
   } = useEventsFeed('teacher', {page: 1, pageSize: 10, from: todayIso()});
+  const {data: unreadCount} = useUnreadNotificationsCount();
   const {t} = useLanguage();
   const styles = useThemedStyles(t2 => ({
     scrollContent: {
@@ -114,7 +116,7 @@ export function TeacherDashboardScreen(): React.JSX.Element {
         schoolName={user?.schoolName}
         actions={[
           {icon: 'announcement', onPress: () => navigation.navigate(ScreenNames.Announcements)},
-          {icon: 'notification', onPress: () => navigation.navigate(ScreenNames.Notifications), badgeCount: 2},
+          {icon: 'notification', onPress: () => navigation.navigate(ScreenNames.Notifications), badgeCount: unreadCount},
         ]}
       />
       <ScrollView

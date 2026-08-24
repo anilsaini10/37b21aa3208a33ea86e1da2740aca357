@@ -28,7 +28,6 @@ import type {
   AttendanceStatus,
   TeacherAttendanceRecord,
   ChatThread,
-  AppNotification,
   MarkEntry,
   Gender,
   TimetablePeriod,
@@ -491,13 +490,6 @@ const chatThreads: ChatThread[] = [
   {id: 'ct_3', participantId: 'admin_1', participantName: 'School Admin', participantRole: 'admin', lastMessage: 'Staff meeting rescheduled.', lastMessageAt: isoDate(2026, 6, 28), unreadCount: 1},
 ];
 
-const notifications: AppNotification[] = [
-  {id: 'nt_1', title: 'Fee Due Soon', body: 'Q2 fee payment is due on 15 July.', type: 'fee', createdAt: isoDate(2026, 6, 30), read: false},
-  {id: 'nt_2', title: 'New Homework', body: 'Mathematics worksheet assigned.', type: 'homework', createdAt: isoDate(2026, 6, 29), read: false},
-  {id: 'nt_3', title: 'Exam Schedule', body: 'Mid term timetable published.', type: 'exam', createdAt: isoDate(2026, 6, 28), read: true},
-  {id: 'nt_4', title: 'Attendance Alert', body: 'Your ward was marked absent today.', type: 'attendance', createdAt: today, read: false},
-];
-
 export const db = {
   subjects,
   classes,
@@ -521,7 +513,6 @@ export const db = {
   attendanceRecords,
   teacherAttendanceRecords,
   chatThreads,
-  notifications,
   today,
 };
 

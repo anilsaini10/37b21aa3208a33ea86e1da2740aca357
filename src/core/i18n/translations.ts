@@ -770,6 +770,9 @@ export const translations = {
     notifications_title: 'Notifications',
     notifications_loadingNotifications: 'Loading notifications…',
     notifications_noNotifications: 'No notifications',
+    notifications_allCaughtUp: 'You\'re all caught up',
+    notifications_unread: 'Unread',
+    notifications_markAllRead: 'Mark all read',
     notifications_new: 'New',
 
     // Admin More & Settings
@@ -1786,6 +1789,9 @@ export const translations = {
     notifications_title: 'सूचनाएं',
     notifications_loadingNotifications: 'सूचनाएं लोड हो रही हैं…',
     notifications_noNotifications: 'कोई सूचना नहीं है',
+    notifications_allCaughtUp: 'आप सब कुछ देख चुके हैं',
+    notifications_unread: 'अपठित',
+    notifications_markAllRead: 'सभी को पढ़ा हुआ चिह्नित करें',
     notifications_new: 'नया',
 
     // Admin More & Settings

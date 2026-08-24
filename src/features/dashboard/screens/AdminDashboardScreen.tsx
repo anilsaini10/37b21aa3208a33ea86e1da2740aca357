@@ -28,6 +28,7 @@ import {useAdminDashboard} from '../dashboard.service';
 import {useAdminDashboardStats} from '../adminDashboard.service';
 import {useAdminEvents} from '../../events/events.service';
 import {useAdminAnnouncements} from '../../communication/announcements.service';
+import {useUnreadNotificationsCount} from '../../communication/notifications.service';
 import {useIsTodayStaffAttendanceMarked} from '../../attendance/adminTeacherAttendance.service';
 import type {AdminStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
@@ -69,6 +70,7 @@ export function AdminDashboardScreen(): React.JSX.Element {
     refetch: refetchAnnouncements,
   } = useAdminAnnouncements({page: 1, pageSize: 20});
   const {isMarked: isTodayMarked} = useIsTodayStaffAttendanceMarked();
+  const {data: unreadCount} = useUnreadNotificationsCount();
   const {t} = useLanguage();
 
   if (
@@ -108,7 +110,7 @@ export function AdminDashboardScreen(): React.JSX.Element {
         schoolName={user?.schoolName}
         actions={[
           {icon: 'announcement', onPress: () => navigation.navigate(ScreenNames.Announcements)},
-          {icon: 'notification', onPress: () => navigation.navigate(ScreenNames.Notifications), badgeCount: 3},
+          {icon: 'notification', onPress: () => navigation.navigate(ScreenNames.Notifications), badgeCount: unreadCount},
         ]}
       />
       <ScrollView
