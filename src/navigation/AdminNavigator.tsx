@@ -52,7 +52,6 @@ import {AnnouncementsScreen} from '../features/communication/screens/Announcemen
 import {AnnouncementFormScreen} from '../features/communication/screens/AnnouncementFormScreen';
 import {NotificationsScreen} from '../features/communication/screens/NotificationsScreen';
 import {AdminLeaveScreen} from '../features/leave/screens/AdminLeaveScreen';
-import {AdminTeacherLeaveScreen} from '../features/leave/screens/AdminTeacherLeaveScreen';
 
 const Tab = createBottomTabNavigator<AdminTabParamList>();
 const Stack = createNativeStackNavigator<AdminStackParamList>();
@@ -122,7 +121,6 @@ export function AdminNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.PeriodForm} component={PeriodFormScreen} />
       <Stack.Screen name={ScreenNames.TeacherSchedule} component={TeacherScheduleScreen} />
       <Stack.Screen name={ScreenNames.Leave} component={AdminLeaveScreen} />
-      <Stack.Screen name={ScreenNames.TeacherLeaveRequests} component={AdminTeacherLeaveScreen} />
       <Stack.Screen name={ScreenNames.MarkStaffAttendance} component={MarkStaffAttendanceScreen} />
       <Stack.Screen name={ScreenNames.StaffAttendanceRegister} component={StaffAttendanceRegisterScreen} />
       <Stack.Screen name={ScreenNames.Staff} component={StaffListScreen} />

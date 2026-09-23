@@ -3,7 +3,7 @@ import React, {useEffect, useState} from 'react';
 import {FlatList, Pressable, RefreshControl, ScrollView, View} from 'react-native';
 import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useThemedStyles} from '../../../core/theme';
+import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -11,28 +11,34 @@ import {
   SearchBar,
   ListRow,
   Badge,
+  Row,
+  AppText,
   Pagination,
   EmptyState,
   Loader,
   Spacer,
 } from '../../../shared/components';
+import {statusTone, capitalize} from '../../../shared/helpers';
 import {useStudents} from '../students.service';
 import type {AdminStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
-import type {Student} from '../../../shared/types';
+import type {Status, Student} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
+type StatusFilter = Extract<Status, 'active' | 'inactive'> | 'all';
 
 const ALL_SECTIONS_VALUE = '';
 const SEARCH_DEBOUNCE_MS = 350;
 
 export function StudentsListScreen(): React.JSX.Element {
+  const {theme} = useTheme();
   const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
   const route = useRoute<RouteProp<AdminStackParamList, 'StudentsList'>>();
-  const {classId, className, sectionId, sectionName, sections} = route.params;
+  const {classId, className, sectionId, sectionName, sections, statusFilter: initialStatusFilter} = route.params;
 
   const [activeSectionId, setActiveSectionId] = useState(sectionId ?? ALL_SECTIONS_VALUE);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(initialStatusFilter ?? 'all');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -49,6 +55,7 @@ export function StudentsListScreen(): React.JSX.Element {
   const {data, isLoading, isRefetching, isError, error, refetch} = useStudents({
     classId,
     sectionId: activeSectionId || undefined,
+    status: statusFilter === 'all' ? undefined : statusFilter,
     page,
     search: debouncedSearch || undefined,
     pageSize: 15,
@@ -69,6 +76,11 @@ export function StudentsListScreen(): React.JSX.Element {
       paddingTop: t2.spacing.sm,
       paddingBottom: t2.spacing.sm,
     },
+    pill: {
+      paddingHorizontal: t2.spacing.md,
+      paddingVertical: t2.spacing.xs,
+      borderRadius: t2.radius.pill,
+    },
     list: {
       flex: 1,
     },
@@ -78,6 +90,12 @@ export function StudentsListScreen(): React.JSX.Element {
       flexGrow: 1,
     },
   }));
+
+  const STATUS_FILTERS: {label: string; value: StatusFilter}[] = [
+    {label: t('common_all'), value: 'all'},
+    {label: t('teacherEdit_active'), value: 'active'},
+    {label: t('teacherEdit_inactive'), value: 'inactive'},
+  ];
 
   const activeSection = (sections ?? []).find(s => s.id === activeSectionId);
   const activeSectionName = activeSection?.name ?? (activeSectionId ? sectionName : undefined);
@@ -91,6 +109,11 @@ export function StudentsListScreen(): React.JSX.Element {
 
   const selectSection = (id: string): void => {
     setActiveSectionId(id);
+    setPage(1);
+  };
+
+  const selectStatus = (value: StatusFilter): void => {
+    setStatusFilter(value);
     setPage(1);
   };
 
@@ -128,6 +151,19 @@ export function StudentsListScreen(): React.JSX.Element {
         </ScrollView>
       ) : null}
 
+      <ScrollView horizontal style={styles.chips} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsRow}>
+        {STATUS_FILTERS.map(f => (
+          <Pressable
+            key={f.value}
+            onPress={() => selectStatus(f.value)}
+            style={[styles.pill, {backgroundColor: statusFilter === f.value ? theme.colors.primary : theme.colors.surfaceVariant}]}>
+            <AppText variant="label" style={{color: statusFilter === f.value ? theme.colors.onPrimary : theme.colors.textSecondary}}>
+              {f.label}
+            </AppText>
+          </Pressable>
+        ))}
+      </ScrollView>
+
       {isError ? (
         <EmptyState
           icon="warning"
@@ -163,7 +199,12 @@ export function StudentsListScreen(): React.JSX.Element {
                 sectionName: item.sectionName,
                 rollNo: String(item.rollNo),
               })}
-              right={<Badge label={`${item.attendancePercentage}%`} tone="info" />}
+              right={
+                <Row gap={theme.spacing.xs} align="center">
+                  <Badge label={capitalize(item.status)} tone={statusTone(item.status)} />
+                  <Badge label={`${item.attendancePercentage}%`} tone="info" />
+                </Row>
+              }
               onPress={() => navigation.navigate(ScreenNames.StudentDetail, {id: item.id, initial: item})}
             />
           )}

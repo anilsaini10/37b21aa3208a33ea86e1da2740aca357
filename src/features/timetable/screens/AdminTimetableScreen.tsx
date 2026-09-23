@@ -14,6 +14,7 @@ import {
   Select,
   SearchBar,
   AppText,
+  Badge,
   Icon,
   Row,
   Spacer,
@@ -79,7 +80,7 @@ export function AdminTimetableScreen(): React.JSX.Element {
     scrollContent: {padding: t2.spacing.lg, flexGrow: 1},
     pickerWrap: {flex: 1},
     filterRow: {marginBottom: t2.spacing.sm},
-    resetButtonWrap: {width: 96},
+    resetButtonWrap: {width: 96, marginTop: 22},
     daySelectorWrap: {alignItems: 'center', marginBottom: t2.spacing.sm},
     dayScrollContent: {columnGap: t2.spacing.sm},
     dayPill: {
@@ -101,6 +102,7 @@ export function AdminTimetableScreen(): React.JSX.Element {
     },
     periodInfo: {flex: 1},
     entryMeta: {marginBottom: t2.spacing.xs},
+    highlightText: {fontWeight: t2.typography.fontWeight.bold},
     modalButtonWrap: {flex: 1},
   }));
 
@@ -325,7 +327,7 @@ export function AdminTimetableScreen(): React.JSX.Element {
               </CustomCard>
             ) : (
               <CustomCard key={entry.id} style={styles.periodCard}>
-                <AppText variant="caption" color="textMuted" style={styles.entryMeta}>
+                <AppText variant="caption" color="text" style={styles.entryMeta}>
                   {entry.className} - {entry.sectionName} · {t(DAY_LABEL_KEYS[entry.day])}
                 </AppText>
                 <Row justify="space-between">
@@ -346,9 +348,18 @@ export function AdminTimetableScreen(): React.JSX.Element {
                           {entry.startTime} - {entry.endTime}
                         </AppText>
                       </Row>
-                      <AppText variant="label" color="textMuted">
-                        {t('timetable_teacherRoom', {teacher: entry.teacherName ?? '', room: entry.roomNo ?? ''})}
-                      </AppText>
+                      <Spacer size={4} />
+                      <Row gap={theme.spacing.sm} align="center" wrap>
+                        {entry.teacherName ? (
+                          <Row gap={4} align="center">
+                            <Icon name="teacher" size={13} color={theme.colors.primary} />
+                            <AppText variant="label" color="primary" style={styles.highlightText}>
+                              {entry.teacherName}
+                            </AppText>
+                          </Row>
+                        ) : null}
+                        {entry.roomNo ? <Badge label={t('timetable_roomLabel', {room: entry.roomNo})} tone="info" /> : null}
+                      </Row>
                     </View>
                   </Row>
                   <Row gap={theme.spacing.md} align="center">

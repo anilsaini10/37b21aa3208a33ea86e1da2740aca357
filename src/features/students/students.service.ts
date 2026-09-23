@@ -29,6 +29,10 @@ export interface StudentInput {
  */
 export type UpdateStudentInput = Partial<StudentInput> & {status?: Extract<Status, 'active' | 'inactive'>};
 
+export interface StudentFilters extends QueryParams {
+  status?: Extract<Status, 'active' | 'inactive'>;
+}
+
 export interface ParentAccountResult {
   isNew: boolean;
   email: string;
@@ -90,9 +94,10 @@ export function toStudent(raw: StudentApi): Student {
 }
 
 export const studentsApi = {
-  list: async (params?: QueryParams): Promise<Paginated<Student>> => {
+  list: async (params?: StudentFilters): Promise<Paginated<Student>> => {
     try {
-      const {data} = await axiosClient.get<Paginated<StudentApi>>(Endpoints.admin.students, {params});
+      const apiParams = params?.status ? {...params, status: params.status.toUpperCase()} : params;
+      const {data} = await axiosClient.get<Paginated<StudentApi>>(Endpoints.admin.students, {params: apiParams});
       return {...data, items: data.items.map(toStudent)};
     } catch (e) {
       console.error('studentsApi.list failed', e);
@@ -149,7 +154,7 @@ export const studentsApi = {
   },
 };
 
-export const useStudents = (params?: QueryParams) =>
+export const useStudents = (params?: StudentFilters) =>
   useQuery({queryKey: ['students', params], queryFn: () => studentsApi.list(params)});
 
 /** `initial` (e.g. the row already shown in the list) renders instantly while a fresh copy refetches in the background. */
@@ -165,7 +170,11 @@ export const useCreateStudent = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: StudentInput) => studentsApi.create(input),
-    onSuccess: () => qc.invalidateQueries({queryKey: ['students']}),
+    onSuccess: () => {
+      qc.invalidateQueries({queryKey: ['students']});
+      // A new student changes its class/section's student count, shown on the classes list.
+      qc.invalidateQueries({queryKey: ['classes']});
+    },
   });
 };
 
@@ -176,6 +185,8 @@ export const useUpdateStudent = () => {
     onSuccess: (updated, {id}) => {
       qc.setQueryData(['student', id], updated);
       qc.invalidateQueries({queryKey: ['students']});
+      // Covers both a class/section transfer and an active/inactive status change.
+      qc.invalidateQueries({queryKey: ['classes']});
     },
   });
 };
@@ -184,6 +195,10 @@ export const useDeleteStudent = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => studentsApi.remove(id),
-    onSuccess: () => qc.invalidateQueries({queryKey: ['students']}),
+    onSuccess: () => {
+      qc.invalidateQueries({queryKey: ['students']});
+      // The student's class/section student count is now stale.
+      qc.invalidateQueries({queryKey: ['classes']});
+    },
   });
 };

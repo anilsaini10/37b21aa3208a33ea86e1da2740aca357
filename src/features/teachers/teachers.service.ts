@@ -41,6 +41,11 @@ export interface AssignTeacherSubjectInput {
   classId: string;
 }
 
+/** Omit `status` (or the whole object) for the everyday roster — the backend defaults to ACTIVE-only. */
+export interface TeacherFilters extends QueryParams {
+  status?: 'ACTIVE' | 'INACTIVE' | 'ALL';
+}
+
 /**
  * Full profile/HR edit — separate from subject-class scheduling (`assignSubject`/`removeSubject`)
  * and from homeroom assignment (Classes/Sections edit screen). Any subset is a valid PATCH body.
@@ -104,7 +109,7 @@ export function toTeacher(raw: TeacherApi): Teacher {
 }
 
 export const teachersApi = {
-  list: async (params?: QueryParams): Promise<Paginated<Teacher>> => {
+  list: async (params?: TeacherFilters): Promise<Paginated<Teacher>> => {
     try {
       const {data} = await axiosClient.get<Paginated<TeacherApi>>(Endpoints.admin.teachers, {params});
       return {...data, items: data.items.map(toTeacher)};
@@ -154,9 +159,16 @@ export const teachersApi = {
     }
   },
 
-  remove: async (id: string): Promise<void> => {
+  /**
+   * Soft delete — flips the teacher to INACTIVE, disables their login, and revokes any
+   * existing session, everywhere. Their historical data (subject/class-teacher
+   * assignments, schedules, attendance they marked, etc.) is kept, not erased, and none
+   * of those assignments are auto-reassigned. Reverse with `update(id, {status: 'active'})`.
+   */
+  remove: async (id: string): Promise<Teacher> => {
     try {
-      await axiosClient.delete(Endpoints.admin.teachers_byId(id));
+      const {data} = await axiosClient.delete<TeacherApi>(Endpoints.admin.teachers_byId(id));
+      return toTeacher(data);
     } catch (e) {
       console.error('teachersApi.remove failed', e);
       rethrowApiError(e, 'Failed to remove teacher.');
@@ -188,7 +200,7 @@ export const teachersApi = {
   },
 };
 
-export const useTeachers = (params?: QueryParams) =>
+export const useTeachers = (params?: TeacherFilters) =>
   useQuery({queryKey: ['teachers', params], queryFn: () => teachersApi.list(params)});
 
 /** `initial` (e.g. the row already shown in the list) renders instantly while a fresh copy refetches in the background. */
@@ -247,6 +259,9 @@ export const useDeleteTeacher = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => teachersApi.remove(id),
-    onSuccess: () => qc.invalidateQueries({queryKey: ['teachers']}),
+    onSuccess: (updated, id) => {
+      qc.setQueryData(['teacher', id], updated);
+      qc.invalidateQueries({queryKey: ['teachers']});
+    },
   });
 };

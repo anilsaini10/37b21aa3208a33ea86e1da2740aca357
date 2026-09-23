@@ -24,7 +24,7 @@ import {
 } from '../../../shared/components';
 import {statusTone, capitalize} from '../../../shared/helpers';
 import {formatDate, formatCurrency} from '../../../core/utils/format';
-import {useTeacher, useAssignTeacherSubject, useRemoveTeacherSubject} from '../teachers.service';
+import {useTeacher, useAssignTeacherSubject, useRemoveTeacherSubject, useDeleteTeacher, useUpdateTeacher} from '../teachers.service';
 import {useClasses} from '../../classes/classes.service';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {AdminStackParamList} from '../../../navigation/types';
@@ -254,12 +254,16 @@ export function TeacherDetailScreen(): React.JSX.Element {
   const {data: classes} = useClasses();
   const assignMutation = useAssignTeacherSubject();
   const removeMutation = useRemoveTeacherSubject();
+  const deleteMutation = useDeleteTeacher();
+  const restoreMutation = useUpdateTeacher();
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [assignSubjectName, setAssignSubjectName] = useState('');
   const [assignClassId, setAssignClassId] = useState('');
   const [assignError, setAssignError] = useState<string | undefined>();
   const [removeTarget, setRemoveTarget] = useState<TeacherSubjectAssignment | null>(null);
   const [removeError, setRemoveError] = useState<string | undefined>();
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | undefined>();
   const styles = useThemedStyles(t2 => ({
     scrollContent: {
       paddingBottom: t2.spacing.lg,
@@ -323,6 +327,18 @@ export function TeacherDetailScreen(): React.JSX.Element {
         onError: (e: Error) => setRemoveError(e.message),
       },
     );
+  };
+
+  const onDelete = (): void => {
+    setDeleteError(undefined);
+    deleteMutation.mutate(teacherId, {
+      onSuccess: () => setDeleteConfirmOpen(false),
+      onError: (e: Error) => setDeleteError(e.message),
+    });
+  };
+
+  const onRestore = (): void => {
+    restoreMutation.mutate({id: teacherId, input: {status: 'active'}});
   };
 
   return (
@@ -390,6 +406,26 @@ export function TeacherDetailScreen(): React.JSX.Element {
             teacher.subjects.map(s => (
               <SubjectCard key={`${s.subjectId}_${s.classId}`} subject={s} onDelete={() => setRemoveTarget(s)} />
             ))
+          )}
+
+          <Spacer size={theme.spacing.md} />
+          {teacher.status === 'inactive' ? (
+            <CustomButton
+              title={t('teacherDetail_restoreTeacher')}
+              iconLeft="check"
+              loading={restoreMutation.isPending}
+              onPress={onRestore}
+            />
+          ) : (
+            <CustomButton
+              title={t('teacherDetail_deleteTeacher')}
+              variant="danger"
+              iconLeft="delete"
+              onPress={() => {
+                setDeleteError(undefined);
+                setDeleteConfirmOpen(true);
+              }}
+            />
           )}
         </View>
 
@@ -466,6 +502,34 @@ export function TeacherDetailScreen(): React.JSX.Element {
               variant="danger"
               loading={removeMutation.isPending}
               onPress={submitRemove}
+            />
+          </View>
+        </Row>
+      </CustomModal>
+
+      <CustomModal
+        visible={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        title={t('teacherDetail_deleteTeacher')}>
+        <AppText variant="body" color="textSecondary">
+          {t('teacherDetail_deleteConfirmMessage')}
+        </AppText>
+        {deleteError ? (
+          <AppText variant="caption" color="error" style={{marginTop: theme.spacing.sm}}>
+            {deleteError}
+          </AppText>
+        ) : null}
+        <Spacer size={16} />
+        <Row gap={theme.spacing.md}>
+          <View style={styles.modalButtonWrap}>
+            <CustomButton title={t('common_cancel')} variant="outline" onPress={() => setDeleteConfirmOpen(false)} />
+          </View>
+          <View style={styles.modalButtonWrap}>
+            <CustomButton
+              title={t('common_delete')}
+              variant="danger"
+              loading={deleteMutation.isPending}
+              onPress={onDelete}
             />
           </View>
         </Row>

@@ -246,9 +246,10 @@ export function EventsScreen(): React.JSX.Element {
             <CustomCard
               style={styles.card}
               onPress={
-                isAdmin
+                isAdmin && viewFilter !== 'past'
                   ? () => navigation.navigate(ScreenNames.EventForm, {id: item.id, initial: item})
-                  : undefined
+                  : // Past events are read-only — no edit navigation on tap.
+                    undefined
               }>
               <Row justify="space-between" align="flex-start">
                 <Row gap={theme.spacing.xs} wrap>

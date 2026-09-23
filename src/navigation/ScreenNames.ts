@@ -67,7 +67,6 @@ export const ScreenNames = {
   ClassSchedule: 'ClassSchedule',
   PeriodForm: 'PeriodForm',
   TeacherSchedule: 'TeacherSchedule',
-  TeacherLeaveRequests: 'TeacherLeaveRequests',
   MarkStaffAttendance: 'MarkStaffAttendance',
   StaffAttendanceRegister: 'StaffAttendanceRegister',
   Staff: 'Staff',

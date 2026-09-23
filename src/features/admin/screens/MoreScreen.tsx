@@ -36,7 +36,6 @@ type NoParamRoute =
   | 'Exams'
   | 'Announcements'
   | 'Leave'
-  | 'TeacherLeaveRequests'
   | 'Events'
   | 'Transport'
   | 'Library'
@@ -53,9 +52,9 @@ interface ModuleItem {
 
 const MODULES: ModuleItem[] = [
   {labelKey: 'teacherProfile_profile', icon: 'profile', route: ScreenNames.Profile},
-  {labelKey: 'feesList_headerTitle', icon: 'fee', route: ScreenNames.Fees},
+  // {labelKey: 'feesList_headerTitle', icon: 'fee', route: ScreenNames.Fees},
   {labelKey: 'moreScreen_classes', icon: 'class', route: ScreenNames.ClassesManage},
-  {labelKey: 'moreScreen_subjects', icon: 'homework', route: ScreenNames.SubjectsManage},
+  // {labelKey: 'moreScreen_subjects', icon: 'homework', route: ScreenNames.SubjectsManage},
   {labelKey: 'moreScreen_classSchedule', icon: 'timetable', route: ScreenNames.ClassSchedule},
   {labelKey: 'moreScreen_teacherSchedule', icon: 'timetable', route: ScreenNames.TeacherSchedule},
   {labelKey: 'moreScreen_staff', icon: 'staff', route: ScreenNames.Staff},
@@ -63,12 +62,11 @@ const MODULES: ModuleItem[] = [
   {labelKey: 'moreScreen_exams', icon: 'exam', route: ScreenNames.Exams},
   {labelKey: 'moreScreen_announcements', icon: 'announcement', route: ScreenNames.Announcements},
   {labelKey: 'moreScreen_leave', icon: 'calendar', route: ScreenNames.Leave},
-  {labelKey: 'moreScreen_teacherLeave', icon: 'calendar', route: ScreenNames.TeacherLeaveRequests},
   {labelKey: 'moreScreen_events', icon: 'event', route: ScreenNames.Events},
-  {labelKey: 'moreScreen_transport', icon: 'transport', route: ScreenNames.Transport},
+  // {labelKey: 'moreScreen_transport', icon: 'transport', route: ScreenNames.Transport},
   // {labelKey: 'moreScreen_library', icon: 'library', route: ScreenNames.Library},
-  {labelKey: 'moreScreen_inventory', icon: 'inventory', route: ScreenNames.Inventory},
-  {labelKey: 'moreScreen_reports', icon: 'reports', route: ScreenNames.Reports},
+  // {labelKey: 'moreScreen_inventory', icon: 'inventory', route: ScreenNames.Inventory},
+  // {labelKey: 'moreScreen_reports', icon: 'reports', route: ScreenNames.Reports},
   {labelKey: 'moreScreen_settings', icon: 'settings', route: ScreenNames.Settings},
   // {labelKey: 'moreScreen_notifications', icon: 'notification', route: ScreenNames.Notifications},
 ];

@@ -1,6 +1,6 @@
 /** Students-wise class list — searchable/filterable, every class as a compact accent-colored card with its sections shown next to the name. */
 import React, {useMemo, useState} from 'react';
-import {ScrollView, View} from 'react-native';
+import {Pressable, ScrollView, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme, useThemedStyles} from '../../../core/theme';
@@ -21,9 +21,10 @@ import {
 import {useClasses} from '../../classes/classes.service';
 import type {AdminStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
-import type {SchoolClass} from '../../../shared/types';
+import type {SchoolClass, Status} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
+type StatusFilter = Extract<Status, 'active' | 'inactive'> | 'all';
 
 const ALL_SECTIONS_VALUE = '';
 
@@ -37,6 +38,12 @@ export function StudentsWiseClassListScreen(): React.JSX.Element {
     },
     searchItem: {flex: 7},
     filterItem: {flex: 3},
+    statusRow: {paddingTop: t2.spacing.sm},
+    pill: {
+      paddingHorizontal: t2.spacing.md,
+      paddingVertical: t2.spacing.xs,
+      borderRadius: t2.radius.pill,
+    },
   }));
   const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
@@ -44,6 +51,13 @@ export function StudentsWiseClassListScreen(): React.JSX.Element {
 
   const [search, setSearch] = useState('');
   const [sectionFilter, setSectionFilter] = useState(ALL_SECTIONS_VALUE);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+
+  const STATUS_FILTERS: {label: string; value: StatusFilter}[] = [
+    {label: t('common_all'), value: 'all'},
+    {label: t('teacherEdit_active'), value: 'active'},
+    {label: t('teacherEdit_inactive'), value: 'inactive'},
+  ];
 
   const sectionOptions = useMemo(() => {
     const names = Array.from(new Set((classes ?? []).flatMap(c => c.sections.map(s => s.name)))).sort();
@@ -69,6 +83,7 @@ export function StudentsWiseClassListScreen(): React.JSX.Element {
     navigation.navigate(ScreenNames.StudentsList, {
       classId: cls.id,
       className: cls.name,
+      statusFilter: statusFilter === 'all' ? undefined : statusFilter,
       sections: cls.sections.map(s => ({id: s.id, name: s.name, studentCount: s.studentCount})),
     });
   };
@@ -115,6 +130,18 @@ export function StudentsWiseClassListScreen(): React.JSX.Element {
               onChange={setSectionFilter}
             />
           </View>
+        </Row>
+        <Row gap={theme.spacing.xs} style={styles.statusRow}>
+          {STATUS_FILTERS.map(f => (
+            <Pressable
+              key={f.value}
+              onPress={() => setStatusFilter(f.value)}
+              style={[styles.pill, {backgroundColor: statusFilter === f.value ? theme.colors.primary : theme.colors.surfaceVariant}]}>
+              <AppText variant="label" style={{color: statusFilter === f.value ? theme.colors.onPrimary : theme.colors.textSecondary}}>
+                {f.label}
+              </AppText>
+            </Pressable>
+          ))}
         </Row>
 
         {filteredClasses.length === 0 ? (

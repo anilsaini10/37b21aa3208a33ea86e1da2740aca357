@@ -35,6 +35,9 @@ export interface FormField {
   placeholder?: string;
   required?: boolean;
   options?: SelectOption[];
+  /** Only used when type is 'date' — overrides DatePicker's default year range (e.g. a birth-date field needs past years, not future ones). */
+  minYear?: number;
+  maxYear?: number;
   /** Custom validation rule; return an error message or undefined. */
   validate?: (value: unknown) => string | undefined;
 }
@@ -85,7 +88,15 @@ export function DynamicForm<T extends FieldValues>({
                   />
                 );
               case 'date':
-                return <DatePicker label={field.label} value={value} onChange={onChange} />;
+                return (
+                  <DatePicker
+                    label={field.label}
+                    value={value}
+                    onChange={onChange}
+                    minYear={field.minYear}
+                    maxYear={field.maxYear}
+                  />
+                );
               case 'time':
                 return <TimePicker label={field.label} value={value} onChange={onChange} />;
               default:
