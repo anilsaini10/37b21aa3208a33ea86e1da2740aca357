@@ -4,7 +4,7 @@ import {FlatList, Pressable, RefreshControl, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme, useThemedStyles} from '../../../core/theme';
-import {useLanguage} from '../../../core/i18n';
+import {useLanguage, type TranslationKey} from '../../../core/i18n';
 import {
   Screen,
   CustomHeader,
@@ -24,11 +24,12 @@ import {
 } from '../../../shared/components';
 import type {BadgeTone} from '../../../shared/components';
 import {formatDate} from '../../../core/utils/format';
+import {homeworkStatusTone} from '../../../shared/helpers';
 import {useTeacherHomeworkList, useDeleteTeacherHomework} from '../teacherHomework.service';
 import {useTeacherClasses} from '../../teacher/teacherClasses.service';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {TeacherStackParamList} from '../../../navigation/types';
-import type {HomeworkType, TeacherHomework} from '../../../shared/types';
+import type {HomeworkStatus, HomeworkType, TeacherHomework} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<TeacherStackParamList>;
 
@@ -56,6 +57,13 @@ function daysUntil(dueDate: string): number {
   const msPerDay = 24 * 60 * 60 * 1000;
   return Math.round((new Date(dueDate).getTime() - new Date(today).getTime()) / msPerDay);
 }
+
+const STATUS_LABEL_KEY: Record<HomeworkStatus, TranslationKey> = {
+  SCHEDULED: 'homeworkDetail_statusScheduled',
+  ACTIVE: 'homeworkDetail_statusActive',
+  IN_PROGRESS: 'homeworkDetail_statusInProgress',
+  COMPLETED: 'homeworkDetail_statusCompleted',
+};
 
 export function HomeworkListScreen(): React.JSX.Element {
   const {theme} = useTheme();
@@ -262,9 +270,12 @@ export function HomeworkListScreen(): React.JSX.Element {
                   <Badge label={item.subjectName} tone="primary" />
                 </Row>
                 <Spacer size={theme.spacing.xs} />
-                <AppText variant="caption" style={{color: theme.colors[due.tone]}}>
-                  {t('homeworkList_dueLabel', {due: due.label})}
-                </AppText>
+                <Row justify="space-between" align="center">
+                  <AppText variant="caption" style={{color: theme.colors[due.tone]}}>
+                    {t('homeworkList_dueLabel', {due: due.label})}
+                  </AppText>
+                  <Badge label={t(STATUS_LABEL_KEY[item.status])} tone={homeworkStatusTone(item.status)} />
+                </Row>
               </CustomCard>
             );
           }}

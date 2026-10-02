@@ -45,7 +45,8 @@ export interface ClassCardSectionChip {
 
 export interface ClassCardProps {
   name: string;
-  subtitle: string;
+  /** Omit when the subtitle line itself is handled via `children` instead (e.g. placed in a custom bottom row). */
+  subtitle?: string;
   sections?: ClassCardSectionChip[];
   accent?: ClassCardAccent;
   onPress?: () => void;
@@ -123,9 +124,11 @@ export function ClassCard({
               </AppText>
             ) : null}
           </AppText>
-          <AppText variant="label" color="textSecondary">
-            {subtitle}
-          </AppText>
+          {subtitle ? (
+            <AppText variant="label" color="textSecondary">
+              {subtitle}
+            </AppText>
+          ) : null}
           {children == null && !titleSuffix && sections.length > 0 ? (
             <Row wrap gap={theme.spacing.xs} style={styles.chipsRow}>
               {sections.map(section => {

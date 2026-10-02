@@ -4,6 +4,7 @@ import {axiosClient} from '../../core/api/axiosClient';
 import {Endpoints} from '../../core/api/apiConfig';
 import {rethrowApiError} from '../../core/api/apiError';
 import type {
+  HomeworkStatus,
   HomeworkType,
   Paginated,
   QueryParams,
@@ -20,15 +21,23 @@ export interface CreateHomeworkInput {
   description?: string;
   /** Defaults to 'ASSIGNMENT' server-side when omitted. */
   type?: HomeworkType;
+  /** Optional — must be on/before dueDate. Leaving it empty means "available immediately". */
+  fromDate?: string;
   dueDate: string;
 }
 
-/** Editing only ever touches these fields — classId/sectionId/subjectId can't be changed (delete + recreate instead). */
+/**
+ * Editing only ever touches these fields — classId/sectionId/subjectId can't be changed
+ * (delete + recreate instead). `status` never accepts 'SCHEDULED' — that's computed
+ * server-side from `fromDate` and rejected (400) if sent directly.
+ */
 export type UpdateHomeworkInput = Partial<{
   title: string;
   description: string;
   type: HomeworkType;
+  fromDate: string;
   dueDate: string;
+  status: Extract<HomeworkStatus, 'ACTIVE' | 'IN_PROGRESS' | 'COMPLETED'>;
 }>;
 
 export const teacherHomeworkApi = {
@@ -72,9 +81,11 @@ export const teacherHomeworkApi = {
     }
   },
 
-  remove: async (homeworkId: string): Promise<void> => {
+  /** Soft delete — the returned homework has `isActive: false`; nothing else about its data is erased. */
+  remove: async (homeworkId: string): Promise<TeacherHomework> => {
     try {
-      await axiosClient.delete(Endpoints.teacher.homework_byId(homeworkId));
+      const {data} = await axiosClient.delete<TeacherHomework>(Endpoints.teacher.homework_byId(homeworkId));
+      return data;
     } catch (e) {
       console.error('teacherHomeworkApi.remove failed', e);
       rethrowApiError(e, 'Failed to delete homework.');

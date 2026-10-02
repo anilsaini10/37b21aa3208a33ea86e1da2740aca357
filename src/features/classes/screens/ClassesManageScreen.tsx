@@ -83,6 +83,9 @@ export function ClassesManageScreen(): React.JSX.Element {
   const [deleteSectionTarget, setDeleteSectionTarget] = useState<Section | null>(null);
   const [deleteSectionError, setDeleteSectionError] = useState<string | undefined>();
 
+  const [removeTeacherTarget, setRemoveTeacherTarget] = useState<Section | null>(null);
+  const [removeTeacherError, setRemoveTeacherError] = useState<string | undefined>();
+
   const styles = useThemedStyles(t2 => ({
     searchSection: {paddingHorizontal: t2.spacing.lg, paddingTop: t2.spacing.md},
     scrollContent: {padding: t2.spacing.lg, flexGrow: 1},
@@ -269,6 +272,20 @@ export function ClassesManageScreen(): React.JSX.Element {
     );
   };
 
+  const confirmRemoveClassTeacher = (): void => {
+    if (!removeTeacherTarget) {
+      return;
+    }
+    setRemoveTeacherError(undefined);
+    updateSectionMutation.mutate(
+      {classId: removeTeacherTarget.classId, sectionId: removeTeacherTarget.id, input: {classTeacherId: null}},
+      {
+        onSuccess: () => setRemoveTeacherTarget(null),
+        onError: (e: Error) => setRemoveTeacherError(e.message),
+      },
+    );
+  };
+
   const confirmDeleteSection = (): void => {
     if (!deleteSectionTarget) {
       return;
@@ -347,7 +364,17 @@ export function ClassesManageScreen(): React.JSX.Element {
                     </View>
                     <Row gap={theme.spacing.sm} align="center">
                       {section.classTeacherName ? (
-                        <Badge label={section.classTeacherName} tone="info" />
+                        <>
+                          <Badge label={section.classTeacherName} tone="info" />
+                          <Pressable
+                            onPress={() => {
+                              setRemoveTeacherTarget(section);
+                              setRemoveTeacherError(undefined);
+                            }}
+                            hitSlop={8}>
+                            <Icon name="close" size={14} color={theme.colors.error} />
+                          </Pressable>
+                        </>
                       ) : null}
                       <Pressable onPress={() => openSectionEditModal(section)} hitSlop={8}>
                         <Icon name="edit" size={16} color={theme.colors.textMuted} />
@@ -642,6 +669,37 @@ export function ClassesManageScreen(): React.JSX.Element {
               variant="danger"
               loading={deleteSectionMutation.isPending}
               onPress={confirmDeleteSection}
+            />
+          </View>
+        </Row>
+      </CustomModal>
+
+      <CustomModal
+        visible={!!removeTeacherTarget}
+        onClose={() => setRemoveTeacherTarget(null)}
+        title={t('classesManage_removeClassTeacherTitle')}>
+        <AppText variant="body" color="textSecondary">
+          {t('classesManage_removeClassTeacherConfirm', {
+            teacher: removeTeacherTarget?.classTeacherName ?? '',
+            section: removeTeacherTarget?.name ?? '',
+          })}
+        </AppText>
+        {removeTeacherError ? (
+          <AppText variant="caption" color="error" style={{marginTop: theme.spacing.sm}}>
+            {removeTeacherError}
+          </AppText>
+        ) : null}
+        <Spacer size={16} />
+        <Row gap={theme.spacing.md}>
+          <View style={styles.modalButtonWrap}>
+            <CustomButton title={t('common_cancel')} variant="outline" onPress={() => setRemoveTeacherTarget(null)} />
+          </View>
+          <View style={styles.modalButtonWrap}>
+            <CustomButton
+              title={t('common_remove')}
+              variant="danger"
+              loading={updateSectionMutation.isPending}
+              onPress={confirmRemoveClassTeacher}
             />
           </View>
         </Row>

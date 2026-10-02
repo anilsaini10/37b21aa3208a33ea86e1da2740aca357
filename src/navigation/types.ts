@@ -55,7 +55,7 @@ export type AdminStackParamList = {
     sectionId?: string;
     sectionName?: string;
     /** Every section of this class, so the list screen can offer a section filter without another API call. */
-    sections?: {id: string; name: string; studentCount: number}[];
+    sections?: {id: string; name: string; studentCount: number; classTeacherName: string | null}[];
     /** Carried over from the class list's own status filter, if one was set there. */
     statusFilter?: 'active' | 'inactive';
   };

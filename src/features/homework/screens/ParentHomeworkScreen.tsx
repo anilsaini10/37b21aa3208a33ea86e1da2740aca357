@@ -2,7 +2,7 @@
 import React, {useState} from 'react';
 import {FlatList, Pressable, RefreshControl, ScrollView, View} from 'react-native';
 import {useTheme, useThemedStyles} from '../../../core/theme';
-import {useLanguage} from '../../../core/i18n';
+import {useLanguage, type TranslationKey} from '../../../core/i18n';
 import {
   Screen,
   CustomHeader,
@@ -19,9 +19,17 @@ import {
 } from '../../../shared/components';
 import type {BadgeTone} from '../../../shared/components';
 import {formatDate} from '../../../core/utils/format';
+import {homeworkStatusTone} from '../../../shared/helpers';
 import {useParentProfile} from '../../parent/parentStudents.service';
 import {useParentHomeworkList, useParentHomeworkItem} from '../../parent/parentHomework.service';
-import type {HomeworkType, ParentChild, ParentHomeworkItem} from '../../../shared/types';
+import type {HomeworkStatus, HomeworkType, ParentChild, ParentHomeworkItem} from '../../../shared/types';
+
+const STATUS_LABEL_KEY: Record<HomeworkStatus, TranslationKey> = {
+  SCHEDULED: 'homeworkDetail_statusScheduled',
+  ACTIVE: 'homeworkDetail_statusActive',
+  IN_PROGRESS: 'homeworkDetail_statusInProgress',
+  COMPLETED: 'homeworkDetail_statusCompleted',
+};
 
 const TYPE_ICON: Record<HomeworkType, string> = {
   ASSIGNMENT: 'homework',
@@ -219,6 +227,15 @@ function ChildHomeworkList({
                     {item.teacherName}
                   </AppText>
                 </Row>
+                <Spacer size={theme.spacing.xs} />
+                <Row justify="space-between" align="center">
+                  <Badge label={t(STATUS_LABEL_KEY[item.status])} tone={homeworkStatusTone(item.status)} />
+                  {item.status === 'SCHEDULED' && item.fromDate ? (
+                    <AppText variant="label" color="textMuted">
+                      {t('homeworkDetail_availableFrom', {date: formatDate(item.fromDate)})}
+                    </AppText>
+                  ) : null}
+                </Row>
               </CustomCard>
             );
           }}
@@ -250,8 +267,17 @@ function ChildHomeworkList({
               />
               <Badge label={detail.subjectName} tone="primary" />
               <Badge label={detail.type} tone={TYPE_TONE[detail.type]} />
+              <Badge label={t(STATUS_LABEL_KEY[detail.status])} tone={homeworkStatusTone(detail.status)} />
             </Row>
             <Spacer size={12} />
+            {detail.status === 'SCHEDULED' && detail.fromDate ? (
+              <>
+                <AppText variant="caption" color="textMuted">
+                  {t('homeworkDetail_availableFrom', {date: formatDate(detail.fromDate)})}
+                </AppText>
+                <Spacer size={4} />
+              </>
+            ) : null}
             <AppText variant="caption" style={{color: theme.colors[dueDateInfo(detail.dueDate).tone]}}>
               {t('homeworkList_dueLabel', {due: dueDateInfo(detail.dueDate).label})}
             </AppText>

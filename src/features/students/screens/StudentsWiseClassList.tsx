@@ -13,6 +13,8 @@ import {
   SearchBar,
   Select,
   AppText,
+  Badge,
+  Icon,
   Row,
   Spacer,
   EmptyState,
@@ -38,11 +40,26 @@ export function StudentsWiseClassListScreen(): React.JSX.Element {
     },
     searchItem: {flex: 7},
     filterItem: {flex: 3},
+    filterValueText: {fontSize: t2.typography.fontSize.sm},
     statusRow: {paddingTop: t2.spacing.sm},
     pill: {
       paddingHorizontal: t2.spacing.md,
       paddingVertical: t2.spacing.xs,
       borderRadius: t2.radius.pill,
+    },
+    bottomRow: {
+      marginTop: 6,
+    },
+    teacherWrap: {
+      flex: 1,
+      minWidth: 0,
+      paddingRight: t2.spacing.sm,
+    },
+    teacherRow: {
+      marginTop: 2,
+    },
+    teacherNameBadge: {
+      maxWidth: 120,
     },
   }));
   const {t} = useLanguage();
@@ -84,7 +101,12 @@ export function StudentsWiseClassListScreen(): React.JSX.Element {
       classId: cls.id,
       className: cls.name,
       statusFilter: statusFilter === 'all' ? undefined : statusFilter,
-      sections: cls.sections.map(s => ({id: s.id, name: s.name, studentCount: s.studentCount})),
+      sections: cls.sections.map(s => ({
+        id: s.id,
+        name: s.name,
+        studentCount: s.studentCount,
+        classTeacherName: s.classTeacherName ?? null,
+      })),
     });
   };
 
@@ -128,6 +150,7 @@ export function StudentsWiseClassListScreen(): React.JSX.Element {
               value={sectionFilter}
               options={sectionOptions}
               onChange={setSectionFilter}
+              valueStyle={styles.filterValueText}
             />
           </View>
         </Row>
@@ -161,10 +184,41 @@ export function StudentsWiseClassListScreen(): React.JSX.Element {
               compact
               name={cls.name}
               titleSuffix={cls.sections.length > 0 ? `(${cls.sections.map(s => s.name).join(', ')})` : undefined}
-              subtitle={t('classList_studentCount', {count: cls.totalStudents})}
               accent={classCardAccent(index)}
-              onPress={() => openClass(cls)}
-            />
+              onPress={() => openClass(cls)}>
+              <Row justify="space-between" align="flex-start" style={styles.bottomRow}>
+                <View style={styles.teacherWrap}>
+                  {cls.sections.length === 1 ? (
+                    <Row gap={6} align="center">
+                      <Icon name="teacher" size={12} color={theme.colors.textMuted} />
+                      <AppText variant="label" color="textMuted" numberOfLines={1}>
+                        {t('classesManage_classTeacherLabel')}
+                      </AppText>
+                      <Badge
+                        label={cls.sections[0].classTeacherName ?? t('classesManage_noClassTeacher')}
+                        tone={cls.sections[0].classTeacherName ? 'info' : 'neutral'}
+                        numberOfLines={1}
+                        style={styles.teacherNameBadge}
+                      />
+                    </Row>
+                  ) : cls.sections.length > 1 ? (
+                    cls.sections.map((s, i) => (
+                      <Row key={s.id} gap={6} align="center" style={i > 0 ? styles.teacherRow : undefined}>
+                        <Icon name="teacher" size={12} color={theme.colors.textMuted} />
+                        <Badge label={'Section: ' + s.name} tone="neutral" numberOfLines={1} />
+                        <Badge
+                          label={s.classTeacherName ?? t('classesManage_noClassTeacher')}
+                          tone={s.classTeacherName ? 'info' : 'neutral'}
+                          numberOfLines={1}
+                          style={styles.teacherNameBadge}
+                        />
+                      </Row>
+                    ))
+                  ) : null}
+                </View>
+                <Badge label={t('classList_studentCount', {count: cls.totalStudents})} tone="neutral" />
+              </Row>
+            </ClassCard>
           ))
         )}
       </ScrollView>

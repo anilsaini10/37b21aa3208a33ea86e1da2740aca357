@@ -13,7 +13,7 @@ import {
   CustomButton,
   DatePicker,
   SearchBar,
-  Badge,
+  ResultModal,
   Loader,
   EmptyState,
   Row,
@@ -48,8 +48,7 @@ export function MarkStaffAttendanceScreen(): React.JSX.Element {
 
   const [selectedDate, setSelectedDate] = useState(todayIso());
   const [statuses, setStatuses] = useState<Record<string, AttendanceStatusCode>>({});
-  const [saved, setSaved] = useState(false);
-  const [submitError, setSubmitError] = useState<string | undefined>();
+  const [result, setResult] = useState<{variant: 'success' | 'error'; message?: string} | null>(null);
   const [search, setSearch] = useState('');
 
   const {data: teachersPage, isLoading: teachersLoading, isError, error, refetch} = useTeachers({pageSize: 100});
@@ -103,14 +102,11 @@ export function MarkStaffAttendanceScreen(): React.JSX.Element {
         next[tch.id] = record?.status ?? 'PRESENT';
       });
       setStatuses(next);
-      setSaved(false);
-      setSubmitError(undefined);
     }
   }, [selectedDate, teachersPage, existing, existingLoading]);
 
   const setStatus = (teacherId: string, status: AttendanceStatusCode): void => {
     setStatuses(prev => ({...prev, [teacherId]: status}));
-    setSaved(false);
   };
 
   const counts: Record<AttendanceStatusCode, number> = {PRESENT: 0, ABSENT: 0, LATE: 0, LEAVE: 0, HOLIDAY: 0};
@@ -124,15 +120,14 @@ export function MarkStaffAttendanceScreen(): React.JSX.Element {
     : teachers;
 
   const onSave = (): void => {
-    setSubmitError(undefined);
     markAttendance.mutate(
       {
         date: selectedDate,
         records: Object.entries(statuses).map(([teacherId, status]) => ({teacherId, status})),
       },
       {
-        onSuccess: () => setSaved(true),
-        onError: (e: Error) => setSubmitError(e.message),
+        onSuccess: () => setResult({variant: 'success'}),
+        onError: (e: Error) => setResult({variant: 'error', message: e.message}),
       },
     );
   };
@@ -230,16 +225,6 @@ export function MarkStaffAttendanceScreen(): React.JSX.Element {
             )}
 
             <Spacer size={16} />
-            {submitError ? (
-              <AppText variant="caption" color="error" style={{marginBottom: theme.spacing.sm}}>
-                {submitError}
-              </AppText>
-            ) : null}
-            {saved ? (
-              <Row justify="center" style={{marginBottom: theme.spacing.sm}}>
-                <Badge label={t('markAttendance_saved')} tone="success" />
-              </Row>
-            ) : null}
             <CustomButton
               title={t('markAttendance_saveAttendance')}
               iconLeft="check"
@@ -250,6 +235,14 @@ export function MarkStaffAttendanceScreen(): React.JSX.Element {
         )}
         <Spacer size={24} />
       </ScrollView>
+
+      <ResultModal
+        visible={!!result}
+        variant={result?.variant ?? 'success'}
+        title={result?.variant === 'error' ? t('markAttendance_saveErrorTitle') : t('markAttendance_saveSuccessTitle')}
+        message={result?.variant === 'error' ? result.message : t('markAttendance_saveSuccessMessage')}
+        onClose={() => setResult(null)}
+      />
     </Screen>
   );
 }

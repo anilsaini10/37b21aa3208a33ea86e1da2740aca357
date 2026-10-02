@@ -12,6 +12,7 @@ export * from './CustomCard';
 export * from './CustomHeader';
 export * from './DashboardGreetingHeader';
 export * from './CustomModal';
+export * from './ResultModal';
 export * from './CustomBottomSheet';
 export * from './CustomTable';
 export * from './EmptyState';

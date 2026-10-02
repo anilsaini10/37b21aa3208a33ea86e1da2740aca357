@@ -32,6 +32,14 @@ export interface HomeworkSubmission {
 
 export type HomeworkType = 'ASSIGNMENT' | 'PROJECT' | 'READING' | 'PRACTICE' | 'OTHER';
 
+/**
+ * 'SCHEDULED' is computed server-side (fromDate still in the future) and can never be
+ * set directly — PATCHing status to it is rejected. Once fromDate has passed (or was
+ * never set), the real status shows: 'ACTIVE' (default) → 'IN_PROGRESS' → 'COMPLETED',
+ * all settable by the teacher.
+ */
+export type HomeworkStatus = 'SCHEDULED' | 'ACTIVE' | 'IN_PROGRESS' | 'COMPLETED';
+
 /** Homework (real backend) — a teacher creates/manages via `/api/teacher/homework`. */
 export interface TeacherHomework {
   id: ID;
@@ -44,7 +52,12 @@ export interface TeacherHomework {
   title: string;
   description: string | null;
   type: HomeworkType;
+  /** Optional — set to make the homework not show as available until this date (see `status`). */
+  fromDate: string | null;
   dueDate: string;
+  status: HomeworkStatus;
+  /** false once soft-deleted — parent responses never include soft-deleted homework at all, so this is teacher-side only. */
+  isActive: boolean;
   createdBy: {id: ID; name: string};
   createdAt: string;
   updatedAt: string;
@@ -96,7 +109,9 @@ export interface ParentHomeworkItem {
   title: string;
   description: string | null;
   type: HomeworkType;
+  fromDate: string | null;
   dueDate: string;
+  status: HomeworkStatus;
   teacherName: string;
   createdAt: string;
   updatedAt: string;

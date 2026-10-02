@@ -3,7 +3,7 @@ import React, {useMemo, useState} from 'react';
 import {Pressable, View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme, useThemedStyles} from '../../../core/theme';
+import {palette, useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -12,7 +12,6 @@ import {
   CustomCard,
   DatePicker,
   BarChart,
-  Badge,
   Icon,
   Loader,
   EmptyState,
@@ -49,6 +48,7 @@ export function DateRangeFilter({
   const styles = useThemedStyles(t2 => ({
     card: {
       marginBottom: t2.spacing.md,
+      padding: t2.spacing.md,
     },
     fieldWrap: {
       flex: 1,
@@ -56,11 +56,17 @@ export function DateRangeFilter({
     arrow: {
       marginTop: 30,
     },
+    dateValueText: {
+      fontSize: t2.typography.fontSize.sm,
+    },
+    dateFieldBox: {
+      height: 42,
+    },
   }));
 
   return (
     <CustomCard style={styles.card}>
-      <AppText variant="label" color="textSecondary">
+      <AppText color="textSecondary" style={{color: palette.black}}>
         {t('attendanceReport_dateRangeLabel')}
       </AppText>
       <Spacer size={theme.spacing.xs} />
@@ -70,6 +76,8 @@ export function DateRangeFilter({
             label={t('attendanceReport_fromDate')}
             value={fromDate}
             onChange={d => onChange(d, d > toDate ? d : toDate)}
+            valueStyle={styles.dateValueText}
+            style={styles.dateFieldBox}
           />
         </View>
         <Icon name="forward" size={16} color={theme.colors.textMuted} style={styles.arrow} />
@@ -78,6 +86,8 @@ export function DateRangeFilter({
             label={t('attendanceReport_toDate')}
             value={toDate}
             onChange={d => onChange(d < fromDate ? d : fromDate, d)}
+            valueStyle={styles.dateValueText}
+            style={styles.dateFieldBox}
           />
         </View>
       </Row>
@@ -293,6 +303,11 @@ export function AttendanceReportScreen(): React.JSX.Element {
       columnGap: t2.spacing.sm,
       marginBottom: t2.spacing.sm,
     },
+    tabPill: {
+      paddingHorizontal: t2.spacing.lg,
+      paddingVertical: t2.spacing.sm,
+      borderRadius: t2.radius.pill,
+    },
   }));
 
   const TABS: {label: string; value: Tab}[] = [
@@ -323,11 +338,19 @@ export function AttendanceReportScreen(): React.JSX.Element {
         )}
 
         <Row gap={theme.spacing.sm} style={styles.tabsRow}>
-          {TABS.map(tabOption => (
-            <Pressable key={tabOption.value} onPress={() => setTab(tabOption.value)}>
-              <Badge label={tabOption.label} tone={tab === tabOption.value ? 'primary' : 'neutral'} />
-            </Pressable>
-          ))}
+          {TABS.map(tabOption => {
+            const active = tab === tabOption.value;
+            return (
+              <Pressable
+                key={tabOption.value}
+                onPress={() => setTab(tabOption.value)}
+                style={[styles.tabPill, {backgroundColor: active ? theme.colors.primary : theme.colors.surfaceVariant}]}>
+                <AppText variant="label" style={{color: active ? theme.colors.onPrimary : theme.colors.textSecondary}}>
+                  {tabOption.label}
+                </AppText>
+              </Pressable>
+            );
+          })}
         </Row>
 
         {tab === 'teacher' ? (
@@ -337,7 +360,7 @@ export function AttendanceReportScreen(): React.JSX.Element {
             <>
               <AttendanceSection icon="teacher" title={t('attendanceReport_teachersSection')} summary={teacherSummary} />
               <Spacer size={theme.spacing.md} />
-              <AppText variant="label" color="textSecondary">
+              <AppText variant="bodyBold" color="text" style={{fontSize:theme.typography.fontSize.xl, marginBottom: theme.spacing.md}}>
                 {t('attendanceReport_teacherListTitle')}
               </AppText>
               <Spacer size={theme.spacing.xs} />

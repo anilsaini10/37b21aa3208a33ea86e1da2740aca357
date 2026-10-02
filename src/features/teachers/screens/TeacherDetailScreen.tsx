@@ -25,10 +25,10 @@ import {
 import {statusTone, capitalize} from '../../../shared/helpers';
 import {formatDate, formatCurrency} from '../../../core/utils/format';
 import {useTeacher, useAssignTeacherSubject, useRemoveTeacherSubject, useDeleteTeacher, useUpdateTeacher} from '../teachers.service';
-import {useClasses} from '../../classes/classes.service';
+import {useClasses, useUpdateSection} from '../../classes/classes.service';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {AdminStackParamList} from '../../../navigation/types';
-import type {Teacher, TeacherSubjectAssignment} from '../../../shared/types';
+import type {Teacher, TeacherHomeroomSection, TeacherSubjectAssignment} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
@@ -256,12 +256,15 @@ export function TeacherDetailScreen(): React.JSX.Element {
   const removeMutation = useRemoveTeacherSubject();
   const deleteMutation = useDeleteTeacher();
   const restoreMutation = useUpdateTeacher();
+  const updateSectionMutation = useUpdateSection();
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [assignSubjectName, setAssignSubjectName] = useState('');
   const [assignClassId, setAssignClassId] = useState('');
   const [assignError, setAssignError] = useState<string | undefined>();
   const [removeTarget, setRemoveTarget] = useState<TeacherSubjectAssignment | null>(null);
   const [removeError, setRemoveError] = useState<string | undefined>();
+  const [removeClassTeacherTarget, setRemoveClassTeacherTarget] = useState<TeacherHomeroomSection | null>(null);
+  const [removeClassTeacherError, setRemoveClassTeacherError] = useState<string | undefined>();
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | undefined>();
   const styles = useThemedStyles(t2 => ({
@@ -270,6 +273,9 @@ export function TeacherDetailScreen(): React.JSX.Element {
     },
     contentWrap: {
       marginHorizontal: t2.spacing.lg,
+    },
+    card: {
+      marginBottom: t2.spacing.sm,
     },
     modalButtonWrap: {
       flex: 1,
@@ -329,6 +335,27 @@ export function TeacherDetailScreen(): React.JSX.Element {
     );
   };
 
+  const confirmRemoveClassTeacher = (): void => {
+    if (!removeClassTeacherTarget) {
+      return;
+    }
+    setRemoveClassTeacherError(undefined);
+    updateSectionMutation.mutate(
+      {
+        classId: removeClassTeacherTarget.classId,
+        sectionId: removeClassTeacherTarget.sectionId,
+        input: {classTeacherId: null},
+      },
+      {
+        onSuccess: () => {
+          setRemoveClassTeacherTarget(null);
+          refetch();
+        },
+        onError: (e: Error) => setRemoveClassTeacherError(e.message),
+      },
+    );
+  };
+
   const onDelete = (): void => {
     setDeleteError(undefined);
     deleteMutation.mutate(teacherId, {
@@ -375,6 +402,33 @@ export function TeacherDetailScreen(): React.JSX.Element {
               navigation.navigate(ScreenNames.StaffAttendanceRegister, {teacherId, teacherName: teacher.name})
             }
           />
+
+          <SectionTitle title={t('teacherMyProfile_classTeacherSection')} icon="class" />
+          {teacher.classTeacherOf.length === 0 ? (
+            <SubtleGradientCard>
+              <AppText variant="caption" color="textMuted">
+                {t('teacherMyProfile_noClassTeacherAssignment')}
+              </AppText>
+            </SubtleGradientCard>
+          ) : (
+            teacher.classTeacherOf.map(section => (
+              <SubtleGradientCard key={section.sectionId} style={styles.card}>
+                <Row justify="space-between" align="center">
+                  <AppText variant="body" style={{flex: 1}}>
+                    {section.className} - {section.sectionName}
+                  </AppText>
+                  <Pressable
+                    onPress={() => {
+                      setRemoveClassTeacherTarget(section);
+                      setRemoveClassTeacherError(undefined);
+                    }}
+                    hitSlop={8}>
+                    <Icon name="delete" size={18} color={theme.colors.error} />
+                  </Pressable>
+                </Row>
+              </SubtleGradientCard>
+            ))
+          )}
 
           <SectionTitle title={t('teacherDetail_subjectsTaughtSection')} icon="book" />
           <SubtleGradientCard>
@@ -502,6 +556,43 @@ export function TeacherDetailScreen(): React.JSX.Element {
               variant="danger"
               loading={removeMutation.isPending}
               onPress={submitRemove}
+            />
+          </View>
+        </Row>
+      </CustomModal>
+
+      <CustomModal
+        visible={!!removeClassTeacherTarget}
+        onClose={() => setRemoveClassTeacherTarget(null)}
+        title={t('classesManage_removeClassTeacherTitle')}>
+        <AppText variant="body" color="textSecondary">
+          {t('classesManage_removeClassTeacherConfirm', {
+            teacher: teacher.name,
+            section: removeClassTeacherTarget
+              ? `${removeClassTeacherTarget.className} - ${removeClassTeacherTarget.sectionName}`
+              : '',
+          })}
+        </AppText>
+        {removeClassTeacherError ? (
+          <AppText variant="caption" color="error" style={{marginTop: theme.spacing.sm}}>
+            {removeClassTeacherError}
+          </AppText>
+        ) : null}
+        <Spacer size={16} />
+        <Row gap={theme.spacing.md}>
+          <View style={styles.modalButtonWrap}>
+            <CustomButton
+              title={t('common_cancel')}
+              variant="outline"
+              onPress={() => setRemoveClassTeacherTarget(null)}
+            />
+          </View>
+          <View style={styles.modalButtonWrap}>
+            <CustomButton
+              title={t('common_remove')}
+              variant="danger"
+              loading={updateSectionMutation.isPending}
+              onPress={confirmRemoveClassTeacher}
             />
           </View>
         </Row>

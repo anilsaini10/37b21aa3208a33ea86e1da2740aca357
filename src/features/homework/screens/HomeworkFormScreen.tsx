@@ -6,7 +6,7 @@
  * classId/sectionId/subjectId can't be changed afterwards (backend requires delete + recreate).
  */
 import React, {useEffect, useState} from 'react';
-import {ScrollView} from 'react-native';
+import {Pressable, ScrollView} from 'react-native';
 import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
@@ -53,6 +53,7 @@ export function HomeworkFormScreen(): React.JSX.Element {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<HomeworkType>('ASSIGNMENT');
+  const [fromDate, setFromDate] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [classId, setClassId] = useState('');
   const [sectionId, setSectionId] = useState('');
@@ -70,6 +71,7 @@ export function HomeworkFormScreen(): React.JSX.Element {
       setTitle(homework.title);
       setDescription(homework.description ?? '');
       setType(homework.type);
+      setFromDate(homework.fromDate ? homework.fromDate.slice(0, 10) : '');
       setDueDate(homework.dueDate.slice(0, 10));
     }
   }, [homework]);
@@ -135,6 +137,8 @@ export function HomeworkFormScreen(): React.JSX.Element {
         setSubjectError(t('homeworkForm_subjectNotAssignedError'));
       } else if (e.code === 'SECTION_NOT_FOUND') {
         setSectionError(t('homeworkForm_sectionNotFoundError'));
+      } else if (e.code === 'INVALID_DATE_RANGE') {
+        setDueDateError(t('homeworkForm_invalidDateRangeError'));
       } else {
         setSubmitError(e.message);
       }
@@ -154,6 +158,9 @@ export function HomeworkFormScreen(): React.JSX.Element {
       if (type !== homework.type) {
         patch.type = type;
       }
+      if (fromDate && fromDate !== (homework.fromDate ? homework.fromDate.slice(0, 10) : '')) {
+        patch.fromDate = fromDate;
+      }
       if (dueDate !== homework.dueDate.slice(0, 10)) {
         patch.dueDate = dueDate;
       }
@@ -170,6 +177,7 @@ export function HomeworkFormScreen(): React.JSX.Element {
         title: trimmedTitle,
         description: trimmedDescription || undefined,
         type,
+        fromDate: fromDate || undefined,
         dueDate,
       };
       createMutation.mutate(input, {onSuccess: () => navigation.goBack(), onError});
@@ -261,6 +269,22 @@ export function HomeworkFormScreen(): React.JSX.Element {
           onChange={val => setType(val as HomeworkType)}
           required
         />
+        <DatePicker label={t('homeworkForm_fromDate')} value={fromDate} onChange={setFromDate} />
+        {fromDate ? (
+          <Pressable
+            onPress={() => setFromDate('')}
+            hitSlop={8}
+            style={{alignSelf: 'flex-end', marginTop: -theme.spacing.sm, marginBottom: theme.spacing.sm}}>
+            <AppText variant="caption" color="primary">
+              {t('homeworkForm_clearFromDate')}
+            </AppText>
+          </Pressable>
+        ) : (
+          <AppText variant="label" color="textMuted" style={{marginTop: -theme.spacing.sm, marginBottom: theme.spacing.sm}}>
+            {t('homeworkForm_fromDateHelper')}
+          </AppText>
+        )}
+
         <DatePicker label={t('homeworkForm_dueDate')} value={dueDate} onChange={setDueDate} />
         {dueDateError ? (
           <AppText variant="caption" color="error" style={{marginTop: -theme.spacing.sm, marginBottom: theme.spacing.sm}}>

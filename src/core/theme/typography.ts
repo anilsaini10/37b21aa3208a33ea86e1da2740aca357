@@ -77,6 +77,8 @@ export function buildTypography(
       medium: '500',
       semibold: '600',
       bold: '700',
+      bold8: '800',
+      bold9: '900',
     },
     scale: clampedScale,
   };

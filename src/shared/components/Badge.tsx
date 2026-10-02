@@ -1,6 +1,6 @@
 /** Small status pill. */
 import React from 'react';
-import {View} from 'react-native';
+import {View, type StyleProp, type ViewStyle} from 'react-native';
 import {useTheme, useThemedStyles} from '../../core/theme';
 import {AppText} from './AppText';
 
@@ -15,13 +15,16 @@ const TONES: Record<BadgeTone, keyof import('../../core/theme').ThemeColors> = {
   neutral: 'textMuted',
 };
 
-export function Badge({
-  label,
-  tone = 'neutral',
-}: {
+export interface BadgeProps {
   label: string;
   tone?: BadgeTone;
-}): React.JSX.Element {
+  /** Caps the label to N lines with an ellipsis (tail) once it's set — e.g. a long name in a width-constrained badge. Omit to keep the default single-line, no-truncate behavior. */
+  numberOfLines?: number;
+  /** Overrides the pill's outer container style — e.g. a maxWidth so `numberOfLines` has something to truncate against. */
+  style?: StyleProp<ViewStyle>;
+}
+
+export function Badge({label, tone = 'neutral', numberOfLines, style}: BadgeProps): React.JSX.Element {
   const {theme} = useTheme();
   const color = theme.colors[TONES[tone]];
   const styles = useThemedStyles(t => ({
@@ -33,8 +36,12 @@ export function Badge({
     },
   }));
   return (
-    <View style={[styles.badge, {backgroundColor: color + '22'}]}>
-      <AppText variant="label" style={{color}}>
+    <View style={[styles.badge, {backgroundColor: color + '22'}, style]}>
+      <AppText
+        variant="label"
+        style={{color}}
+        numberOfLines={numberOfLines}
+        ellipsizeMode={numberOfLines ? 'tail' : undefined}>
         {label}
       </AppText>
     </View>

@@ -50,6 +50,9 @@ export function StudentDetailScreen(): React.JSX.Element {
     nameBlock: {
       flex: 1,
     },
+    attendanceHistoryButton: {
+      marginTop: theme.spacing.md
+    },
   }));
   const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
@@ -94,6 +97,7 @@ export function StudentDetailScreen(): React.JSX.Element {
           onPress={() =>
             navigation.navigate(ScreenNames.StudentAttendanceHistory, {studentId: student.id, studentName: student.name})
           }
+          style={styles.attendanceHistoryButton}
         />
 
         <SectionTitle title={t('studentDetail_personalSection')} />

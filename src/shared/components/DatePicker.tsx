@@ -5,7 +5,7 @@
  * Value + onChange use ISO date strings ("YYYY-MM-DD").
  */
 import React, {useMemo, useState} from 'react';
-import {Pressable, View, type StyleProp, type TextStyle} from 'react-native';
+import {Pressable, View, type StyleProp, type TextStyle, type ViewStyle} from 'react-native';
 import {useTheme, useThemedStyles} from '../../core/theme';
 import {useLanguage} from '../../core/i18n';
 import {AppText} from './AppText';
@@ -30,6 +30,8 @@ export interface DatePickerProps {
   maxYear?: number;
   /** Overrides the displayed value/placeholder text's style — e.g. a smaller fontSize for a denser filter row. */
   valueStyle?: StyleProp<TextStyle>;
+  /** Overrides the field box's container style (height, padding, border, background, etc.) — merged on top of the default box styling, so omitting it keeps today's exact look. */
+  style?: StyleProp<ViewStyle>;
 }
 
 function toParts(iso?: string): {y: number; m: number; d: number} {
@@ -46,6 +48,7 @@ export function DatePicker({
   minYear = 2026,
   maxYear = 2045,
   valueStyle,
+  style,
 }: DatePickerProps): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
@@ -101,7 +104,7 @@ export function DatePicker({
           {label}
         </AppText>
       ) : null}
-      <Pressable onPress={() => setOpen(true)} style={styles.field}>
+      <Pressable onPress={() => setOpen(true)} style={[styles.field, style]}>
         <AppText color={value ? 'text' : 'textMuted'} style={valueStyle}>
           {value ? formatDate(value) : t('common_selectDate')}
         </AppText>
