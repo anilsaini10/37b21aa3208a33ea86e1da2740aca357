@@ -37,6 +37,10 @@ export function MyScheduleScreen(): React.JSX.Element {
     },
     periodsScrollContent: {padding: t2.spacing.lg, flexGrow: 1},
     periodCard: {marginBottom: t2.spacing.md},
+    breakCard: {
+      backgroundColor: t2.colors.warning + '14',
+      borderColor: t2.colors.warning + '55',
+    },
     periodNoBlock: {
       width: 52,
       alignItems: 'center',
@@ -84,38 +88,54 @@ export function MyScheduleScreen(): React.JSX.Element {
         {periods.length === 0 ? (
           <EmptyState icon="timetable" title={t('timetable_noClasses')} message={t('timetable_noClassesMessage')} />
         ) : (
-          periods.map(period => (
-            <CustomCard key={period.id} style={styles.periodCard}>
-              <Row gap={theme.spacing.md}>
-                <View style={styles.periodNoBlock}>
-                  <AppText variant="h3" color="primary">
-                    {period.periodNo}
-                  </AppText>
-                  <AppText variant="label" color="textMuted">
-                    {t('timetable_period')}
-                  </AppText>
-                </View>
-                <View style={styles.periodInfo}>
-                  <AppText variant="bodyBold">{period.subjectName}</AppText>
-                  <Row gap={theme.spacing.xs}>
-                    <Icon name="clock" size={13} color={theme.colors.textMuted} />
+          periods.map(period =>
+            period.type === 'BREAK' ? (
+              <CustomCard key={period.id} style={[styles.periodCard, styles.breakCard]}>
+                <Row gap={theme.spacing.md} align="center">
+                  <Icon name="clock" size={16} color={theme.colors.warning} />
+                  <View style={{flex: 1}}>
+                    <AppText variant="bodyBold" color="warning">
+                      {period.title}
+                    </AppText>
                     <AppText variant="caption" color="textSecondary">
                       {period.startTime} - {period.endTime}
                     </AppText>
-                  </Row>
-                  <AppText variant="label" color="textMuted">
-                    {period.roomNo
-                      ? t('mySchedule_classSectionRoom', {
-                          className: period.className,
-                          sectionName: period.sectionName,
-                          room: period.roomNo,
-                        })
-                      : t('mySchedule_classSection', {className: period.className, sectionName: period.sectionName})}
-                  </AppText>
-                </View>
-              </Row>
-            </CustomCard>
-          ))
+                  </View>
+                </Row>
+              </CustomCard>
+            ) : (
+              <CustomCard key={period.id} style={styles.periodCard}>
+                <Row gap={theme.spacing.md}>
+                  <View style={styles.periodNoBlock}>
+                    <AppText variant="h3" color="primary">
+                      {period.periodNo}
+                    </AppText>
+                    <AppText variant="label" color="textMuted">
+                      {t('timetable_period')}
+                    </AppText>
+                  </View>
+                  <View style={styles.periodInfo}>
+                    <AppText variant="bodyBold">{period.subjectName}</AppText>
+                    <Row gap={theme.spacing.xs}>
+                      <Icon name="clock" size={13} color={theme.colors.textMuted} />
+                      <AppText variant="caption" color="textSecondary">
+                        {period.startTime} - {period.endTime}
+                      </AppText>
+                    </Row>
+                    <AppText variant="label" color="textMuted">
+                      {period.roomNo
+                        ? t('mySchedule_classSectionRoom', {
+                            className: period.className,
+                            sectionName: period.sectionName,
+                            room: period.roomNo,
+                          })
+                        : t('mySchedule_classSection', {className: period.className, sectionName: period.sectionName})}
+                    </AppText>
+                  </View>
+                </Row>
+              </CustomCard>
+            ),
+          )
         )}
       </ScrollView>
     </Screen>

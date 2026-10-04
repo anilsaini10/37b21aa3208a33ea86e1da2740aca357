@@ -240,7 +240,7 @@ export function HomeworkListScreen(): React.JSX.Element {
             return (
               <CustomCard
                 style={styles.card}
-                onPress={() => navigation.navigate(ScreenNames.HomeworkDetail, {homeworkId: item.id, initial: item})}>
+                onPress={() => navigation.navigate(ScreenNames.HomeworkSubmissions, {homeworkId: item.id, initial: item})}>
                 <Row justify="space-between" align="flex-start">
                   <Row gap={theme.spacing.sm} align="center" style={{flex: 1}}>
                     <Icon name={TYPE_ICON[item.type]} size={18} color={typeColor} />

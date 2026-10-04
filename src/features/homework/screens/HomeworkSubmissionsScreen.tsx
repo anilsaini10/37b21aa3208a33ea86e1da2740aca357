@@ -32,6 +32,7 @@ import {
 } from '../../../shared/components';
 import {formatDate} from '../../../core/utils/format';
 import {useHomeworkSubmissions, useMarkHomeworkSubmissions} from '../teacherHomework.service';
+import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {TeacherStackParamList} from '../../../navigation/types';
 import type {HomeworkSubmissionRecordInput, HomeworkSubmissionStatus, HomeworkSubmissionStudent} from '../../../shared/types';
 
@@ -56,6 +57,7 @@ export function HomeworkSubmissionsScreen(): React.JSX.Element {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(ALL_STATUS_VALUE);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [saveRemark, setSaveRemark] = useState('');
+  const [bulkAction, setBulkAction] = useState('');
 
   const styles = useThemedStyles(t2 => ({
     filterSection: {
@@ -69,9 +71,13 @@ export function HomeworkSubmissionsScreen(): React.JSX.Element {
     bulkRow: {
       paddingHorizontal: t2.spacing.lg,
       paddingTop: t2.spacing.md,
-      flexWrap: 'wrap',
+      alignItems: 'center',
     },
-    bulkLabel: {flexBasis: '100%'},
+    bulkTitle: {paddingRight: t2.spacing.sm},
+    bulkDropdown: {width: 130},
+    filterField: {height: 36},
+    filterValueText: {fontSize: t2.typography.fontSize.sm},
+    filterLabelBold: {fontWeight: t2.typography.fontWeight.bold},
     content: {padding: t2.spacing.lg, flexGrow: 1},
     row: {paddingVertical: t2.spacing.sm},
     nameBlock: {flex: 1},
@@ -114,6 +120,12 @@ export function HomeworkSubmissionsScreen(): React.JSX.Element {
     {label: t('homeworkSubmissions_unchecked'), value: 'UNCHECKED'},
   ];
 
+  const bulkOptions = [
+    {label: t('common_select'), value: ''},
+    {label: t('homeworkSubmissions_markAllSubmitted'), value: 'SUBMITTED'},
+    {label: t('homeworkSubmissions_markAllNotSubmitted'), value: 'NOT_SUBMITTED'},
+  ];
+
   const query = search.trim().toLowerCase();
   const filteredStudents = data.students.filter(student => {
     const effectiveStatus = pendingStatus[student.studentId] ?? student.status;
@@ -124,9 +136,22 @@ export function HomeworkSubmissionsScreen(): React.JSX.Element {
     return matchesSearch && matchesStatus;
   });
 
-  const setStatus = (studentId: string, status: HomeworkSubmissionStatus): void => {
+  /**
+   * Tapping the already-active pill deselects it — reverts to whatever the server currently
+   * has for that student (which may itself be null/"unchecked"), rather than force-setting a
+   * status; the mark API has no way to explicitly save back to null, so "deselect" only ever
+   * undoes a local, not-yet-saved staging change.
+   */
+  const toggleStatus = (studentId: string, currentEffective: HomeworkSubmissionStatus | null, status: HomeworkSubmissionStatus): void => {
     setSaveError(undefined);
-    setPendingStatus(prev => ({...prev, [studentId]: status}));
+    setPendingStatus(prev => {
+      if (currentEffective === status) {
+        const next = {...prev};
+        delete next[studentId];
+        return next;
+      }
+      return {...prev, [studentId]: status};
+    });
   };
 
   /** Stages the same status for every currently visible (search/status-filtered) student — instant, local only. */
@@ -139,6 +164,14 @@ export function HomeworkSubmissionsScreen(): React.JSX.Element {
       });
       return next;
     });
+  };
+
+  /** The dropdown is a one-shot action trigger, not a persistent filter — it resets to "Select" right after firing. */
+  const onBulkActionChange = (value: string): void => {
+    if (value === 'SUBMITTED' || value === 'NOT_SUBMITTED') {
+      markAllVisible(value);
+    }
+    setBulkAction('');
   };
 
   const changedCount = Object.keys(pendingStatus).length;
@@ -185,7 +218,7 @@ export function HomeworkSubmissionsScreen(): React.JSX.Element {
             </View>
             <Row gap={theme.spacing.xs}>
               <Pressable
-                onPress={() => setStatus(student.studentId, 'SUBMITTED')}
+                onPress={() => toggleStatus(student.studentId, effectiveStatus, 'SUBMITTED')}
                 style={[
                   styles.pill,
                   {
@@ -199,7 +232,7 @@ export function HomeworkSubmissionsScreen(): React.JSX.Element {
                 </AppText>
               </Pressable>
               <Pressable
-                onPress={() => setStatus(student.studentId, 'NOT_SUBMITTED')}
+                onPress={() => toggleStatus(student.studentId, effectiveStatus, 'NOT_SUBMITTED')}
                 style={[
                   styles.pill,
                   {
@@ -225,6 +258,7 @@ export function HomeworkSubmissionsScreen(): React.JSX.Element {
         title={data.title}
         subtitle={`${data.sectionName} · ${formatDate(data.dueDate)}`}
         onBack={() => navigation.goBack()}
+        actions={[{icon: 'edit', onPress: () => navigation.navigate(ScreenNames.HomeworkDetail, {homeworkId})}]}
       />
       {data.students.length === 0 ? (
         <EmptyState
@@ -244,28 +278,26 @@ export function HomeworkSubmissionsScreen(): React.JSX.Element {
                 value={statusFilter}
                 options={statusOptions}
                 onChange={val => setStatusFilter(val as StatusFilter)}
+                style={styles.filterField}
+                valueStyle={styles.filterValueText}
+                labelStyle={styles.filterLabelBold}
               />
             </View>
           </Row>
           {filteredStudents.length > 0 ? (
-            <Row gap={theme.spacing.sm} align="center" style={styles.bulkRow}>
-              <AppText variant="caption" color="textSecondary" style={styles.bulkLabel}>
-                {t('homeworkSubmissions_bulkLabel', {count: filteredStudents.length})}
+            <Row align="center" style={styles.bulkRow}>
+              <AppText variant="bodyBold" style={styles.bulkTitle} numberOfLines={1}>
+                {t('homeworkSubmissions_bulkLabel', {count: filteredStudents.length})}:
               </AppText>
-              <CustomButton
-                title={t('homeworkSubmissions_markAllSubmitted')}
-                variant="outline"
-                size="sm"
-                fullWidth={false}
-                onPress={() => markAllVisible('SUBMITTED')}
-              />
-              <CustomButton
-                title={t('homeworkSubmissions_markAllNotSubmitted')}
-                variant="outline"
-                size="sm"
-                fullWidth={false}
-                onPress={() => markAllVisible('NOT_SUBMITTED')}
-              />
+              <View style={styles.bulkDropdown}>
+                <Select
+                  value={bulkAction}
+                  options={bulkOptions}
+                  onChange={onBulkActionChange}
+                  style={styles.filterField}
+                  valueStyle={styles.filterValueText}
+                />
+              </View>
             </Row>
           ) : null}
           {filteredStudents.length === 0 ? (

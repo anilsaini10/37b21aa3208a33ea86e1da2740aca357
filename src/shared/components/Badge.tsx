@@ -1,6 +1,6 @@
 /** Small status pill. */
 import React from 'react';
-import {View, type StyleProp, type ViewStyle} from 'react-native';
+import {View, type StyleProp, type TextStyle, type ViewStyle} from 'react-native';
 import {useTheme, useThemedStyles} from '../../core/theme';
 import {AppText} from './AppText';
 
@@ -22,9 +22,11 @@ export interface BadgeProps {
   numberOfLines?: number;
   /** Overrides the pill's outer container style — e.g. a maxWidth so `numberOfLines` has something to truncate against. */
   style?: StyleProp<ViewStyle>;
+  /** Overrides the label text's own style — e.g. a smaller fontSize. Merged on top of the default color, so pass `color` here only if you also want to override that. */
+  textStyle?: StyleProp<TextStyle>;
 }
 
-export function Badge({label, tone = 'neutral', numberOfLines, style}: BadgeProps): React.JSX.Element {
+export function Badge({label, tone = 'neutral', numberOfLines, style, textStyle}: BadgeProps): React.JSX.Element {
   const {theme} = useTheme();
   const color = theme.colors[TONES[tone]];
   const styles = useThemedStyles(t => ({
@@ -39,7 +41,7 @@ export function Badge({label, tone = 'neutral', numberOfLines, style}: BadgeProp
     <View style={[styles.badge, {backgroundColor: color + '22'}, style]}>
       <AppText
         variant="label"
-        style={{color}}
+        style={[{color}, textStyle]}
         numberOfLines={numberOfLines}
         ellipsizeMode={numberOfLines ? 'tail' : undefined}>
         {label}

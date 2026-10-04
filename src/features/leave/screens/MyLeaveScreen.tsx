@@ -51,6 +51,7 @@ export function MyLeaveScreen(): React.JSX.Element {
   const styles = useThemedStyles(t2 => ({
     scrollContent: {padding: t2.spacing.lg},
     leaveCard: {marginBottom: t2.spacing.md},
+    cancelButtonWrap: {width: '33%', alignSelf: 'flex-end'},
     modalButtonWrap: {flex: 1},
   }));
 
@@ -111,15 +112,17 @@ export function MyLeaveScreen(): React.JSX.Element {
               {item.status === 'PENDING' ? (
                 <>
                   <Spacer size={theme.spacing.sm} />
-                  <CustomButton
-                    title={t('common_cancel')}
-                    variant="outline"
-                    size="sm"
-                    onPress={() => {
-                      setCancelError(undefined);
-                      setCancelTarget(item);
-                    }}
-                  />
+                  <View style={styles.cancelButtonWrap}>
+                    <CustomButton
+                      title={t('common_cancel')}
+                      variant="outline"
+                      size="sm"
+                      onPress={() => {
+                        setCancelError(undefined);
+                        setCancelTarget(item);
+                      }}
+                    />
+                  </View>
                 </>
               ) : null}
             </CustomCard>
@@ -140,11 +143,11 @@ export function MyLeaveScreen(): React.JSX.Element {
         <Spacer size={16} />
         <Row gap={theme.spacing.md}>
           <View style={styles.modalButtonWrap}>
-            <CustomButton title={t('common_cancel')} variant="outline" onPress={() => setCancelTarget(null)} />
+            <CustomButton title={t('common_close')} variant="outline" onPress={() => setCancelTarget(null)} />
           </View>
           <View style={styles.modalButtonWrap}>
             <CustomButton
-              title={t('leave_cancelConfirmTitle')}
+              title={t('leave_cancelLeaveButton')}
               variant="danger"
               loading={cancelMutation.isPending}
               onPress={confirmCancel}

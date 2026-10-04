@@ -188,12 +188,6 @@ export function HomeworkDetailScreen(): React.JSX.Element {
             </>
           )}
         </CustomCard>
-
-        <CustomButton
-          title={t('homeworkDetail_trackSubmissions')}
-          iconLeft="attendance"
-          onPress={() => navigation.navigate(ScreenNames.HomeworkSubmissions, {homeworkId, initial: homework})}
-        />
       </View>
 
       <CustomModal

@@ -23,7 +23,6 @@ export interface CreateScheduleInput {
   sectionId: string;
   day: ScheduleDay;
   type: ScheduleEntryType;
-  periodNo: number;
   /** Required for CLASS_PERIOD, must be omitted for BREAK. */
   subjectId?: string;
   teacherId?: string;
@@ -34,10 +33,13 @@ export interface CreateScheduleInput {
   endTime: string;
 }
 
-/** classId/sectionId/type are immutable — delete + recreate instead of trying to change them. */
+/**
+ * classId/sectionId/type are immutable — delete + recreate instead of trying to change them.
+ * No `periodNo` here — it's fully auto-assigned by the backend (a gapless 1..N sequence per
+ * section+day, ordered by time) and recalculates whenever day/startTime/endTime change.
+ */
 export type UpdateScheduleInput = Partial<{
   day: ScheduleDay;
-  periodNo: number;
   subjectId: string;
   teacherId: string;
   roomNo: string;

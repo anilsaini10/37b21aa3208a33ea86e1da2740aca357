@@ -1,6 +1,6 @@
 /** Teacher dashboard — daily KPIs, quick actions, class-teacher attendance status, schedule, announcements + class performance. */
 import React from 'react';
-import {Pressable, View, ScrollView, RefreshControl} from 'react-native';
+import {View, ScrollView, RefreshControl} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme, useThemedStyles} from '../../../core/theme';
@@ -70,6 +70,10 @@ export function TeacherDashboardScreen(): React.JSX.Element {
   const styles = useThemedStyles(t2 => ({
     scrollContent: {
       padding: t2.spacing.lg,
+    },
+    attendanceMarkedBadge: {
+      fontSize: t2.typography.fontSize.sm,
+      lineHeight: t2.typography.fontSize.sm * 1.5,
     },
   }));
 
@@ -150,35 +154,43 @@ export function TeacherDashboardScreen(): React.JSX.Element {
               {dashboardStats.attendance.map((section, i) => (
                 <React.Fragment key={section.sectionId}>
                   {i > 0 ? <Divider /> : null}
-                  <Pressable
-                    onPress={
-                      section.isMarked
-                        ? undefined
-                        : () =>
+                  <Row justify="space-between" align="center" style={{paddingVertical: theme.spacing.sm}}>
+                    <View style={{flex: 1}}>
+                      <AppText variant="bodyBold">
+                        {section.className} - {section.sectionName}
+                      </AppText>
+                      {!section.isMarked ? (
+                        <AppText variant="caption" color="textSecondary">
+                          {t('teacherDashboard_markedCount', {marked: section.markedCount, total: section.totalStudents})}
+                        </AppText>
+                      ) : null}
+                    </View>
+                    {section.isMarked ? (
+                      <Badge
+                        label={t('teacherDashboard_attendanceMarked')}
+                        tone="success"
+                        textStyle={styles.attendanceMarkedBadge}
+                      />
+                    ) : (
+                      <Row gap={theme.spacing.sm} align="center">
+                        {/* <Badge label={t('teacherDashboard_attendancePending')} tone="warning" /> */}
+                        <CustomButton
+                          title={t('teacherDashboard_markAttendance')}
+                          size="sm"
+                          variant="outline"
+                          fullWidth={false}
+                          onPress={() =>
                             navigation.navigate(ScreenNames.MarkAttendance, {
                               classId: section.classId,
                               className: section.className,
                               sectionId: section.sectionId,
                               sectionName: section.sectionName,
                             })
-                    }>
-                    <Row justify="space-between" align="center" style={{paddingVertical: theme.spacing.sm}}>
-                      <View style={{flex: 1}}>
-                        <AppText variant="bodyBold">
-                          {section.className} - {section.sectionName}
-                        </AppText>
-                        {!section.isMarked ? (
-                          <AppText variant="caption" color="textSecondary">
-                            {t('teacherDashboard_markedCount', {marked: section.markedCount, total: section.totalStudents})}
-                          </AppText>
-                        ) : null}
-                      </View>
-                      <Badge
-                        label={section.isMarked ? t('teacherDashboard_attendanceMarked') : t('teacherDashboard_attendancePending')}
-                        tone={section.isMarked ? 'success' : 'warning'}
-                      />
-                    </Row>
-                  </Pressable>
+                          }
+                        />
+                      </Row>
+                    )}
+                  </Row>
                 </React.Fragment>
               ))}
             </CustomCard>
@@ -204,15 +216,28 @@ export function TeacherDashboardScreen(): React.JSX.Element {
             todaySchedule.periods.map((period, i) => (
               <View key={period.id}>
                 {i > 0 ? <Divider /> : null}
-                <AppText variant="bodyBold">
-                  {t('teacherDashboard_periodTime', {
-                    periodNo: String(period.periodNo),
-                    time: `${period.startTime} - ${period.endTime}`,
-                  })}
-                </AppText>
-                <AppText variant="caption" color="textSecondary">
-                  {`${period.subjectName} — ${period.className} - ${period.sectionName}`}
-                </AppText>
+                {period.type === 'BREAK' ? (
+                  <>
+                    <AppText variant="bodyBold" color="warning">
+                      {period.title}
+                    </AppText>
+                    <AppText variant="caption" color="textSecondary">
+                      {period.startTime} - {period.endTime}
+                    </AppText>
+                  </>
+                ) : (
+                  <>
+                    <AppText variant="bodyBold">
+                      {t('teacherDashboard_periodTime', {
+                        periodNo: String(i+1),
+                        time: `${period.startTime} - ${period.endTime}`,
+                      })}
+                    </AppText>
+                    <AppText variant="caption" color="textSecondary">
+                      {`${period.subjectName} — ${period.className} - ${period.sectionName}`}
+                    </AppText>
+                  </>
+                )}
               </View>
             ))
           )}

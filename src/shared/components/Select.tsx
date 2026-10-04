@@ -22,6 +22,8 @@ export interface SelectProps {
   style?: StyleProp<ViewStyle>;
   /** Overrides the displayed value/placeholder text's style — e.g. a smaller fontSize for a denser filter row. */
   valueStyle?: StyleProp<TextStyle>;
+  /** Overrides the floating label's own text style — e.g. making it bold. Merged on top of the default label style. */
+  labelStyle?: StyleProp<TextStyle>;
 }
 
 export function Select({
@@ -36,6 +38,7 @@ export function Select({
   onDisabledPress,
   style,
   valueStyle,
+  labelStyle,
 }: SelectProps): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
@@ -86,7 +89,7 @@ export function Select({
   return (
     <View style={styles.wrapper}>
       {label ? (
-        <AppText variant="label" color="textSecondary" style={styles.label}>
+        <AppText variant="label" color="textSecondary" style={[styles.label, labelStyle]}>
           {label}
           {required ? <AppText variant="label" color="error"> *</AppText> : null}
         </AppText>

@@ -19,6 +19,7 @@ import {
   EmptyState,
   Loader,
   Spacer,
+  ResultModal,
 } from '../../../shared/components';
 import {statusTone, capitalize} from '../../../shared/helpers';
 import {useStudents} from '../students.service';
@@ -48,6 +49,7 @@ export function StudentsListScreen(): React.JSX.Element {
   const [page, setPage] = useState(1);
   const [assignTarget, setAssignTarget] = useState<{sectionId: string; sectionName: string} | null>(null);
   const [assignError, setAssignError] = useState<string | undefined>();
+  const [assignSuccess, setAssignSuccess] = useState<{teacherName: string; sectionName: string} | null>(null);
   // Route params are a static snapshot taken when this screen was opened — track freshly
   // assigned teachers locally so the "None" → name swap shows immediately without a round trip.
   const [teacherOverrides, setTeacherOverrides] = useState<Record<string, string>>({});
@@ -193,6 +195,7 @@ export function StudentsListScreen(): React.JSX.Element {
       {
         onSuccess: () => {
           setTeacherOverrides(prev => ({...prev, [assignTarget.sectionId]: teacherName}));
+          setAssignSuccess({teacherName, sectionName: assignTarget.sectionName});
           setAssignTarget(null);
         },
         onError: (e: Error) => setAssignError(e.message),
@@ -381,6 +384,18 @@ export function StudentsListScreen(): React.JSX.Element {
           </ScrollView>
         )}
       </CustomModal>
+
+      <ResultModal
+        visible={!!assignSuccess}
+        variant="success"
+        title={t('classesManage_assignSuccessTitle')}
+        message={
+          assignSuccess
+            ? t('classesManage_assignSuccessMessage', {teacher: assignSuccess.teacherName, section: assignSuccess.sectionName})
+            : undefined
+        }
+        onClose={() => setAssignSuccess(null)}
+      />
     </Screen>
   );
 }

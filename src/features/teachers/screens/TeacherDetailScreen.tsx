@@ -21,6 +21,7 @@ import {
   SectionTitle,
   Loader,
   EmptyState,
+  ResultModal,
 } from '../../../shared/components';
 import {statusTone, capitalize} from '../../../shared/helpers';
 import {formatDate, formatCurrency} from '../../../core/utils/format';
@@ -267,6 +268,7 @@ export function TeacherDetailScreen(): React.JSX.Element {
   const [removeClassTeacherError, setRemoveClassTeacherError] = useState<string | undefined>();
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | undefined>();
+  const [actionResult, setActionResult] = useState<{title: string; message?: string} | null>(null);
   const styles = useThemedStyles(t2 => ({
     scrollContent: {
       paddingBottom: t2.spacing.lg,
@@ -312,10 +314,17 @@ export function TeacherDetailScreen(): React.JSX.Element {
       return;
     }
     setAssignError(undefined);
+    const className = classOptions.find(c => c.value === assignClassId)?.label ?? '';
     assignMutation.mutate(
       {teacherId, input: {subject: assignSubjectName, classId: assignClassId}},
       {
-        onSuccess: () => setAssignModalOpen(false),
+        onSuccess: () => {
+          setAssignModalOpen(false);
+          setActionResult({
+            title: t('teacherDetail_assignSubjectSuccessTitle'),
+            message: t('teacherDetail_assignSubjectSuccessMessage', {subject: assignSubjectName, className}),
+          });
+        },
         onError: (e: Error) => setAssignError(e.message),
       },
     );
@@ -329,7 +338,16 @@ export function TeacherDetailScreen(): React.JSX.Element {
     removeMutation.mutate(
       {teacherId, subjectId: removeTarget.subjectId, classId: removeTarget.classId},
       {
-        onSuccess: () => setRemoveTarget(null),
+        onSuccess: () => {
+          setActionResult({
+            title: t('teacherDetail_removeSubjectSuccessTitle'),
+            message: t('teacherDetail_removeSubjectSuccessMessage', {
+              subject: removeTarget.name,
+              className: removeTarget.className,
+            }),
+          });
+          setRemoveTarget(null);
+        },
         onError: (e: Error) => setRemoveError(e.message),
       },
     );
@@ -348,6 +366,13 @@ export function TeacherDetailScreen(): React.JSX.Element {
       },
       {
         onSuccess: () => {
+          setActionResult({
+            title: t('classesManage_removeClassTeacherSuccessTitle'),
+            message: t('classesManage_removeClassTeacherSuccessMessage', {
+              teacher: teacher.name,
+              section: `${removeClassTeacherTarget.className} - ${removeClassTeacherTarget.sectionName}`,
+            }),
+          });
           setRemoveClassTeacherTarget(null);
           refetch();
         },
@@ -359,7 +384,13 @@ export function TeacherDetailScreen(): React.JSX.Element {
   const onDelete = (): void => {
     setDeleteError(undefined);
     deleteMutation.mutate(teacherId, {
-      onSuccess: () => setDeleteConfirmOpen(false),
+      onSuccess: () => {
+        setDeleteConfirmOpen(false);
+        setActionResult({
+          title: t('teacherDetail_deleteSuccessTitle'),
+          message: t('teacherDetail_deleteSuccessMessage', {name: teacher.name}),
+        });
+      },
       onError: (e: Error) => setDeleteError(e.message),
     });
   };
@@ -625,6 +656,14 @@ export function TeacherDetailScreen(): React.JSX.Element {
           </View>
         </Row>
       </CustomModal>
+
+      <ResultModal
+        visible={!!actionResult}
+        variant="success"
+        title={actionResult?.title ?? ''}
+        message={actionResult?.message}
+        onClose={() => setActionResult(null)}
+      />
     </Screen>
   );
 }

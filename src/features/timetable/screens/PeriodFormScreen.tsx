@@ -41,6 +41,11 @@ type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
 const DAYS: ScheduleDay[] = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
 
+/** Strips anything but digits as the user types, so period number / room number can only ever end up as a whole integer. */
+function sanitizeIntegerInput(value: string): string {
+  return value.replace(/[^0-9]/g, '');
+}
+
 const DAY_LABEL_KEYS: Record<ScheduleDay, TranslationKey> = {
   MONDAY: 'common_dayMon',
   TUESDAY: 'common_dayTue',
@@ -69,7 +74,6 @@ export function PeriodFormScreen(): React.JSX.Element {
   const [sectionId, setSectionId] = useState(initial?.sectionId ?? routeSectionId);
   const [day, setDay] = useState<ScheduleDay>(initial?.day ?? initialDay);
   const [type, setType] = useState<ScheduleEntryType>(initial?.type ?? 'CLASS_PERIOD');
-  const [periodNo, setPeriodNo] = useState(String(initial?.periodNo ?? 1));
   const [startTime, setStartTime] = useState(initial?.startTime ?? '');
   const [endTime, setEndTime] = useState(initial?.endTime ?? '');
   const [subjectId, setSubjectId] = useState(initial?.subjectId ?? '');
@@ -79,7 +83,6 @@ export function PeriodFormScreen(): React.JSX.Element {
 
   const [classError, setClassError] = useState<string | undefined>();
   const [sectionError, setSectionError] = useState<string | undefined>();
-  const [periodNoError, setPeriodNoError] = useState<string | undefined>();
   const [timeError, setTimeError] = useState<string | undefined>();
   const [subjectError, setSubjectError] = useState<string | undefined>();
   const [teacherError, setTeacherError] = useState<string | undefined>();
@@ -93,7 +96,6 @@ export function PeriodFormScreen(): React.JSX.Element {
       setSectionId(entry.sectionId);
       setDay(entry.day);
       setType(entry.type);
-      setPeriodNo(String(entry.periodNo));
       setStartTime(entry.startTime);
       setEndTime(entry.endTime);
       setSubjectId(entry.subjectId ?? '');
@@ -125,7 +127,6 @@ export function PeriodFormScreen(): React.JSX.Element {
   const clearErrors = (): void => {
     setClassError(undefined);
     setSectionError(undefined);
-    setPeriodNoError(undefined);
     setTimeError(undefined);
     setSubjectError(undefined);
     setTeacherError(undefined);
@@ -149,11 +150,6 @@ export function PeriodFormScreen(): React.JSX.Element {
       }
     }
 
-    const periodNoValue = Number(periodNo);
-    if (!periodNo.trim() || !Number.isInteger(periodNoValue) || periodNoValue <= 0) {
-      setPeriodNoError(t('periodForm_periodNoError'));
-      hasError = true;
-    }
     if (!startTime || !endTime || endTime <= startTime) {
       setTimeError(t('periodForm_timeRangeError'));
       hasError = true;
@@ -181,9 +177,6 @@ export function PeriodFormScreen(): React.JSX.Element {
         case 'SUBJECT_NOT_ASSIGNED':
           setSubjectError(t('periodForm_errorSubjectNotAssigned'));
           break;
-        case 'PERIOD_NO_TAKEN':
-          setPeriodNoError(t('periodForm_errorPeriodNoTaken', {n: periodNoValue}));
-          break;
         case 'TIME_OVERLAP_SECTION':
           setTimeError(t('periodForm_errorTimeOverlapSection'));
           break;
@@ -205,9 +198,6 @@ export function PeriodFormScreen(): React.JSX.Element {
       const patch: UpdateScheduleInput = {};
       if (day !== entry.day) {
         patch.day = day;
-      }
-      if (periodNoValue !== entry.periodNo) {
-        patch.periodNo = periodNoValue;
       }
       if (startTime !== entry.startTime) {
         patch.startTime = startTime;
@@ -239,7 +229,6 @@ export function PeriodFormScreen(): React.JSX.Element {
         sectionId,
         day,
         type,
-        periodNo: periodNoValue,
         startTime,
         endTime,
         subjectId: type === 'CLASS_PERIOD' ? subjectId : undefined,
@@ -329,18 +318,6 @@ export function PeriodFormScreen(): React.JSX.Element {
         )}
         <Spacer size={theme.spacing.md} />
 
-        <CustomInput
-          label={t('periodForm_periodNo')}
-          keyboardType="numeric"
-          value={periodNo}
-          error={periodNoError}
-          onChangeText={val => {
-            setPeriodNo(val);
-            setPeriodNoError(undefined);
-          }}
-          required
-        />
-
         {type === 'CLASS_PERIOD' ? (
           <>
             <Select
@@ -372,10 +349,11 @@ export function PeriodFormScreen(): React.JSX.Element {
             <CustomInput
               label={t('periodForm_room')}
               placeholder={t('periodForm_roomPlaceholder')}
+              keyboardType="numeric"
               value={roomNo}
               error={roomError}
               onChangeText={val => {
-                setRoomNo(val);
+                setRoomNo(sanitizeIntegerInput(val));
                 setRoomError(undefined);
               }}
             />

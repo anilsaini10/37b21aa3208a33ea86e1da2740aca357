@@ -114,20 +114,24 @@ export interface TeacherTimetable {
 
 // ---- Teacher's own schedule (real backend, /api/teacher/schedule) ---------
 // Read-only, self-service: the teacher is always resolved from the JWT, never
-// a client-supplied id. Breaks never appear here (no assigned teacher).
+// a client-supplied id. BREAK rows can appear here too — subjectId/subjectName
+// are null for them, and `title` (e.g. "Lunch Break") is the only meaningful
+// content besides the time range.
 
 export interface TeacherPeriod {
   id: ID;
   day: ScheduleDay;
-  type: 'CLASS_PERIOD';
+  type: ScheduleEntryType;
   periodNo: number;
   classId: ID;
   className: string;
   sectionId: ID;
   sectionName: string;
-  subjectId: ID;
-  subjectName: string;
+  /** Null for type === 'BREAK'. */
+  subjectId: ID | null;
+  subjectName: string | null;
   roomNo: string | null;
+  /** Only meaningful for type === 'BREAK' (e.g. "Lunch Break"); null for CLASS_PERIOD. */
   title: string | null;
   startTime: string;
   endTime: string;

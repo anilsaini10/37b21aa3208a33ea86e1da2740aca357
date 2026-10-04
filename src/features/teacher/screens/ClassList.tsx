@@ -1,6 +1,6 @@
 /** My Classes — only the classes this teacher actually teaches, grouped by section. */
 import React, {useState} from 'react';
-import {Pressable, ScrollView, View} from 'react-native';
+import {Pressable, RefreshControl, ScrollView, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme, useThemedStyles} from '../../../core/theme';
@@ -45,7 +45,7 @@ export function ClassListScreen(): React.JSX.Element {
   }));
   const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
-  const {data: classes, isLoading, isError, error, refetch} = useTeacherClasses();
+  const {data: classes, isLoading, isRefetching, isError, error, refetch} = useTeacherClasses();
   const [search, setSearch] = useState('');
 
   const openSection = (cls: TeacherClassSummary, section: TeacherClassSection): void => {
@@ -95,7 +95,8 @@ export function ClassListScreen(): React.JSX.Element {
       </View>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => refetch()} />}>
         {classes.length === 0 ? (
           <EmptyState
             icon="class"

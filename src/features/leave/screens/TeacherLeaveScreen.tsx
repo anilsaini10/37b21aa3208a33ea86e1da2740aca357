@@ -25,7 +25,7 @@ import type {Leave, LeaveStatus} from '../../../shared/types';
 
 type TabValue = LeaveStatus | 'ALL';
 
-const TABS: TabValue[] = ['PENDING', 'APPROVED', 'REJECTED', 'ALL'];
+const TABS: TabValue[] = ['ALL', 'PENDING', 'APPROVED', 'REJECTED'];
 
 const STATUS_TONE: Record<LeaveStatus, BadgeTone> = {
   PENDING: 'warning',
@@ -37,7 +37,7 @@ export function TeacherLeaveScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
   const navigation = useNavigation();
-  const [tab, setTab] = useState<TabValue>('PENDING');
+  const [tab, setTab] = useState<TabValue>('ALL');
   const [reviewTarget, setReviewTarget] = useState<Leave | null>(null);
   const [remarks, setRemarks] = useState('');
   const [reviewError, setReviewError] = useState<string | undefined>();
