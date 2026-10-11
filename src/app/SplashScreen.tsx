@@ -5,7 +5,7 @@
  * native → JS is invisible.
  */
 import React, {useEffect} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {Image, StyleSheet} from 'react-native';
 import Animated, {
   Easing,
   runOnJS,
@@ -17,18 +17,15 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import BootSplash from 'react-native-bootsplash';
-import {AppText, AriseLogo} from '../shared/components';
-import {useLanguage} from '../core/i18n';
 
-const BACKGROUND = '#F5F4FC';
+const BACKGROUND = '#000000';
+const LOGO_BANNER = require('../assets/images/logo_title_banner.png');
+const LOGO_WIDTH = Math.round((180 * 2172) / 1940);
+const LOGO_HEIGHT = Math.round((LOGO_WIDTH * 724) / 2172);
 
 export function SplashScreen({onFinish}: {onFinish: () => void}): React.JSX.Element {
-  const {t} = useLanguage();
-
   const logoOpacity = useSharedValue(0);
-  const logoScale = useSharedValue(0.72);
-  const textOpacity = useSharedValue(0);
-  const textTranslateY = useSharedValue(10);
+  const logoScale = useSharedValue(0.9);
   const screenOpacity = useSharedValue(1);
 
   useEffect(() => {
@@ -36,30 +33,23 @@ export function SplashScreen({onFinish}: {onFinish: () => void}): React.JSX.Elem
     // painted, so the swap reads as one continuous screen, not a flash.
     void BootSplash.hide({fade: true});
 
-    // Entrance: a slower, gentler ease-in with a soft overshoot (~0-950ms).
+    // Entrance: a subtle fade + scale-up (no overshoot — the wide banner reads badly when it balloons).
     logoOpacity.value = withTiming(1, {duration: 700, easing: Easing.out(Easing.cubic)});
     logoScale.value = withSequence(
-      withTiming(1.1, {duration: 700, easing: Easing.out(Easing.cubic)}),
-      withTiming(1, {duration: 450, easing: Easing.out(Easing.quad)}),
+      withTiming(1, {duration: 700, easing: Easing.out(Easing.cubic)}),
       // Gentle breathing pulse to keep the dwell time feeling alive rather
       // than static — stops automatically once the screen unmounts.
       withDelay(
         250,
         withRepeat(
           withSequence(
-            withTiming(1.035, {duration: 900, easing: Easing.inOut(Easing.sin)}),
+            withTiming(1.02, {duration: 900, easing: Easing.inOut(Easing.sin)}),
             withTiming(1, {duration: 900, easing: Easing.inOut(Easing.sin)}),
           ),
           -1,
           false,
         ),
       ),
-    );
-
-    textOpacity.value = withDelay(500, withTiming(1, {duration: 650, easing: Easing.out(Easing.cubic)}));
-    textTranslateY.value = withDelay(
-      500,
-      withTiming(0, {duration: 650, easing: Easing.out(Easing.cubic)}),
     );
 
     // Hold on screen for a beat, then fade out — total runtime ≈ 3.5s.
@@ -78,26 +68,12 @@ export function SplashScreen({onFinish}: {onFinish: () => void}): React.JSX.Elem
     opacity: logoOpacity.value,
     transform: [{scale: logoScale.value}],
   }));
-  const textStyle = useAnimatedStyle(() => ({
-    opacity: textOpacity.value,
-    transform: [{translateY: textTranslateY.value}],
-  }));
   const rootStyle = useAnimatedStyle(() => ({opacity: screenOpacity.value}));
 
   return (
     <Animated.View style={[styles.root, rootStyle]} pointerEvents="none">
-      <Animated.View style={[styles.logoShadow, logoStyle]}>
-        <AriseLogo size={120} />
-      </Animated.View>
-      <Animated.View style={textStyle}>
-        <AppText variant="h2" center>
-          Arise
-        </AppText>
-        <View style={styles.tagline}>
-          <AppText variant="caption" color="textSecondary" center>
-            {t('arise_full_form')}
-          </AppText>
-        </View>
+      <Animated.View style={logoStyle}>
+        <Image source={LOGO_BANNER} style={styles.logo} resizeMode="contain" />
       </Animated.View>
     </Animated.View>
   );
@@ -115,16 +91,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 999,
   },
-  logoShadow: {
-    marginBottom: 20,
-    borderRadius: 999,
-    shadowColor: '#2E4E8F',
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    shadowOffset: {width: 0, height: 10},
-    elevation: 8,
-  },
-  tagline: {
-    marginTop: 4,
+  // The PNG has transparent padding (artwork is 1940 of 2172px wide); sized so the
+  // visible artwork is 180dp — same as the native BootSplash logo, so the hand-off doesn't jump.
+  // Explicit width + height: with only width + aspectRatio the image rendered at its native pixel size.
+  logo: {
+    width: LOGO_WIDTH,
+    height: LOGO_HEIGHT,
   },
 });
