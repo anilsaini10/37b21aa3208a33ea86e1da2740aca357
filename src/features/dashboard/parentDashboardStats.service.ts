@@ -18,7 +18,7 @@ export interface ParentDashboardStats {
   sectionName: string;
   classTeacherName: string | null;
   todayAttendance: {date: string; status: AttendanceStatusCode | null};
-  pendingHomeworkCount: number;
+  activeHomeworkCount: number;
   upcomingExamsCount: number;
 }
 

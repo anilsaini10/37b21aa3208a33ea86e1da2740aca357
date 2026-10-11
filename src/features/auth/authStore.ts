@@ -8,6 +8,7 @@
 import {create} from 'zustand';
 import {storage, StorageKeys} from '../../core/storage/storage';
 import {authApi, type SignupInput} from './authApi';
+import {extractErrorDetails} from '../../core/api/apiError';
 import type {AuthSession, AuthUser, UserRole} from '../../shared/types';
 import type {PermissionKey} from '../../core/config/permissions';
 import {hasPermission} from '../../core/config/permissions';
@@ -21,6 +22,8 @@ interface AuthState {
   error: string | null;
   /** Backend error code (e.g. `EMAIL_TAKEN`, `VALIDATION_ERROR`) for the last failed auth action, if any. */
   errorCode: string | null;
+  /** Backend `details` payload for the last failed auth action (e.g. `{attemptsLeft}` for `INVALID_OTP`), if any. */
+  errorDetails: Record<string, unknown> | null;
 
   hydrate: () => void;
   setSession: (session: AuthSession) => void;
@@ -31,6 +34,7 @@ interface AuthState {
     password: string,
     schoolId?: string,
   ) => Promise<boolean>;
+  loginWithOtp: (role: UserRole, phone: string, otp: string, schoolId?: string) => Promise<boolean>;
   logout: () => Promise<void>;
   /** Clears the session locally without calling the logout endpoint — used when the
    * backend itself has already invalidated the session (e.g. a 401 on any request). */
@@ -64,6 +68,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isLoading: false,
   error: null,
   errorCode: null,
+  errorDetails: null,
 
   hydrate: () => {
     const user = storage.getObject<AuthUser>(StorageKeys.AUTH_USER);
@@ -75,12 +80,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   setSession: (session: AuthSession) => {
     persistSession(session);
-    set({user: session.user, isAuthenticated: true, error: null, errorCode: null});
+    set({user: session.user, isAuthenticated: true, error: null, errorCode: null, errorDetails: null});
     registerDeviceTokenBestEffort();
   },
 
   signup: async (input: SignupInput) => {
-    set({isLoading: true, error: null, errorCode: null});
+    set({isLoading: true, error: null, errorCode: null, errorDetails: null});
     try {
       const session = await authApi.signup(input);
       persistSession(session);
@@ -90,13 +95,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (e) {
       const message = (e as {message?: string}).message ?? 'Signup failed. Please try again.';
       const code = (e as {code?: string}).code ?? null;
-      set({isLoading: false, error: message, errorCode: code});
+      set({isLoading: false, error: message, errorCode: code, errorDetails: extractErrorDetails(e) ?? null});
       return false;
     }
   },
 
   loginWithPassword: async (role, identifier, password, schoolId) => {
-    set({isLoading: true, error: null, errorCode: null});
+    set({isLoading: true, error: null, errorCode: null, errorDetails: null});
     try {
       const session = await authApi.loginWithPassword(role, identifier, password, schoolId);
       persistSession(session);
@@ -106,7 +111,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (e) {
       const message = (e as {message?: string}).message ?? 'Login failed. Please try again.';
       const code = (e as {code?: string}).code ?? null;
-      set({isLoading: false, error: message, errorCode: code});
+      set({isLoading: false, error: message, errorCode: code, errorDetails: extractErrorDetails(e) ?? null});
+      return false;
+    }
+  },
+
+  loginWithOtp: async (role, phone, otp, schoolId) => {
+    set({isLoading: true, error: null, errorCode: null, errorDetails: null});
+    try {
+      const session = await authApi.verifyLoginOtp(phone, otp, role, schoolId);
+      persistSession(session);
+      set({user: session.user, isAuthenticated: true, isLoading: false});
+      registerDeviceTokenBestEffort();
+      return true;
+    } catch (e) {
+      const message = (e as {message?: string}).message ?? 'Login failed. Please try again.';
+      const code = (e as {code?: string}).code ?? null;
+      set({isLoading: false, error: message, errorCode: code, errorDetails: extractErrorDetails(e) ?? null});
       return false;
     }
   },
@@ -122,15 +143,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
     await authApi.logout();
     clearSession();
-    set({user: null, isAuthenticated: false, error: null, errorCode: null});
+    set({user: null, isAuthenticated: false, error: null, errorCode: null, errorDetails: null});
   },
 
   forceLogout: () => {
     clearSession();
-    set({user: null, isAuthenticated: false, error: null, errorCode: null});
+    set({user: null, isAuthenticated: false, error: null, errorCode: null, errorDetails: null});
   },
 
-  clearError: () => set({error: null, errorCode: null}),
+  clearError: () => set({error: null, errorCode: null, errorDetails: null}),
 
   can: (permission) => {
     const user = get().user;

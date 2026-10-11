@@ -9,3 +9,8 @@ export function isValidEmail(value: string): boolean {
 export function isValidPhoneDigits(value: string): boolean {
   return /^\d{10,15}$/.test(value);
 }
+
+/** 10-digit Indian mobile number (starts 6-9) — used by the Mobile OTP login screen. */
+export function isValidIndianMobile(value: string): boolean {
+  return /^[6-9]\d{9}$/.test(value);
+}

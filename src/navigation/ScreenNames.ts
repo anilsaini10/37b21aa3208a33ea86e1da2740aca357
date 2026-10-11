@@ -35,6 +35,7 @@ export const ScreenNames = {
   RoleSelect: 'RoleSelect',
   SelectSchool: 'SelectSchool',
   Login: 'Login',
+  OtpLogin: 'OtpLogin',
   SignUp: 'SignUp',
   ForgotPassword: 'ForgotPassword',
   ResetPassword: 'ResetPassword',

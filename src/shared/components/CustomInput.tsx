@@ -16,6 +16,8 @@ export interface CustomInputProps extends Omit<TextInputProps, 'style'> {
   label?: string;
   error?: string;
   iconLeft?: string;
+  /** Fixed text shown before the input (e.g. "+91") — alternative to `iconLeft` for a country-code style prefix. */
+  prefix?: string;
   secure?: boolean;
   containerStyle?: StyleProp<ViewStyle>;
   required?: boolean;
@@ -25,6 +27,7 @@ export function CustomInput({
   label,
   error,
   iconLeft,
+  prefix,
   secure,
   required,
   containerStyle,
@@ -73,6 +76,11 @@ export function CustomInput({
 
       <View style={[styles.inputRow, {borderColor}]}>
         {iconLeft ? <Icon name={iconLeft} size={18} color={theme.colors.textMuted} /> : null}
+        {prefix ? (
+          <AppText variant="body" color="text">
+            {prefix}
+          </AppText>
+        ) : null}
         <TextInput
           {...inputProps}
           secureTextEntry={hidden}

@@ -167,6 +167,7 @@ function ParentDashboardContent({
     refetch: refetchStats,
   } = useParentDashboardStats(child.id);
   const {data: mockData, isLoading: mockLoading} = useParentDashboard();
+  
   const {
     data: eventsPage,
     isLoading: eventsLoading,
@@ -236,7 +237,7 @@ function ParentDashboardContent({
       icon: 'attendance',
       accent: attendanceStatus ? STATUS_ACCENT[attendanceStatus] : 'warning',
     },
-    {key: 'fees', label: t('parentDashboard_pendingFees'), value: formatCurrency(mockData.pendingFees), icon: 'fee', accent: 'error'},
+    // {key: 'fees', label: t('parentDashboard_pendingFees'), value: formatCurrency(mockData.pendingFees), icon: 'fee', accent: 'error'},
     {
       key: 'exams',
       label: t('parentDashboard_upcomingExams'),
@@ -247,8 +248,8 @@ function ParentDashboardContent({
     },
     {
       key: 'homework',
-      label: t('parentDashboard_pendingHomework'),
-      value: stats.pendingHomeworkCount,
+      label: t('parentDashboard_ActiveHomework'),
+      value: stats.activeHomeworkCount,
       icon: 'homework',
       accent: 'warning',
       onPress: () => tabNavigation.navigate(ScreenNames.Homework),
@@ -368,10 +369,10 @@ function ParentDashboardContent({
           )}
         </CustomCard>
 
-        <SectionTitle title={t('parentDashboard_attendanceTrend')} />
+        {/* <SectionTitle title={t('parentDashboard_attendanceTrend')} />
         <CustomCard>
           <LineChart series={mockData.attendanceTrend} color={theme.colors.success} />
-        </CustomCard>
+        </CustomCard> */}
 
         {/* <SectionTitle title={t('parentDashboard_performance')} />
         <CustomCard>

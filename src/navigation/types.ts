@@ -33,7 +33,16 @@ export type RootStackParamList = {
 export type AuthStackParamList = {
   RoleSelect: undefined;
   SelectSchool: {role: Extract<UserRole, 'teacher' | 'parent'>};
-  Login: {role: UserRole; schoolId?: string; schoolName?: string};
+  Login: {role: UserRole; schoolId?: string; schoolName?: string; otpError?: string};
+  OtpLogin: {
+    role: UserRole;
+    schoolId?: string;
+    schoolName?: string;
+    phone: string;
+    message: string;
+    resendAfterSeconds: number;
+    expiresInSeconds: number;
+  };
   SignUp: undefined;
   ForgotPassword: undefined;
   ResetPassword: {email: string};

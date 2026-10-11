@@ -8,6 +8,7 @@ export * from './ProfileHero';
 export * from './DashboardProfileCard';
 export * from './CustomButton';
 export * from './CustomInput';
+export * from './OtpInput';
 export * from './CustomCard';
 export * from './CustomHeader';
 export * from './DashboardGreetingHeader';

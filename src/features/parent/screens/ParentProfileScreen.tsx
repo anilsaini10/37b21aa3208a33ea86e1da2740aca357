@@ -26,7 +26,7 @@ const MENU: {labelKey: TranslationKey; icon: string; route: MenuRoute}[] = [
   {labelKey: 'parentProfile_childProfile', icon: 'student', route: ScreenNames.ChildProfile},
   {labelKey: 'parentProfile_results', icon: 'grade', route: ScreenNames.Results},
   {labelKey: 'teacherProfile_timetable', icon: 'timetable', route: ScreenNames.ChildTimetable},
-  {labelKey: 'parentFees_headerTitle', icon: 'fee', route: ScreenNames.Fees},
+  // {labelKey: 'parentFees_headerTitle', icon: 'fee', route: ScreenNames.Fees},
   {labelKey: 'teacherProfile_announcements', icon: 'announcement', route: ScreenNames.Announcements},
   {labelKey: 'eventsManage_headerTitle', icon: 'event', route: ScreenNames.Events},
   // {labelKey: 'parentProfile_chatWithTeacher', icon: 'chat', route: ScreenNames.Chat},

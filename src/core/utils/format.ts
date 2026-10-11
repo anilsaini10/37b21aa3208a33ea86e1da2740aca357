@@ -68,6 +68,14 @@ export function formatPercentage(value: number, digits = 0): string {
   return `${value.toFixed(digits)}%`;
 }
 
+/** Seconds as `M:SS` — for resend/expiry/rate-limit countdowns. */
+export function formatCountdown(totalSeconds: number): string {
+  const safe = Math.max(0, totalSeconds);
+  const m = Math.floor(safe / 60);
+  const s = safe % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
 /** First-letter initials from a name (max 2). */
 export function initials(name: string): string {
   return name

@@ -35,6 +35,12 @@ interface AuthApiResponse {
   tokens?: {accessToken: string; refreshToken: string; expiresAt?: string | number};
 }
 
+export interface SendLoginOtpResult {
+  message: string;
+  resendAfterSeconds: number;
+  expiresInSeconds: number;
+}
+
 /** Backend sends `expiresAt` as an ISO string; the app stores epoch ms everywhere else. */
 function toExpiresAtMs(value: string | number | undefined, fallbackMs: number): number {
   if (value === undefined) {
@@ -115,6 +121,56 @@ export const authApi = {
     } catch (e) {
       logger.warn('authApi.loginWithPassword failed', e);
       rethrowApiError(e, 'Login failed. Please check your credentials and try again.');
+    }
+  },
+
+  /**
+   * Public — no auth token. `schoolId` is required for teacher/parent, omitted
+   * for admin (same rule as `loginWithPassword`). Always responds 200 even
+   * when the number isn't registered (deliberate, for security) — the UI must
+   * show the server's own `message` and move on to the OTP screen rather than
+   * claiming "OTP sent successfully".
+   */
+  async sendLoginOtp(phone: string, role: UserRole, schoolId?: string): Promise<SendLoginOtpResult> {
+    try {
+      const {data} = await axiosClient.post<SendLoginOtpResult>(Endpoints.auth.loginOtpSend, {
+        phone,
+        role: role.toUpperCase(),
+        schoolId,
+      });
+      return data;
+    } catch (e) {
+      logger.warn('authApi.sendLoginOtp failed', e);
+      rethrowApiError(e, 'Failed to send OTP. Please try again.');
+    }
+  },
+
+  /**
+   * Public — completes the OTP login above. Same response shape as
+   * `loginWithPassword`. A wrong/expired/already-used/unregistered OTP all
+   * come back as a 400 with `code: "INVALID_OTP"` — the backend doesn't
+   * distinguish between them (deliberate, for security).
+   */
+  async verifyLoginOtp(phone: string, otp: string, role: UserRole, schoolId?: string): Promise<AuthSession> {
+    try {
+      const {data} = await axiosClient.post<AuthApiResponse>(Endpoints.auth.loginOtpVerify, {
+        phone,
+        otp,
+        role: role.toUpperCase(),
+        schoolId,
+      });
+      if (!data?.user) {
+        throw new Error('Login succeeded but the server response was missing user data.');
+      }
+      const tokens: AuthTokens = {
+        accessToken: data.tokens?.accessToken ?? data.accessToken ?? '',
+        refreshToken: data.tokens?.refreshToken ?? data.refreshToken ?? '',
+        expiresAt: toExpiresAtMs(data.tokens?.expiresAt, Date.now() + 15 * 60 * 1000),
+      };
+      return {user: toAuthUser(data.user, {role, schoolId}), tokens};
+    } catch (e) {
+      logger.warn('authApi.verifyLoginOtp failed', e);
+      rethrowApiError(e, 'Invalid or expired OTP. Please try again.');
     }
   },
 
