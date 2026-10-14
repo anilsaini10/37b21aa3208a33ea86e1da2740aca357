@@ -29,6 +29,8 @@ export interface DashboardProfileCardProps {
   schoolName?: string;
   roleLabel: string;
   email?: string;
+  /** Extra role-specific content under the date/email row — e.g. the teacher's check-in panel. */
+  footer?: React.ReactNode;
 }
 
 export function DashboardProfileCard({
@@ -37,6 +39,7 @@ export function DashboardProfileCard({
   schoolName,
   roleLabel,
   email,
+  footer,
 }: DashboardProfileCardProps): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
@@ -96,6 +99,12 @@ export function DashboardProfileCard({
           </Row>
         ) : null}
       </Row>
+      {footer ? (
+        <>
+          <Divider dashed />
+          {footer}
+        </>
+      ) : null}
     </CustomCard>
   );
 }

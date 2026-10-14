@@ -76,6 +76,13 @@ export const Endpoints = {
       `/api/admin/exams/${examId}/classes/${classId}/students`,
     exams_results: (examId: string) => `/api/admin/exams/${examId}/results`,
     exams_resultById: (examId: string, resultId: string) => `/api/admin/exams/${examId}/results/${resultId}`,
+    exams_schedule: (examId: string) => `/api/admin/exams/${examId}/schedule`,
+    exams_scheduleBulk: (examId: string) => `/api/admin/exams/${examId}/schedule/bulk`,
+    exams_scheduleById: (examId: string, scheduleId: string) => `/api/admin/exams/${examId}/schedule/${scheduleId}`,
+    exams_scheduleStudents: (examId: string, scheduleId: string) =>
+      `/api/admin/exams/${examId}/schedule/${scheduleId}/students`,
+    exams_scheduleMarks: (examId: string, scheduleId: string) =>
+      `/api/admin/exams/${examId}/schedule/${scheduleId}/marks`,
     schedule: '/api/admin/schedule',
     schedule_byId: (scheduleId: string) => `/api/admin/schedule/${scheduleId}`,
     schedule_bySection: (sectionId: string) => `/api/admin/schedule/sections/${sectionId}`,
@@ -106,8 +113,14 @@ export const Endpoints = {
     myLeave: '/api/teacher/my-leave',
     myLeave_byId: (leaveId: string) => `/api/teacher/my-leave/${leaveId}`,
     myAttendance: '/api/teacher/my-attendance',
+    myAttendanceToday: '/api/teacher/my-attendance/today',
+    myAttendanceCheckIn: '/api/teacher/my-attendance/check-in',
+    myAttendanceCheckOut: '/api/teacher/my-attendance/check-out',
     resetPassword: '/api/teacher/reset-password',
     profile: '/api/teacher/profile',
+    exams: '/api/teacher/exams',
+    exams_scheduleStudents: (scheduleId: string) => `/api/teacher/exams/schedule/${scheduleId}/students`,
+    exams_scheduleMarks: (scheduleId: string) => `/api/teacher/exams/schedule/${scheduleId}/marks`,
   },
   parent: {
     dashboard: '/api/parent/dashboard',

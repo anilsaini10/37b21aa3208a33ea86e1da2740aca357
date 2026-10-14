@@ -197,6 +197,12 @@ export function ExamsListScreen(): React.JSX.Element {
         <AppText variant="body" color="textSecondary">
           {t('examsList_deleteConfirm', {title: deleteTarget?.title ?? ''})}
         </AppText>
+        <Row gap={6} align="flex-start">
+          <Icon name="warning" size={14} color={theme.colors.error} />
+          <AppText variant="caption" color="error" style={{flex: 1}}>
+            {t('examsList_deleteCascadeWarning')}
+          </AppText>
+        </Row>
         {deleteError ? (
           <AppText variant="caption" color="error" style={{marginTop: theme.spacing.sm}}>
             {deleteError}

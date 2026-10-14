@@ -111,6 +111,39 @@ export function formatDateTime(iso: string): string {
   return `${d.getDate()} ${MONTHS[d.getMonth()]}, ${hh}:${mm}`;
 }
 
+/** "2026-10-13" (or an ISO string — only its first 10 chars are used) → "13/10/2026". Split, not `new Date()`, so the day can't shift. */
+export function formatDateDMY(date: string): string {
+  const [y, m, d] = date.slice(0, 10).split('-');
+  return y && m && d ? `${d}/${m}/${y}` : '';
+}
+
+/** Format an ISO date-time as a 12h local time, e.g. "08:03 AM". Returns '' for invalid input. */
+export function formatTime12h(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) {
+    return '';
+  }
+  const h = d.getHours();
+  const hh = String(h % 12 === 0 ? 12 : h % 12).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${hh}:${mm} ${h < 12 ? 'AM' : 'PM'}`;
+}
+
+/** Format an ISO date-time as a 24h local time with seconds, e.g. "08:16:44". Returns '' for invalid input. */
+export function formatTimeHms(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) {
+    return '';
+  }
+  return [d.getHours(), d.getMinutes(), d.getSeconds()].map(n => String(n).padStart(2, '0')).join(':');
+}
+
+/** Minutes as a duration, e.g. 420 → "7h 0m", 45 → "45m". */
+export function formatDuration(minutes: number): string {
+  const m = Math.max(0, Math.round(minutes));
+  return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`;
+}
+
 /** Relative time such as "just now", "5m ago", "3d ago". */
 export function timeAgo(iso: string, now: number = Date.now()): string {
   const then = new Date(iso).getTime();

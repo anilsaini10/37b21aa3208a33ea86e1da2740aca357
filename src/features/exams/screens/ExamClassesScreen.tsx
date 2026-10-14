@@ -1,4 +1,9 @@
-/** Classes assigned to an exam — grading progress per class; tap a class to see its students. */
+/**
+ * Exam detail (admin) — tabs:
+ *  - Classes: classes assigned to the exam with grading progress; tap a class to see its students.
+ *  - Date Sheet: the exam's papers (one per class + subject).
+ *  - Marks: subject-wise marks per paper.
+ */
 import React, {useState} from 'react';
 import {Pressable, ScrollView, View} from 'react-native';
 import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
@@ -26,6 +31,10 @@ import {useClasses} from '../../classes/classes.service';
 import type {AdminStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {ExamClassProgress} from '../../../shared/types';
+import {DateSheetTab} from '../components/DateSheetTab';
+import {MarksTab} from '../components/MarksTab';
+
+type ExamTab = 'classes' | 'dateSheet' | 'marks';
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
@@ -45,6 +54,7 @@ export function ExamClassesScreen(): React.JSX.Element {
   const navigation = useNavigation<Nav>();
   const route = useRoute<RouteProp<AdminStackParamList, 'ExamClasses'>>();
   const {examId, examName} = route.params;
+  const [tab, setTab] = useState<ExamTab>('classes');
   const {data, isLoading, isError, error, refetch} = useExamClasses(examId);
   const {data: allClasses} = useClasses();
   const addClassMutation = useAddExamClass();
@@ -64,6 +74,16 @@ export function ExamClassesScreen(): React.JSX.Element {
     scrollContent: {padding: t2.spacing.lg, flexGrow: 1},
     card: {marginBottom: t2.spacing.md},
     modalButtonWrap: {flex: 1},
+    tabBar: {
+      flexDirection: 'row',
+      marginHorizontal: t2.spacing.lg,
+      marginTop: t2.spacing.md,
+      padding: 3,
+      borderRadius: t2.radius.md,
+      backgroundColor: t2.colors.surfaceVariant,
+    },
+    tabItem: {flex: 1, alignItems: 'center', paddingVertical: t2.spacing.sm, borderRadius: t2.radius.md - 2},
+    tabItemActive: {backgroundColor: t2.colors.surface},
   }));
 
   const filteredData = (data ?? []).filter(cls =>
@@ -109,7 +129,13 @@ export function ExamClassesScreen(): React.JSX.Element {
       {
         onSuccess: () => setRemoveTarget(null),
         onError: (e: Error & {code?: string}) => {
-          setRemoveError(e.code === 'EXAM_CLASS_HAS_RESULTS' ? t('examClasses_hasResultsError') : e.message);
+          setRemoveError(
+            e.code === 'EXAM_CLASS_HAS_RESULTS'
+              ? t('examClasses_hasResultsError')
+              : e.code === 'EXAM_CLASS_HAS_SCHEDULE'
+                ? t('examClasses_hasScheduleError')
+                : e.message,
+          );
         },
       },
     );
@@ -120,9 +146,28 @@ export function ExamClassesScreen(): React.JSX.Element {
       <CustomHeader
         title={examName ?? t('examClasses_title')}
         onBack={() => navigation.goBack()}
-        actions={[{icon: 'add', onPress: openAddModal}]}
+        actions={tab === 'classes' ? [{icon: 'add', onPress: openAddModal}] : []}
       />
-      {isError ? (
+      <View style={styles.tabBar}>
+        {(
+          [
+            ['classes', t('examDetail_tabClasses')],
+            ['dateSheet', t('examDetail_tabDateSheet')],
+            ['marks', t('examDetail_tabMarks')],
+          ] as [ExamTab, string][]
+        ).map(([key, label]) => (
+          <Pressable key={key} onPress={() => setTab(key)} style={[styles.tabItem, tab === key ? styles.tabItemActive : null]}>
+            <AppText variant="label" color={tab === key ? 'primary' : 'textSecondary'}>
+              {label}
+            </AppText>
+          </Pressable>
+        ))}
+      </View>
+      {tab === 'dateSheet' ? (
+        <DateSheetTab examId={examId} examTitle={examName} />
+      ) : tab === 'marks' ? (
+        <MarksTab examId={examId} />
+      ) : isError ? (
         <EmptyState
           icon="warning"
           title={t('common_somethingWentWrong')}

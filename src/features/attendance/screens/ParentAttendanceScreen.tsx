@@ -2,7 +2,7 @@
 import React, {useState} from 'react';
 import {View, ScrollView} from 'react-native';
 import {useTheme, useThemedStyles} from '../../../core/theme';
-import {useLanguage} from '../../../core/i18n';
+import {useLanguage, type TranslationKey} from '../../../core/i18n';
 import {
   Screen,
   CustomHeader,
@@ -13,16 +13,17 @@ import {
   Row,
   Spacer,
   Divider,
+  CustomTable,
   Loader,
   EmptyState,
 } from '../../../shared/components';
-import type {BadgeTone} from '../../../shared/components';
+import type {BadgeTone, TableColumn} from '../../../shared/components';
 import {DateRangeFilter} from './AttendanceReportScreen';
-import {formatDate} from '../../../core/utils/format';
+import {formatDateDMY} from '../../../core/utils/format';
 import {attendancePercentageTone} from '../../../shared/helpers';
 import {useParentProfile} from '../../parent/parentStudents.service';
 import {useParentAttendance} from '../../parent/parentAttendance.service';
-import type {AttendanceStatusCode, ParentChild} from '../../../shared/types';
+import type {AttendanceStatusCode, ParentChild, StudentAttendanceHistoryRecord} from '../../../shared/types';
 
 const STATUS_TONE: Record<AttendanceStatusCode, BadgeTone> = {
   PRESENT: 'success',
@@ -31,6 +32,11 @@ const STATUS_TONE: Record<AttendanceStatusCode, BadgeTone> = {
   LEAVE: 'info',
   HOLIDAY: 'neutral',
 };
+
+const DAY_KEYS: TranslationKey[] = [
+  'common_daySun', 'common_dayMon', 'common_dayTue', 'common_dayWed',
+  'common_dayThu', 'common_dayFri', 'common_daySat',
+];
 
 function isoDaysAgo(n: number): string {
   const d = new Date();
@@ -168,9 +174,39 @@ function ChildAttendance({child, onBack}: {child: ParentChild; onBack?: () => vo
   const styles = useThemedStyles(t2 => ({
     scrollContent: {padding: t2.spacing.lg},
     summaryCard: {marginBottom: t2.spacing.md},
-    recordsCard: {paddingHorizontal: t2.spacing.lg},
-    recordRow: {paddingVertical: t2.spacing.sm},
   }));
+
+  const rows = data ? [...data.records].reverse() : [];
+  const columns: TableColumn<StudentAttendanceHistoryRecord>[] = [
+    {
+      key: 'sno',
+      title: t('myAttendance_colSno'),
+      width: 48,
+      align: 'center',
+      render: record => <AppText variant="caption">{rows.indexOf(record) + 1}</AppText>,
+    },
+    {
+      key: 'date',
+      title: t('common_date'),
+      flex: 1.3,
+      render: record => <AppText variant="caption">{formatDateDMY(record.date)}</AppText>,
+    },
+    {
+      key: 'day',
+      title: t('parentAttendance_colDay'),
+      flex: 0.8,
+      render: record => {
+        const [y, m, d] = record.date.slice(0, 10).split('-').map(Number);
+        return <AppText variant="caption">{t(DAY_KEYS[new Date(y, m - 1, d).getDay()])}</AppText>;
+      },
+    },
+    {
+      key: 'status',
+      title: t('common_status'),
+      flex: 1.1,
+      render: record => <Badge label={STATUS_LABEL[record.status]} tone={STATUS_TONE[record.status]} />,
+    },
+  ];
 
   return (
     <Screen padded={false}>
@@ -214,17 +250,8 @@ function ChildAttendance({child, onBack}: {child: ParentChild; onBack?: () => vo
                 message={t('studentAttendanceHistory_noRecordsMessage')}
               />
             ) : (
-              <CustomCard padded={false} style={styles.recordsCard}>
-                {[...data.records].reverse().map((record, i) => (
-                  <View key={record.id}>
-                    {i > 0 ? <Divider /> : null}
-                    <Row justify="space-between" align="center" style={styles.recordRow}>
-                      <AppText variant="bodyBold">{formatDate(record.date)}</AppText>
-                      <Badge label={STATUS_LABEL[record.status]} tone={STATUS_TONE[record.status]} />
-                    </Row>
-                  </View>
-                ))}
-              </CustomCard>
+              // S.No · Date · Day · Status, newest first.
+              <CustomTable columns={columns} data={rows} keyExtractor={record => record.id} />
             )}
           </>
         )}

@@ -102,7 +102,8 @@ export function CustomInput({
         ) : null}
       </View>
 
-      {error ? (
+      {/* A blank `error` just marks the field red (the message is shown elsewhere, e.g. once per row). */}
+      {error?.trim() ? (
         <AppText variant="caption" color="error" style={styles.errorText}>
           {error}
         </AppText>

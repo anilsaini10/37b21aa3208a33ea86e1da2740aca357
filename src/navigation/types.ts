@@ -11,6 +11,8 @@ import type {
   AdminAnnouncement,
   AdminEvent,
   AdminExam,
+  ExamPaperListItem,
+  TeacherExamPaper,
   ExamResult,
   ScheduleDay,
   ScheduleEntry,
@@ -89,6 +91,12 @@ export type AdminStackParamList = {
     resultId?: string;
     initial?: ExamResult | null;
   };
+  /** Add (no `paper`) or edit one date sheet paper. `classId` preselects the class when adding. */
+  PaperForm: {examId: string; paper?: ExamPaperListItem; classId?: string};
+  /** Build a whole class's date sheet in one go (bulk, all-or-nothing). */
+  DateSheetBuilder: {examId: string; classId?: string};
+  /** View / override marks for one paper. */
+  PaperMarks: {examId: string; scheduleId: string; paper?: ExamPaperListItem};
   Announcements: undefined;
   AnnouncementForm: {id?: string; initial?: AdminAnnouncement};
   Events: undefined;
@@ -109,7 +117,8 @@ export type AdminStackParamList = {
   PeriodForm: {classId: string; sectionId: string; day: ScheduleDay; scheduleId?: string; initial?: ScheduleEntry};
   TeacherSchedule: undefined;
   Leave: undefined;
-  MarkStaffAttendance: undefined;
+  /** `date` preselects the day (e.g. from the register's day view). */
+  MarkStaffAttendance: {date?: string} | undefined;
   StaffAttendanceRegister: {teacherId?: string; teacherName?: string} | undefined;
   Staff: undefined;
   StaffForm: {staffId?: string; initial?: Staff} | undefined;
@@ -146,6 +155,10 @@ export type TeacherStackParamList = {
   Events: undefined;
   Notifications: undefined;
   ChangePassword: undefined;
+  /** Exam papers the teacher teaches (own sections) or invigilates. */
+  TeacherExams: undefined;
+  /** Marks entry for one paper — `paper` (from the list) carries `canEnterMarks` / `mySections`. */
+  TeacherPaperMarks: {scheduleId: string; paper?: TeacherExamPaper};
 };
 
 // ---- Parent ---------------------------------------------------------------

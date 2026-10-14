@@ -31,6 +31,9 @@ import {useTodaySchedule} from '../../timetable/teacherSchedule.service';
 import {useAnnouncementsFeed} from '../../communication/announcements.service';
 import {useEventsFeed} from '../../events/events.service';
 import {useUnreadNotificationsCount} from '../../communication/notifications.service';
+import {TodayCheckInPanel} from '../../attendance/components/TodayCheckInPanel';
+import {MY_ATTENDANCE_TODAY_KEY} from '../../attendance/myStaffAttendance.service';
+import {useQueryClient} from '@tanstack/react-query';
 import type {TeacherStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {StatCard} from '../../../shared/types';
@@ -66,6 +69,7 @@ export function TeacherDashboardScreen(): React.JSX.Element {
     refetch: refetchEvents,
   } = useEventsFeed('teacher', {page: 1, pageSize: 10, from: todayIso()});
   const {data: unreadCount} = useUnreadNotificationsCount();
+  const qc = useQueryClient();
   const {t} = useLanguage();
   const styles = useThemedStyles(t2 => ({
     scrollContent: {
@@ -103,7 +107,14 @@ export function TeacherDashboardScreen(): React.JSX.Element {
       accent: 'primary',
     },
     {key: 'homework', label: t('teacherDashboard_pendingHomework'), value: data.pendingHomework, icon: 'homework', accent: 'warning'},
-    {key: 'exams', label: t('teacherDashboard_upcomingExams'), value: data.upcomingExams, icon: 'exam', accent: 'info'},
+    {
+      key: 'exams',
+      label: t('teacherDashboard_upcomingExams'),
+      value: data.upcomingExams,
+      icon: 'exam',
+      accent: 'info',
+      onPress: () => navigation.navigate(ScreenNames.TeacherExams),
+    },
     {
       key: 'attendance',
       label: t('teacherDashboard_attendance'),
@@ -134,6 +145,7 @@ export function TeacherDashboardScreen(): React.JSX.Element {
               refetchStats();
               refetchAnnouncements();
               refetchEvents();
+              qc.invalidateQueries({queryKey: MY_ATTENDANCE_TODAY_KEY});
             }}
           />
         }>
@@ -143,6 +155,7 @@ export function TeacherDashboardScreen(): React.JSX.Element {
           schoolName={user?.schoolName}
           roleLabel={capitalize(user?.role ?? 'teacher')}
           email={user?.email}
+          footer={<TodayCheckInPanel />}
         />
 
         <StatGrid stats={stats} />

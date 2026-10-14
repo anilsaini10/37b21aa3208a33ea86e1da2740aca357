@@ -15,4 +15,5 @@ export const AppConfig = {
 };
 
 export * from './env';
+export * from './apiEnvironment';
 export * from './permissions';

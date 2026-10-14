@@ -126,20 +126,69 @@ export interface StudentAttendanceHistory {
 // marking their own class's students. Named `StaffAttendance*` to avoid colliding
 // with the mock `TeacherAttendanceRecord`/`TeacherAttendanceBreakdown` above.
 
-export interface StaffAttendanceRecord {
-  id: ID;
+/** Admin's view of one teacher-day — the teacher's own record plus who it belongs to. See `MyStaffAttendanceRecord` for the teacher/admin/final split. */
+export interface StaffAttendanceRecord extends MyStaffAttendanceRecord {
   teacherId: ID;
   teacherName: string;
   employeeId: string;
+}
+
+/**
+ * Teacher's own attendance for one day, from `/api/teacher/my-attendance`.
+ * Two independent markings: the teacher's self check-in and the admin's marking.
+ * `status` is the FINAL (official) status = adminStatus if the admin marked the day, else teacherStatus.
+ */
+export interface MyStaffAttendanceRecord {
+  id: ID;
+  /** "YYYY-MM-DD" — parse as a local date. */
   date: string;
   status: AttendanceStatusCode;
-  markedBy: {id: ID; name: string};
+  teacherStatus: AttendanceStatusCode | null;
+  /** ISO UTC time of the teacher's check-in. */
+  teacherMarkedAt: string | null;
+  /** Where the teacher checked in — null when no location was sent. */
+  teacherLatitude?: number | null;
+  teacherLongitude?: number | null;
+  /** Check-out time (ISO UTC) and where — null until the teacher checks out. */
+  teacherCheckOutAt?: string | null;
+  teacherCheckOutLatitude?: number | null;
+  teacherCheckOutLongitude?: number | null;
+  /** Check-out − check-in, in minutes; null until both exist. */
+  workedMinutes?: number | null;
+  adminStatus: AttendanceStatusCode | null;
+  adminMarkedAt: string | null;
+  adminMarkedBy: {id: ID; name: string} | null;
   createdAt: string;
   updatedAt: string;
 }
 
-/** Teacher's own view of the same records, from `/api/teacher/my-attendance` — teacherId/teacherName/employeeId omitted since it's always themselves. Read-only. */
-export type MyStaffAttendanceRecord = Omit<StaffAttendanceRecord, 'teacherId' | 'teacherName' | 'employeeId'>;
+/** Why today's check-in isn't available (same codes the check-in endpoint returns as errors). */
+export type CheckInBlockCode = 'ALREADY_CHECKED_IN' | 'ON_LEAVE_TODAY' | 'HOLIDAY_TODAY' | 'TEACHER_INACTIVE';
+
+/** Why today's check-out isn't available. */
+export type CheckOutBlockCode = 'NOT_CHECKED_IN' | 'ALREADY_CHECKED_OUT' | 'TEACHER_INACTIVE';
+
+/** `/api/teacher/my-attendance/today` — drives the "Mark Attendance" button. "Today" is decided by the server (IST). */
+export interface MyAttendanceToday {
+  /** Today in IST, "YYYY-MM-DD". */
+  date: string;
+  teacherStatus: AttendanceStatusCode | null;
+  teacherMarkedAt: string | null;
+  teacherLatitude?: number | null;
+  teacherLongitude?: number | null;
+  teacherCheckOutAt?: string | null;
+  adminStatus: AttendanceStatusCode | null;
+  /** Final status — null while nothing is marked yet today. */
+  status: AttendanceStatusCode | null;
+  /** = teacherStatus != null. */
+  checkedIn: boolean;
+  canCheckIn: boolean;
+  reason: {code: CheckInBlockCode | string; message: string} | null;
+  checkedOut: boolean;
+  canCheckOut: boolean;
+  checkOutReason: {code: CheckOutBlockCode | string; message: string} | null;
+  record: MyStaffAttendanceRecord | null;
+}
 
 export interface MarkStaffAttendanceEntry {
   teacherId: ID;

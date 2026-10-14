@@ -5,13 +5,15 @@ import {
   Pressable,
   View,
   type StyleProp,
+  type TextStyle,
   type ViewStyle,
 } from 'react-native';
 import {useTheme, useThemedStyles} from '../../core/theme';
 import {AppText} from './AppText';
 import {Icon} from './Icon';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+/** `dangerOutline` = transparent with an error-coloured border + label (a softer "destructive" action). */
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'dangerOutline';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface CustomButtonProps {
@@ -25,6 +27,8 @@ export interface CustomButtonProps {
   iconLeft?: string;
   iconRight?: string;
   style?: StyleProp<ViewStyle>;
+  /** Overrides the label's text style — e.g. a smaller fontSize for a compact button. */
+  textStyle?: StyleProp<TextStyle>;
   testID?: string;
 }
 
@@ -39,6 +43,7 @@ export function CustomButton({
   iconLeft,
   iconRight,
   style,
+  textStyle,
   testID,
 }: CustomButtonProps): React.JSX.Element {
   const {theme} = useTheme();
@@ -52,6 +57,7 @@ export function CustomButton({
     outline: 'transparent',
     ghost: 'transparent',
     danger: theme.colors.error,
+    dangerOutline: 'transparent',
   };
 
   const fg: Record<ButtonVariant, string> = {
@@ -60,10 +66,15 @@ export function CustomButton({
     outline: theme.colors.primary,
     ghost: theme.colors.primary,
     danger: theme.colors.onPrimary,
+    dangerOutline: theme.colors.error,
   };
 
   const border =
-    variant === 'outline' ? {borderWidth: 1.5, borderColor: theme.colors.primary} : undefined;
+    variant === 'outline'
+      ? {borderWidth: 1.5, borderColor: theme.colors.primary}
+      : variant === 'dangerOutline'
+        ? {borderWidth: 1.5, borderColor: theme.colors.error}
+        : undefined;
 
   const styles = useThemedStyles(t => ({
     content: {flexDirection: 'row', alignItems: 'center', columnGap: t.spacing.sm},
@@ -95,7 +106,7 @@ export function CustomButton({
       ) : (
         <View style={styles.content}>
           {iconLeft ? <Icon name={iconLeft} size={18} color={fg[variant]} /> : null}
-          <AppText variant="button" style={{color: fg[variant]}}>
+          <AppText variant="button" style={[{color: fg[variant]}, textStyle]}>
             {title}
           </AppText>
           {iconRight ? <Icon name={iconRight} size={18} color={fg[variant]} /> : null}

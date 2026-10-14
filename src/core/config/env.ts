@@ -5,6 +5,8 @@
  * `react-native-config`. Here they are inlined with sensible dev defaults so
  * the dummy-API starter runs immediately.
  */
+import {BASE_URL} from './apiEnvironment';
+
 export interface AppEnv {
   API_BASE_URL: string;
   API_TIMEOUT_MS: number;
@@ -14,7 +16,8 @@ export interface AppEnv {
 }
 
 export const ENV: AppEnv = {
-  API_BASE_URL: 'http://10.0.2.2:5000',
+  // Live vs demo server is chosen in `apiEnvironment.ts` (`ACTIVE_API_ENV`).
+  API_BASE_URL: BASE_URL,
   // A few admin write endpoints (announcements/events create+update, leave
   // approve/reject) now await a push-notification send server-side before
   // responding — can take a couple seconds for a large school, occasionally

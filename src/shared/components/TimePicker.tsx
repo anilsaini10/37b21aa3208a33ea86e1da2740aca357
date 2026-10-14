@@ -15,6 +15,9 @@ export interface TimePickerProps {
   label?: string;
   value?: string;
   onChange: (hhmm: string) => void;
+  error?: string;
+  required?: boolean;
+  disabled?: boolean;
 }
 
 function parse(value?: string): {h: number; m: number} {
@@ -25,7 +28,7 @@ function parse(value?: string): {h: number; m: number} {
   return {h: 9, m: 0};
 }
 
-export function TimePicker({label, value, onChange}: TimePickerProps): React.JSX.Element {
+export function TimePicker({label, value, onChange, error, required, disabled}: TimePickerProps): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
   const [open, setOpen] = useState(false);
@@ -47,6 +50,15 @@ export function TimePicker({label, value, onChange}: TimePickerProps): React.JSX
       borderRadius: t2.components.input.radius,
       paddingHorizontal: t2.spacing.md,
       backgroundColor: t2.colors.inputBackground,
+    },
+    fieldError: {
+      borderColor: t2.colors.error,
+    },
+    fieldDisabled: {
+      opacity: 0.6,
+    },
+    errorText: {
+      marginTop: t2.spacing.xs,
     },
     pickerRow: {
       flexDirection: 'row',
@@ -70,12 +82,28 @@ export function TimePicker({label, value, onChange}: TimePickerProps): React.JSX
       {label ? (
         <AppText variant="label" color="textSecondary" style={styles.label}>
           {label}
+          {required ? <AppText variant="label" color="error"> *</AppText> : null}
         </AppText>
       ) : null}
-      <Pressable onPress={() => setOpen(true)} style={styles.field}>
-        <AppText color={value ? 'text' : 'textMuted'}>{value ?? t('common_selectTime')}</AppText>
+      <Pressable
+        onPress={
+          disabled
+            ? undefined
+            : () => {
+                setTime(parse(value));
+                setOpen(true);
+              }
+        }
+        style={[styles.field, error ? styles.fieldError : null, disabled ? styles.fieldDisabled : null]}>
+        <AppText color={value ? 'text' : 'textMuted'}>{value || t('common_selectTime')}</AppText>
         <Icon name="clock" size={18} color={theme.colors.textMuted} />
       </Pressable>
+      {/* A blank `error` just marks the field red — e.g. when one message below a start/end pair covers both. */}
+      {error?.trim() ? (
+        <AppText variant="caption" color="error" style={styles.errorText}>
+          {error}
+        </AppText>
+      ) : null}
 
       <CustomBottomSheet visible={open} onClose={() => setOpen(false)} title={label ?? t('common_selectTime')}>
         <View style={styles.pickerRow}>

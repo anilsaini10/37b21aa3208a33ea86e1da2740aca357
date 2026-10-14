@@ -25,10 +25,11 @@ type Nav = NativeStackNavigationProp<TeacherStackParamList>;
 const MENU: {
   icon: string;
   titleKey: TranslationKey;
-  route: 'MyProfile' | 'MySchedule' | 'Announcements' | 'Events' | 'Chat' | 'Leave' | 'MyLeave' | 'MyAttendance' | 'ChangePassword';
+  route: 'MyProfile' | 'MySchedule' | 'TeacherExams' | 'Announcements' | 'Events' | 'Chat' | 'Leave' | 'MyLeave' | 'MyAttendance' | 'ChangePassword';
 }[] = [
   {icon: 'profile', titleKey: 'teacherMyProfile_title', route: ScreenNames.MyProfile},
   {icon: 'timetable', titleKey: 'teacherProfile_timetable', route: ScreenNames.MySchedule},
+  {icon: 'exam', titleKey: 'teacherExams_title', route: ScreenNames.TeacherExams},
   {icon: 'attendance', titleKey: 'teacherProfile_myAttendance', route: ScreenNames.MyAttendance},
   {icon: 'announcement', titleKey: 'teacherProfile_announcements', route: ScreenNames.Announcements},
   {icon: 'event', titleKey: 'eventsManage_headerTitle', route: ScreenNames.Events},

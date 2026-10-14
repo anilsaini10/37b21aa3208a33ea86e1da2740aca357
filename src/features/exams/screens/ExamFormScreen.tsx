@@ -186,6 +186,9 @@ export function ExamFormScreen(): React.JSX.Element {
     const onError = (e: Error & {code?: string}): void => {
       if (e.code === 'INVALID_DATE_RANGE') {
         setDateRangeError(t('examForm_invalidDateRangeServer'));
+      } else if (e.code === 'EXAM_SCHEDULE_OUTSIDE_RANGE') {
+        // Some papers already fall outside the new dates — they have to be moved first.
+        setDateRangeError(t('examForm_scheduleOutsideRange'));
       } else {
         setSubmitError(e.message);
       }

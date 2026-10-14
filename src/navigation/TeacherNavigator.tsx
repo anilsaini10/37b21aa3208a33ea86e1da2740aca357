@@ -32,6 +32,8 @@ import {AnnouncementsScreen} from '../features/communication/screens/Announcemen
 import {EventsScreen} from '../features/events/screens/EventsScreen';
 import {NotificationsScreen} from '../features/communication/screens/NotificationsScreen';
 import {ChangePasswordScreen} from '../features/auth/screens/ChangePasswordScreen';
+import {TeacherExamsScreen} from '../features/exams/screens/TeacherExamsScreen';
+import {TeacherPaperMarksScreen} from '../features/exams/screens/TeacherPaperMarksScreen';
 
 const Tab = createBottomTabNavigator<TeacherTabParamList>();
 const Stack = createNativeStackNavigator<TeacherStackParamList>();
@@ -86,6 +88,8 @@ export function TeacherNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.Events} component={EventsScreen} />
       <Stack.Screen name={ScreenNames.Notifications} component={NotificationsScreen} />
       <Stack.Screen name={ScreenNames.ChangePassword} component={ChangePasswordScreen} />
+      <Stack.Screen name={ScreenNames.TeacherExams} component={TeacherExamsScreen} />
+      <Stack.Screen name={ScreenNames.TeacherPaperMarks} component={TeacherPaperMarksScreen} />
     </Stack.Navigator>
   );
 }

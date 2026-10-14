@@ -3,8 +3,10 @@
  *
  * Distinct from `teacherAttendance.service.ts` (a teacher marking their own class's
  * students) — this is the admin marking attendance FOR teachers/staff themselves.
- * Marking is a bulk upsert: one call per day covers every teacher, and re-submitting
- * the same teacher+date just overwrites the previous status.
+ * Each teacher-day holds two independent markings: the teacher's own check-in
+ * (teacherStatus) and the admin's (adminStatus); `status` is the final one —
+ * the admin's if set, else the teacher's. Admin marking (bulk POST or PATCH) only
+ * ever sets the admin side; teachers' check-ins are kept.
  */
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {axiosClient} from '../../core/api/axiosClient';
@@ -18,7 +20,12 @@ export interface StaffAttendanceFilters {
   date?: string;
   from?: string;
   to?: string;
+  /** Filters the FINAL status. */
   status?: AttendanceStatusCode;
+  /** Filters the teacher's own check-in status. */
+  teacherStatus?: AttendanceStatusCode;
+  /** Filters the admin's marking. */
+  adminStatus?: AttendanceStatusCode;
   teacherId?: string;
 }
 
@@ -90,8 +97,11 @@ function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-/** Cheap proxy for "has today's bulk mark already happened" — the mark screen always submits every teacher's status in one shot, so any record for today means it's done. */
+/**
+ * "Has the admin marked today yet?" — teachers' own check-ins also create records,
+ * so a record existing isn't enough; any record with an admin status means it's done.
+ */
 export const useIsTodayStaffAttendanceMarked = () => {
-  const {data, isLoading} = useStaffAttendanceList({date: todayIso(), page: 1, pageSize: 1});
-  return {isMarked: (data?.total ?? 0) > 0, isLoading};
+  const {data, isLoading} = useStaffAttendanceList({date: todayIso(), page: 1, pageSize: 100});
+  return {isMarked: (data?.items ?? []).some(r => r.adminStatus != null), isLoading};
 };

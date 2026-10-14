@@ -1,7 +1,13 @@
-/** Mark Staff Attendance (Admin) — pick a date, quick-tap each teacher's status, save in bulk. Re-opening the same date pre-fills from existing records, so this doubles as "fix today's mistake." */
+/**
+ * Mark Staff Attendance (Admin) — pick a date, quick-tap each teacher's status, save in bulk.
+ *
+ * This sets the ADMIN status, which becomes the final one; teachers' own check-ins are kept.
+ * Each teacher pre-fills from the admin's existing mark, else their own check-in (so checked-in
+ * teachers default to Present), else stays unset. Only new / changed marks are submitted.
+ */
 import React, {useEffect, useState} from 'react';
 import {Pressable, View, ScrollView} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
@@ -19,11 +25,13 @@ import {
   Row,
   Spacer,
   Divider,
+  Icon,
 } from '../../../shared/components';
+import {formatTime12h} from '../../../core/utils/format';
 import {useTeachers} from '../../teachers/teachers.service';
 import {useStaffAttendanceList, useMarkStaffAttendance} from '../adminTeacherAttendance.service';
 import type {AdminStackParamList} from '../../../navigation/types';
-import type {AttendanceStatusCode} from '../../../shared/types';
+import type {AttendanceStatusCode, StaffAttendanceRecord} from '../../../shared/types';
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
@@ -37,8 +45,10 @@ const STATUS_TONE: Record<AttendanceStatusCode, 'success' | 'error' | 'warning' 
   HOLIDAY: 'textMuted',
 };
 
+/** Local "YYYY-MM-DD" (toISOString is UTC — early morning in IST it would still be yesterday). */
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 export function MarkStaffAttendanceScreen(): React.JSX.Element {
@@ -46,12 +56,14 @@ export function MarkStaffAttendanceScreen(): React.JSX.Element {
   const navigation = useNavigation<Nav>();
   const {t} = useLanguage();
 
-  const [selectedDate, setSelectedDate] = useState(todayIso());
+  const route = useRoute<RouteProp<AdminStackParamList, 'MarkStaffAttendance'>>();
+  const [selectedDate, setSelectedDate] = useState(route.params?.date ?? todayIso());
+  /** Teacher id → status chosen (or pre-filled); absent = not set, won't be submitted. */
   const [statuses, setStatuses] = useState<Record<string, AttendanceStatusCode>>({});
   const [result, setResult] = useState<{variant: 'success' | 'error'; message?: string} | null>(null);
   const [search, setSearch] = useState('');
 
-  const {data: teachersPage, isLoading: teachersLoading, isError, error, refetch} = useTeachers({pageSize: 100});
+  const {data: teachersPage, isLoading: teachersLoading, isError, error, refetch} = useTeachers({status: 'ACTIVE', pageSize: 100});
   const {data: existing, isLoading: existingLoading} = useStaffAttendanceList({
     date: selectedDate,
     pageSize: 100,
@@ -94,16 +106,27 @@ export function MarkStaffAttendanceScreen(): React.JSX.Element {
     },
   }));
 
+  const recordByTeacher = new Map<string, StaffAttendanceRecord>((existing?.items ?? []).map(r => [r.teacherId, r]));
+
   useEffect(() => {
     if (teachersPage && !existingLoading) {
       const next: Record<string, AttendanceStatusCode> = {};
       teachersPage.items.forEach(tch => {
         const record = existing?.items.find(r => r.teacherId === tch.id);
-        next[tch.id] = record?.status ?? 'PRESENT';
+        const prefill = record?.adminStatus ?? record?.teacherStatus;
+        if (prefill) {
+          next[tch.id] = prefill;
+        }
       });
       setStatuses(next);
     }
   }, [selectedDate, teachersPage, existing, existingLoading]);
+
+  /** Only marks that are new or differ from the admin's current one — re-sending unchanged marks would just re-stamp who/when. */
+  const changedEntries = Object.entries(statuses).filter(
+    ([teacherId, status]) => recordByTeacher.get(teacherId)?.adminStatus !== status,
+  );
+  const unsetCount = teachers.filter(tch => !statuses[tch.id]).length;
 
   const setStatus = (teacherId: string, status: AttendanceStatusCode): void => {
     setStatuses(prev => ({...prev, [teacherId]: status}));
@@ -123,7 +146,7 @@ export function MarkStaffAttendanceScreen(): React.JSX.Element {
     markAttendance.mutate(
       {
         date: selectedDate,
-        records: Object.entries(statuses).map(([teacherId, status]) => ({teacherId, status})),
+        records: changedEntries.map(([teacherId, status]) => ({teacherId, status})),
       },
       {
         onSuccess: () => setResult({variant: 'success'}),
@@ -137,6 +160,12 @@ export function MarkStaffAttendanceScreen(): React.JSX.Element {
       <CustomHeader title={t('staffAttendance_markTitle')} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <DatePicker label={t('markAttendance_date')} value={selectedDate} onChange={setSelectedDate} />
+        <Row gap={6} align="flex-start" style={{marginBottom: theme.spacing.md}}>
+          <Icon name="info" size={14} color={theme.colors.info} />
+          <AppText variant="caption" color="textSecondary" style={{flex: 1}}>
+            {t('staffAttendance_markHelp')}
+          </AppText>
+        </Row>
 
         {isError ? (
           <EmptyState
@@ -194,6 +223,21 @@ export function MarkStaffAttendanceScreen(): React.JSX.Element {
                         <AppText variant="caption" color="textSecondary">
                           {t('staffAttendance_employeeIdLabel', {employeeId: tch.employeeId})}
                         </AppText>
+                        {/* Who already checked in themselves — so the admin knows before marking. */}
+                        {(() => {
+                          const rec = recordByTeacher.get(tch.id);
+                          return rec?.teacherStatus ? (
+                            <AppText variant="label" color="success" numberOfLines={1}>
+                              {rec.teacherMarkedAt
+                                ? t('staffAttendance_checkedInAt', {time: formatTime12h(rec.teacherMarkedAt)})
+                                : t('staffAttendance_selfLine', {status: STATUS_LABEL[rec.teacherStatus], time: '—'})}
+                            </AppText>
+                          ) : (
+                            <AppText variant="label" color="textMuted">
+                              {t('staffAttendance_notCheckedIn')}
+                            </AppText>
+                          );
+                        })()}
                       </View>
                       <Row gap={4}>
                         {STATUS_CODES.map(code => {
@@ -225,10 +269,20 @@ export function MarkStaffAttendanceScreen(): React.JSX.Element {
             )}
 
             <Spacer size={16} />
+            {unsetCount > 0 ? (
+              <AppText variant="caption" color="textMuted" center style={{marginBottom: theme.spacing.sm}}>
+                {t('staffAttendance_unsetCount', {count: unsetCount})}
+              </AppText>
+            ) : null}
             <CustomButton
-              title={t('markAttendance_saveAttendance')}
+              title={
+                changedEntries.length > 0
+                  ? t('staffAttendance_saveCount', {count: changedEntries.length})
+                  : t('markAttendance_saveAttendance')
+              }
               iconLeft="check"
               loading={markAttendance.isPending}
+              disabled={changedEntries.length === 0}
               onPress={onSave}
             />
           </>

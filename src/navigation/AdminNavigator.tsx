@@ -33,6 +33,9 @@ import {ExamFormScreen} from '../features/exams/screens/ExamFormScreen';
 import {ExamClassesScreen} from '../features/exams/screens/ExamClassesScreen';
 import {ExamReportScreen} from '../features/exams/screens/ExamReportScreen';
 import {StudentMarksScreen} from '../features/exams/screens/StudentMarksScreen';
+import {PaperFormScreen} from '../features/exams/screens/PaperFormScreen';
+import {DateSheetBuilderScreen} from '../features/exams/screens/DateSheetBuilderScreen';
+import {PaperMarksScreen} from '../features/exams/screens/PaperMarksScreen';
 import {ReportsScreen} from '../features/reports/screens/ReportsScreen';
 import {TransportScreen} from '../features/transport/screens/TransportScreen';
 import {LibraryScreen} from '../features/library/screens/LibraryScreen';
@@ -101,6 +104,9 @@ export function AdminNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.ExamClasses} component={ExamClassesScreen} />
       <Stack.Screen name={ScreenNames.ExamReport} component={ExamReportScreen} />
       <Stack.Screen name={ScreenNames.StudentMarks} component={StudentMarksScreen} />
+      <Stack.Screen name={ScreenNames.PaperForm} component={PaperFormScreen} />
+      <Stack.Screen name={ScreenNames.DateSheetBuilder} component={DateSheetBuilderScreen} />
+      <Stack.Screen name={ScreenNames.PaperMarks} component={PaperMarksScreen} />
       <Stack.Screen name={ScreenNames.Announcements} component={AnnouncementsScreen} />
       <Stack.Screen name={ScreenNames.AnnouncementForm} component={AnnouncementFormScreen} />
       <Stack.Screen name={ScreenNames.Events} component={EventsScreen} />

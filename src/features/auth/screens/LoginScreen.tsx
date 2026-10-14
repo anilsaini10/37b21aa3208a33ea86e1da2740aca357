@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, Pressable, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
+import {ActivityIndicator, Image, Pressable, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Svg, {Defs, LinearGradient, Rect, Stop} from 'react-native-svg';
 import {lightTheme, ThemeContext, useTheme} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
-import {AppText, AriseLogo, CustomCard, CustomInput, CustomButton, Icon, Spacer} from '../../../shared/components';
+import {AppText, CustomCard, CustomInput, CustomButton, Icon, Spacer} from '../../../shared/components';
 import {useAuthStore} from '../authStore';
 import {authApi} from '../authApi';
 import {interpretOtpError} from '../otpErrorHandling';
@@ -14,6 +14,7 @@ import type {AuthScreenProps} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 
 const LOGO_SIZE = 88;
+const LOGO_ICON = require('../../../assets/images/logo_icons.png');
 
 type LoginMode = 'password' | 'otp';
 
@@ -191,8 +192,9 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
 
           <View style={styles.brand}>
             <View style={styles.logoRing}>
-              <View style={[styles.logoCircle, {backgroundColor: theme.colors.surface}]}>
-                <AriseLogo size={48} />
+              {/* Silver-on-transparent mark — sits on a black badge so it stays visible (matches the app icon / splash). */}
+              <View style={styles.logoCircle}>
+                <Image source={LOGO_ICON} style={styles.logoImage} resizeMode="contain" />
               </View>
             </View>
             <Spacer size={18} />
@@ -461,6 +463,11 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     shadowOffset: {width: 0, height: 6},
     elevation: 4,
+    backgroundColor: '#000000',
+  },
+  logoImage: {
+    width: LOGO_SIZE * 0.62,
+    height: LOGO_SIZE * 0.62,
   },
   demoHint: {
     padding: 14,
