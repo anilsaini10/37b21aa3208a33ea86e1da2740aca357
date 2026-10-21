@@ -34,6 +34,7 @@ type NoParamRoute =
   | 'Staff'
   | 'Attendance'
   | 'Exams'
+  | 'AcademicCalendar'
   | 'Announcements'
   | 'Leave'
   | 'Events'
@@ -60,6 +61,7 @@ const MODULES: ModuleItem[] = [
   {labelKey: 'moreScreen_staff', icon: 'staff', route: ScreenNames.Staff},
   {labelKey: 'moreScreen_attendance', icon: 'attendance', route: ScreenNames.Attendance},
   {labelKey: 'moreScreen_exams', icon: 'exam', route: ScreenNames.Exams},
+  {labelKey: 'calendar_title', icon: 'calendar', route: ScreenNames.AcademicCalendar},
   {labelKey: 'moreScreen_announcements', icon: 'announcement', route: ScreenNames.Announcements},
   {labelKey: 'moreScreen_leave', icon: 'calendar', route: ScreenNames.Leave},
   {labelKey: 'moreScreen_events', icon: 'event', route: ScreenNames.Events},

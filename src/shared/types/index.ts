@@ -9,3 +9,4 @@ export * from './leave';
 export * from './operations';
 export * from './dashboard';
 export * from './school';
+export * from './academicCalendar';

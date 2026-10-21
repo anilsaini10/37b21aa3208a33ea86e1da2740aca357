@@ -55,6 +55,7 @@ function TeacherTabs(): React.JSX.Element {
         tabBarActiveTintColor: theme.colors.tabActive,
         tabBarInactiveTintColor: theme.colors.tabInactive,
         tabBarStyle: floatingTabBarStyle(theme, insets),
+        tabBarLabelStyle: {fontSize: 11 * theme.typography.scale},
         tabBarIcon: ({color}) => <Icon name={TAB_ICON[route.name]} size={22} color={color} />,
       })}>
       <Tab.Screen name={ScreenNames.Dashboard} component={TeacherDashboardScreen} />

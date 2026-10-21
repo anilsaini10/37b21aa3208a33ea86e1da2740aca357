@@ -433,6 +433,13 @@ export function TeacherDetailScreen(): React.JSX.Element {
               navigation.navigate(ScreenNames.StaffAttendanceRegister, {teacherId, teacherName: teacher.name})
             }
           />
+          <Spacer size={theme.spacing.sm} />
+          <CustomButton
+            title={t('availability_teacherButton')}
+            iconLeft="clock"
+            variant="outline"
+            onPress={() => navigation.navigate(ScreenNames.TeacherFreeSlots, {teacherId, teacherName: teacher.name})}
+          />
 
           <SectionTitle title={t('teacherMyProfile_classTeacherSection')} icon="class" />
           {teacher.classTeacherOf.length === 0 ? (

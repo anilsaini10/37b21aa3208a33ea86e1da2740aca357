@@ -10,11 +10,9 @@ import {ScreenNames} from './ScreenNames';
 import {floatingTabBarStyle} from './floatingTabBar';
 
 import {AdminDashboardScreen} from '../features/dashboard/screens/AdminDashboardScreen';
-import {StudentsWiseClassListScreen} from '../features/students/screens/StudentsWiseClassList';
 import {StudentsListScreen} from '../features/students/screens/StudentsListScreen';
 import {StudentDetailScreen} from '../features/students/screens/StudentDetailScreen';
 import {StudentFormScreen} from '../features/students/screens/StudentFormScreen';
-import {TeachersListScreen} from '../features/teachers/screens/TeachersListScreen';
 import {TeacherFormScreen} from '../features/teachers/screens/TeacherFormScreen';
 import {TeacherDetailScreen} from '../features/teachers/screens/TeacherDetailScreen';
 import {TeacherEditScreen} from '../features/teachers/screens/TeacherEditScreen';
@@ -36,6 +34,10 @@ import {StudentMarksScreen} from '../features/exams/screens/StudentMarksScreen';
 import {PaperFormScreen} from '../features/exams/screens/PaperFormScreen';
 import {DateSheetBuilderScreen} from '../features/exams/screens/DateSheetBuilderScreen';
 import {PaperMarksScreen} from '../features/exams/screens/PaperMarksScreen';
+import {AcademicCalendarScreen} from '../features/calendar/screens/AcademicCalendarScreen';
+import {CalendarImportScreen} from '../features/calendar/screens/CalendarImportScreen';
+import {TeacherAvailabilityScreen} from '../features/teachers/screens/TeacherAvailabilityScreen';
+import {TeacherFreeSlotsScreen} from '../features/teachers/screens/TeacherFreeSlotsScreen';
 import {ReportsScreen} from '../features/reports/screens/ReportsScreen';
 import {TransportScreen} from '../features/transport/screens/TransportScreen';
 import {LibraryScreen} from '../features/library/screens/LibraryScreen';
@@ -48,6 +50,8 @@ import {SubjectsManageScreen} from '../features/subjects/screens/SubjectsManageS
 import {AdminTimetableScreen} from '../features/timetable/screens/AdminTimetableScreen';
 import {PeriodFormScreen} from '../features/timetable/screens/PeriodFormScreen';
 import {TeacherScheduleScreen} from '../features/timetable/screens/TeacherScheduleScreen';
+import {StudentsTabScreen} from '../features/admin/screens/StudentsTabScreen';
+import {TeachersTabScreen} from '../features/admin/screens/TeachersTabScreen';
 import {MoreScreen} from '../features/admin/screens/MoreScreen';
 import {AdminProfileScreen} from '../features/admin/screens/AdminProfileScreen';
 import {ChangePasswordScreen} from '../features/auth/screens/ChangePasswordScreen';
@@ -76,11 +80,13 @@ function AdminTabs(): React.JSX.Element {
         tabBarActiveTintColor: theme.colors.tabActive,
         tabBarInactiveTintColor: theme.colors.tabInactive,
         tabBarStyle: floatingTabBarStyle(theme, insets),
-        tabBarIcon: ({color}) => <Icon name={TAB_ICON[route.name]} size={22} color={color} />,
+        // Slightly larger than the library default (~10) — scales with the user's font-size setting.
+        tabBarLabelStyle: {fontSize: 11 * theme.typography.scale},
+        tabBarIcon: ({color}) => <Icon name={TAB_ICON[route.name]} size={24} color={color} />,
       })}>
       <Tab.Screen name={ScreenNames.Dashboard} component={AdminDashboardScreen} />
-      <Tab.Screen name={ScreenNames.Students} component={StudentsWiseClassListScreen} />
-      <Tab.Screen name={ScreenNames.Teachers} component={TeachersListScreen} />
+      <Tab.Screen name={ScreenNames.Students} component={StudentsTabScreen} />
+      <Tab.Screen name={ScreenNames.Teachers} component={TeachersTabScreen} />
       <Tab.Screen name={ScreenNames.More} component={MoreScreen} />
     </Tab.Navigator>
   );
@@ -107,6 +113,10 @@ export function AdminNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.PaperForm} component={PaperFormScreen} />
       <Stack.Screen name={ScreenNames.DateSheetBuilder} component={DateSheetBuilderScreen} />
       <Stack.Screen name={ScreenNames.PaperMarks} component={PaperMarksScreen} />
+      <Stack.Screen name={ScreenNames.AcademicCalendar} component={AcademicCalendarScreen} />
+      <Stack.Screen name={ScreenNames.CalendarImport} component={CalendarImportScreen} />
+      <Stack.Screen name={ScreenNames.TeacherAvailability} component={TeacherAvailabilityScreen} />
+      <Stack.Screen name={ScreenNames.TeacherFreeSlots} component={TeacherFreeSlotsScreen} />
       <Stack.Screen name={ScreenNames.Announcements} component={AnnouncementsScreen} />
       <Stack.Screen name={ScreenNames.AnnouncementForm} component={AnnouncementFormScreen} />
       <Stack.Screen name={ScreenNames.Events} component={EventsScreen} />

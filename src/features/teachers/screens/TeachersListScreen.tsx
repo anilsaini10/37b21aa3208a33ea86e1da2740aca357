@@ -31,7 +31,12 @@ const ALL_SUBJECTS_VALUE = '';
 const ALL_CLASSES_VALUE = '';
 const SEARCH_DEBOUNCE_MS = 350;
 
-export function TeachersListScreen(): React.JSX.Element {
+export function TeachersListScreen({
+  topSlot,
+}: {
+  /** Rendered right under the header — e.g. the Teachers / Attendance switch of the Teachers tab. */
+  topSlot?: React.ReactNode;
+} = {}): React.JSX.Element {
   const styles = useThemedStyles(theme => ({
     searchBarWrap: {
       paddingHorizontal: theme.spacing.lg,
@@ -106,10 +111,11 @@ export function TeachersListScreen(): React.JSX.Element {
           ...(isTodayMarked
             ? []
             : [{icon: 'attendance', onPress: () => navigation.navigate(ScreenNames.MarkStaffAttendance)}]),
-          {icon: 'calendar', onPress: () => navigation.navigate(ScreenNames.StaffAttendanceRegister)},
+          {icon: 'clock', onPress: () => navigation.navigate(ScreenNames.TeacherAvailability)},
           {icon: 'add', onPress: () => navigation.navigate(ScreenNames.TeacherForm), circle: true},
         ]}
       />
+      {topSlot}
       <View style={styles.searchBarWrap}>
         <SearchBar
           value={search}

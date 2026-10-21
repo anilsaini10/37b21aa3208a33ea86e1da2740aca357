@@ -30,7 +30,12 @@ type StatusFilter = Extract<Status, 'active' | 'inactive'> | 'all';
 
 const ALL_SECTIONS_VALUE = '';
 
-export function StudentsWiseClassListScreen(): React.JSX.Element {
+export function StudentsWiseClassListScreen({
+  topSlot,
+}: {
+  /** Rendered right under the header — e.g. the Students / Attendance switch of the Students tab. */
+  topSlot?: React.ReactNode;
+} = {}): React.JSX.Element {
   const {theme} = useTheme();
   const styles = useThemedStyles(t2 => ({
     scrollContent: {
@@ -114,6 +119,7 @@ export function StudentsWiseClassListScreen(): React.JSX.Element {
     return (
       <Screen padded={false}>
         <CustomHeader title={t('studentsWiseClassList_headerTitle')} subtitle={t('studentsWiseClassList_subtitle')} />
+        {topSlot}
         <EmptyState
           icon="warning"
           title={t('common_somethingWentWrong')}
@@ -132,6 +138,7 @@ export function StudentsWiseClassListScreen(): React.JSX.Element {
   return (
     <Screen padded={false}>
       <CustomHeader title={t('studentsWiseClassList_headerTitle')} subtitle={t('studentsWiseClassList_subtitle')} />
+      {topSlot}
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <AppText variant="caption" color="textSecondary">
           {t('studentsWiseClassList_totalClassesLabel')}:{' '}

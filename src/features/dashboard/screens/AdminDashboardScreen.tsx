@@ -2,6 +2,7 @@
 import React from 'react';
 import {View, ScrollView, RefreshControl} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import {useQueryClient} from '@tanstack/react-query';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
@@ -26,6 +27,7 @@ import {capitalize} from '../../../shared/helpers';
 import {useAuthStore} from '../../auth/authStore';
 import {useAdminDashboard} from '../dashboard.service';
 import {useAdminDashboardStats} from '../adminDashboard.service';
+import {AdminDashboardCharts} from '../components/AdminDashboardCharts';
 import {useAdminEvents} from '../../events/events.service';
 import {useAdminAnnouncements} from '../../communication/announcements.service';
 import {useUnreadNotificationsCount} from '../../communication/notifications.service';
@@ -71,6 +73,7 @@ export function AdminDashboardScreen(): React.JSX.Element {
   } = useAdminAnnouncements({page: 1, pageSize: 20});
   const {isMarked: isTodayMarked} = useIsTodayStaffAttendanceMarked();
   const {data: unreadCount} = useUnreadNotificationsCount();
+  const qc = useQueryClient();
   const {t} = useLanguage();
 
   if (
@@ -123,6 +126,9 @@ export function AdminDashboardScreen(): React.JSX.Element {
               refetchStats();
               refetchEvents();
               refetchAnnouncements();
+              // Chart data (today's student + teacher attendance).
+              qc.invalidateQueries({queryKey: ['adminAttendanceClasses']});
+              qc.invalidateQueries({queryKey: ['staffAttendance']});
             }}
           />
         }>
@@ -135,6 +141,9 @@ export function AdminDashboardScreen(): React.JSX.Element {
         />
 
         <StatGrid stats={stats} />
+
+        {/* Today's attendance donuts, school at a glance and attendance by class. */}
+        <AdminDashboardCharts stats={statsData} />
 
         {!isTodayMarked ? (
           <CustomCard 

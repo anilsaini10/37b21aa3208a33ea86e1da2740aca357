@@ -27,7 +27,8 @@ import type {AttendanceCounts, ClassAttendanceSummary, TeacherAttendanceBreakdow
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
-type Tab = 'teacher' | 'students';
+export type AttendanceReportTab = 'teacher' | 'students';
+type Tab = AttendanceReportTab;
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
@@ -251,14 +252,22 @@ function ClassAttendanceCard({
   );
 }
 
-export function AttendanceReportScreen(): React.JSX.Element {
+export function AttendanceReportScreen({
+  embedded,
+  fixedTab,
+}: {
+  /** Rendered inside another screen (e.g. the Students tab) — no own header / safe-area wrapper. */
+  embedded?: boolean;
+  /** Show only this report and hide the Teacher / Students switch. */
+  fixedTab?: AttendanceReportTab;
+} = {}): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
   const {t} = useLanguage();
   const [fromDate, setFromDate] = useState(todayIso());
   const [toDate, setToDate] = useState(todayIso());
   const [singleDate, setSingleDate] = useState(todayIso());
-  const [tab, setTab] = useState<Tab>('teacher');
+  const [tab, setTab] = useState<Tab>(fixedTab ?? 'teacher');
 
   const {data: staffPage, isLoading: staffLoading} = useStaffAttendanceList({from: fromDate, to: toDate, pageSize: 100});
   const {data: classData, isLoading: classSummariesLoading} = useClassAttendanceSummaries(singleDate);
@@ -318,9 +327,7 @@ export function AttendanceReportScreen(): React.JSX.Element {
   const isTeacherLoading = staffLoading || !staffPage;
   const isStudentsLoading = classSummariesLoading || !classSummaries;
 
-  return (
-    <Screen padded={false}>
-      <CustomHeader title={t('attendanceReport_title')} onBack={() => navigation.goBack()} />
+  const body = (
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {tab === 'teacher' ? (
           <DateRangeFilter
@@ -337,6 +344,7 @@ export function AttendanceReportScreen(): React.JSX.Element {
           </CustomCard>
         )}
 
+        {fixedTab ? null : (
         <Row gap={theme.spacing.sm} style={styles.tabsRow}>
           {TABS.map(tabOption => {
             const active = tab === tabOption.value;
@@ -352,6 +360,7 @@ export function AttendanceReportScreen(): React.JSX.Element {
             );
           })}
         </Row>
+        )}
 
         {tab === 'teacher' ? (
           isTeacherLoading ? (
@@ -410,6 +419,15 @@ export function AttendanceReportScreen(): React.JSX.Element {
         )}
         <Spacer size={24} />
       </ScrollView>
+  );
+
+  if (embedded) {
+    return <View style={{flex: 1}}>{body}</View>;
+  }
+  return (
+    <Screen padded={false}>
+      <CustomHeader title={t('attendanceReport_title')} onBack={() => navigation.goBack()} />
+      {body}
     </Screen>
   );
 }

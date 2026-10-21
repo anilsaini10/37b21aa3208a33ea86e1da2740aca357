@@ -27,6 +27,7 @@ import {
 } from '../events.service';
 import type {AdminStackParamList} from '../../../navigation/types';
 import type {AnnouncementAudience, EventType} from '../../../shared/types';
+import {EVENT_TYPES, useEventTypeLabels} from '../eventTypes';
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
@@ -35,9 +36,10 @@ export function EventFormScreen(): React.JSX.Element {
   const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
   const route = useRoute<RouteProp<AdminStackParamList, 'EventForm'>>();
-  const {id, initial} = route.params ?? {};
+  const {id, initial, startDate: presetStartDate} = route.params ?? {};
 
   const {data: event, isLoading, isError, error, refetch} = useAdminEvent(id ?? '', initial);
+  const TYPE_LABEL = useEventTypeLabels();
   const createMutation = useCreateEvent();
   const updateMutation = useUpdateEvent();
 
@@ -45,7 +47,7 @@ export function EventFormScreen(): React.JSX.Element {
   const [description, setDescription] = useState('');
   const [eventType, setEventType] = useState<EventType>('OTHER');
   const [audience, setAudience] = useState<AnnouncementAudience>('ALL');
-  const [startDate, setStartDate] = useState<string | undefined>();
+  const [startDate, setStartDate] = useState<string | undefined>(presetStartDate);
   const [endDate, setEndDate] = useState<string | undefined>();
 
   const [titleError, setTitleError] = useState<string | undefined>();
@@ -115,8 +117,10 @@ export function EventFormScreen(): React.JSX.Element {
       if (startDate !== event.startDate.slice(0, 10)) {
         patch.startDate = startDate;
       }
-      if (endDate !== event.endDate.slice(0, 10)) {
-        patch.endDate = endDate;
+      // A cleared end date means "one day" — the server wants it equal to the start date then.
+      const effectiveEnd = endDate ?? startDate;
+      if (effectiveEnd !== event.endDate.slice(0, 10)) {
+        patch.endDate = effectiveEnd;
       }
       if (Object.keys(patch).length === 0) {
         navigation.goBack();
@@ -182,13 +186,7 @@ export function EventFormScreen(): React.JSX.Element {
         <Select
           label={t('eventForm_eventType')}
           value={eventType}
-          options={[
-            {label: t('eventForm_typeHoliday'), value: 'HOLIDAY'},
-            {label: t('eventForm_typeExam'), value: 'EXAM'},
-            {label: t('eventForm_typeMeeting'), value: 'MEETING'},
-            {label: t('eventForm_typeActivity'), value: 'ACTIVITY'},
-            {label: t('eventForm_typeOther'), value: 'OTHER'},
-          ]}
+          options={EVENT_TYPES.map(type => ({label: TYPE_LABEL[type], value: type}))}
           onChange={val => setEventType(val as EventType)}
           required
         />
@@ -219,7 +217,7 @@ export function EventFormScreen(): React.JSX.Element {
           ) : null}
         </Row>
         <Spacer size={theme.spacing.xs} />
-        <DatePicker value={endDate} onChange={setEndDate} />
+        <DatePicker value={endDate} onChange={setEndDate} minDate={startDate} />
         <AppText variant="caption" color="textMuted" style={{marginTop: -theme.spacing.sm, marginBottom: theme.spacing.md}}>
           {t('eventForm_endDateHint')}
         </AppText>

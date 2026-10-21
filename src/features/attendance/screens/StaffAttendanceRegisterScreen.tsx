@@ -66,7 +66,12 @@ interface DayRow {
   record: StaffAttendanceRecord | null;
 }
 
-export function StaffAttendanceRegisterScreen(): React.JSX.Element {
+export function StaffAttendanceRegisterScreen({
+  embedded,
+}: {
+  /** Rendered inside another screen (e.g. the Teachers tab) — no own header / safe-area wrapper. */
+  embedded?: boolean;
+} = {}): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
@@ -244,13 +249,8 @@ export function StaffAttendanceRegisterScreen(): React.JSX.Element {
     />
   );
 
-  return (
-    <Screen padded={false} style={theme.dark ? undefined : {backgroundColor: '#F5F7FB'}}>
-      <CustomHeader
-        title={route.params?.teacherName ?? t('staffAttendance_registerTitle')}
-        onBack={() => navigation.goBack()}
-        actions={[{icon: 'attendance', onPress: () => navigation.navigate(ScreenNames.MarkStaffAttendance, {date: dayDate})}]}
-      />
+  const content = (
+    <>
 
       <View style={styles.segmentBar}>
         {(
@@ -511,6 +511,20 @@ export function StaffAttendanceRegisterScreen(): React.JSX.Element {
           </View>
         </Row>
       </CustomModal>
+    </>
+  );
+
+  if (embedded) {
+    return <View style={{flex: 1}}>{content}</View>;
+  }
+  return (
+    <Screen padded={false} style={theme.dark ? undefined : {backgroundColor: '#F5F7FB'}}>
+      <CustomHeader
+        title={route.params?.teacherName ?? t('staffAttendance_registerTitle')}
+        onBack={() => navigation.goBack()}
+        actions={[{icon: 'attendance', onPress: () => navigation.navigate(ScreenNames.MarkStaffAttendance, {date: dayDate})}]}
+      />
+      {content}
     </Screen>
   );
 }

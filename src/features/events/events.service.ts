@@ -125,7 +125,10 @@ export const useCreateEvent = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateEventInput) => eventsApi.create(input),
-    onSuccess: () => qc.invalidateQueries({queryKey: ['adminEvents']}),
+    onSuccess: () => {
+      qc.invalidateQueries({queryKey: ['adminEvents']});
+      qc.invalidateQueries({queryKey: ['academicCalendar']});
+    },
   });
 };
 
@@ -136,6 +139,7 @@ export const useUpdateEvent = () => {
     onSuccess: (_data, {id}) => {
       qc.invalidateQueries({queryKey: ['adminEvents']});
       qc.invalidateQueries({queryKey: ['adminEvent', id]});
+      qc.invalidateQueries({queryKey: ['academicCalendar']});
     },
   });
 };
@@ -144,6 +148,9 @@ export const useDeleteEvent = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => eventsApi.remove(id),
-    onSuccess: () => qc.invalidateQueries({queryKey: ['adminEvents']}),
+    onSuccess: () => {
+      qc.invalidateQueries({queryKey: ['adminEvents']});
+      qc.invalidateQueries({queryKey: ['academicCalendar']});
+    },
   });
 };

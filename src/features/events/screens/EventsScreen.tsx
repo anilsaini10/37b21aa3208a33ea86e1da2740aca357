@@ -32,6 +32,7 @@ import {useEventsFeed, useDeleteEvent} from '../events.service';
 import {useAuthStore} from '../../auth/authStore';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {AdminEvent, AnnouncementAudience, EventType} from '../../../shared/types';
+import {EVENT_TYPES, EVENT_TYPE_ICON, EVENT_TYPE_TONE, useEventTypeLabels} from '../eventTypes';
 
 /** Loosely typed on purpose — this screen is registered in three differently-typed
  * stacks (Admin/Teacher/Parent); only Admin's stack actually has `EventForm`. */
@@ -39,22 +40,6 @@ type LooseNav = {navigate: (route: string, params?: object) => void; goBack: () 
 
 const ALL_FILTER_VALUE = '';
 const SEARCH_DEBOUNCE_MS = 350;
-
-const EVENT_TYPE_ICON: Record<EventType, string> = {
-  HOLIDAY: 'sun',
-  EXAM: 'exam',
-  MEETING: 'chat',
-  ACTIVITY: 'star',
-  OTHER: 'event',
-};
-
-const EVENT_TYPE_TONE: Record<EventType, BadgeTone> = {
-  HOLIDAY: 'warning',
-  EXAM: 'error',
-  MEETING: 'info',
-  ACTIVITY: 'success',
-  OTHER: 'neutral',
-};
 
 const AUDIENCE_TONE: Record<AnnouncementAudience, BadgeTone> = {
   ALL: 'info',
@@ -135,27 +120,16 @@ export function EventsScreen(): React.JSX.Element {
     },
   }));
 
+  const TYPE_LABEL = useEventTypeLabels();
   const TYPE_TABS: {label: string; value: '' | EventType}[] = [
     {label: t('eventsManage_tabAll'), value: ALL_FILTER_VALUE},
-    {label: t('eventForm_typeHoliday'), value: 'HOLIDAY'},
-    {label: t('eventForm_typeExam'), value: 'EXAM'},
-    {label: t('eventForm_typeMeeting'), value: 'MEETING'},
-    {label: t('eventForm_typeActivity'), value: 'ACTIVITY'},
-    {label: t('eventForm_typeOther'), value: 'OTHER'},
+    ...EVENT_TYPES.map(type => ({label: TYPE_LABEL[type], value: type})),
   ];
 
   const AUDIENCE_LABEL: Record<AnnouncementAudience, string> = {
     ALL: t('announcementForm_audienceEveryone'),
     TEACHER: t('announcementForm_audienceTeachers'),
     PARENT: t('announcementForm_audienceParents'),
-  };
-
-  const TYPE_LABEL: Record<EventType, string> = {
-    HOLIDAY: t('eventForm_typeHoliday'),
-    EXAM: t('eventForm_typeExam'),
-    MEETING: t('eventForm_typeMeeting'),
-    ACTIVITY: t('eventForm_typeActivity'),
-    OTHER: t('eventForm_typeOther'),
   };
 
   const VIEW_TABS: {label: string; value: ViewFilter}[] = [

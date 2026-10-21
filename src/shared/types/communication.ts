@@ -151,7 +151,15 @@ export interface SchoolEvent {
   type: 'holiday' | 'exam' | 'function' | 'meeting' | 'sports';
 }
 
-export type EventType = 'HOLIDAY' | 'EXAM' | 'MEETING' | 'ACTIVITY' | 'OTHER';
+/** School holiday, government holiday and vacation close the school; the rest don't. */
+export type EventType =
+  | 'HOLIDAY'
+  | 'GOVERNMENT_HOLIDAY'
+  | 'VACATION'
+  | 'EXAM'
+  | 'MEETING'
+  | 'ACTIVITY'
+  | 'OTHER';
 
 /** School event (real backend) — admin manages via `/api/admin/events`. */
 export interface AdminEvent {

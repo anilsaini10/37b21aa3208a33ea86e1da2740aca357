@@ -6,7 +6,7 @@
  * backend stay on the form, under the field they belong to, with a "Clashes with …" card.
  */
 import React, {useEffect, useMemo, useState} from 'react';
-import {ScrollView, View} from 'react-native';
+import {Pressable, ScrollView, View} from 'react-native';
 import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme, useThemedStyles} from '../../../core/theme';
@@ -366,6 +366,23 @@ export function PaperFormScreen(): React.JSX.Element {
           error={fieldError('invigilatorId')}
         />
         {conflictFor('invigilatorId')}
+        {/* Find a substitute / free invigilator for this paper's slot. */}
+        {draft.date && draft.startTime && draft.endTime ? (
+          <Pressable
+            hitSlop={8}
+            style={{alignSelf: 'flex-start', marginTop: -theme.spacing.sm, marginBottom: theme.spacing.md}}
+            onPress={() =>
+              navigation.navigate(ScreenNames.TeacherAvailability, {
+                date: draft.date,
+                startTime: draft.startTime,
+                endTime: draft.endTime,
+              })
+            }>
+            <AppText variant="label" color="primary">
+              {t('availability_findFreeTeacher')}
+            </AppText>
+          </Pressable>
+        ) : null}
 
         {saveError && !saveError.field ? (
           <AppText variant="caption" color="error" style={{marginBottom: theme.spacing.sm}}>

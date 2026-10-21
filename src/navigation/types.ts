@@ -95,12 +95,21 @@ export type AdminStackParamList = {
   PaperForm: {examId: string; paper?: ExamPaperListItem; classId?: string};
   /** Build a whole class's date sheet in one go (bulk, all-or-nothing). */
   DateSheetBuilder: {examId: string; classId?: string};
+  /** Academic calendar — session year / month / list views of events + exams. */
+  AcademicCalendar: undefined;
+  /** Bulk import of calendar entries from an Excel sheet. */
+  CalendarImport: undefined;
+  /** "Find a free teacher" — optionally pre-filled with a date or weekday and a time slot. */
+  TeacherAvailability: {date?: string; day?: ScheduleDay; startTime?: string; endTime?: string} | undefined;
+  /** Free/busy timelines — one teacher's week (teacherId) or every teacher for one date / weekday. */
+  TeacherFreeSlots: {teacherId?: string; teacherName?: string; date?: string; day?: ScheduleDay} | undefined;
   /** View / override marks for one paper. */
   PaperMarks: {examId: string; scheduleId: string; paper?: ExamPaperListItem};
   Announcements: undefined;
   AnnouncementForm: {id?: string; initial?: AdminAnnouncement};
   Events: undefined;
-  EventForm: {id?: string; initial?: AdminEvent};
+  /** `startDate` pre-fills a new event (e.g. tapping a day on the academic calendar). */
+  EventForm: {id?: string; initial?: AdminEvent; startDate?: string};
   Transport: undefined;
   Library: undefined;
   Inventory: undefined;
