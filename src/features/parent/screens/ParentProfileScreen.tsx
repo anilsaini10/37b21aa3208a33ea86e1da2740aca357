@@ -15,12 +15,13 @@ import {
   Spacer,
 } from '../../../shared/components';
 import {useAuthStore} from '../../auth/authStore';
+import {TestPaymentButton} from '../../subscription/components/TestPaymentButton';
 import type {ParentStackParamList, ParentTabParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 
 type Nav = NativeStackNavigationProp<ParentStackParamList>;
 
-type MenuRoute = 'ChildProfile' | 'ChildTimetable' | 'Results' | 'Fees' | 'Announcements' | 'Events' | 'Chat' | 'Leave' | 'ChangePassword';
+type MenuRoute = 'ChildProfile' | 'ChildTimetable' | 'Results' | 'Fees' | 'Announcements' | 'Events' | 'Chat' | 'Leave' | 'AcademicCalendar' | 'SubscriptionPlans' | 'ChangePassword';
 
 const MENU: {labelKey: TranslationKey; icon: string; route: MenuRoute}[] = [
   {labelKey: 'parentProfile_childProfile', icon: 'student', route: ScreenNames.ChildProfile},
@@ -30,8 +31,10 @@ const MENU: {labelKey: TranslationKey; icon: string; route: MenuRoute}[] = [
   // {labelKey: 'parentFees_headerTitle', icon: 'fee', route: ScreenNames.Fees},
   {labelKey: 'teacherProfile_announcements', icon: 'announcement', route: ScreenNames.Announcements},
   {labelKey: 'eventsManage_headerTitle', icon: 'event', route: ScreenNames.Events},
+  {labelKey: 'calendar_title', icon: 'calendar', route: ScreenNames.AcademicCalendar},
   // {labelKey: 'parentProfile_chatWithTeacher', icon: 'chat', route: ScreenNames.Chat},
   {labelKey: 'parentProfile_leaveApplication', icon: 'calendar', route: ScreenNames.Leave},
+  {labelKey: 'subscription_title', icon: 'card', route: ScreenNames.SubscriptionPlans},
   {labelKey: 'teacherProfile_changePassword', icon: 'lock', route: ScreenNames.ChangePassword},
 ];
 
@@ -85,6 +88,8 @@ export function ParentProfileScreen(): React.JSX.Element {
           </View>
 
           <Spacer size={16} />
+          <TestPaymentButton />
+          <Spacer size={12} />
           <CustomButton title={t('common_logout')} variant="danger" iconLeft="logout" onPress={() => logout()} />
           <Spacer size={24} />
         </View>

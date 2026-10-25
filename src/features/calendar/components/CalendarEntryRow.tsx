@@ -1,6 +1,7 @@
 /**
  * One academic-calendar entry: date range, title, type badge, audience, days, "School closed".
- * EVENT entries can be edited / deleted here; EXAM entries are managed in the Exams module.
+ * Admin: EVENT entries can be edited / deleted here; EXAM entries are managed in the Exams module.
+ * Teacher / parent: no edit callbacks → read-only; `onPress` opens the entry's detail.
  */
 import React from 'react';
 import {Pressable, View} from 'react-native';
@@ -16,12 +17,15 @@ export function CalendarEntryRow({
   onEdit,
   onDelete,
   onOpenExams,
+  onPress,
 }: {
   entry: CalendarEntry;
-  onEdit: (entry: CalendarEntry) => void;
-  onDelete: (entry: CalendarEntry) => void;
-  onOpenExams: () => void;
+  onEdit?: (entry: CalendarEntry) => void;
+  onDelete?: (entry: CalendarEntry) => void;
+  onOpenExams?: () => void;
+  onPress?: (entry: CalendarEntry) => void;
 }): React.JSX.Element {
+  const editable = !!onEdit;
   const {theme} = useTheme();
   const {t} = useLanguage();
   const TYPE_LABEL = useEventTypeLabels();
@@ -44,19 +48,19 @@ export function CalendarEntryRow({
   }));
 
   return (
-    <View style={styles.row}>
+    <Pressable style={styles.row} disabled={!onPress} onPress={() => onPress?.(entry)}>
       <View style={[styles.stripe, {backgroundColor: EVENT_TYPE_COLOR[entry.type]}]} />
       <View style={styles.body}>
         <Row justify="space-between" align="flex-start" gap={theme.spacing.sm}>
           <AppText variant="bodyBold" style={{flex: 1}}>
             {entry.title}
           </AppText>
-          {entry.source === 'EVENT' ? (
+          {!editable ? null : entry.source === 'EVENT' ? (
             <Row gap={theme.spacing.md}>
-              <Pressable onPress={() => onEdit(entry)} hitSlop={8} accessibilityLabel={t('common_edit')}>
+              <Pressable onPress={() => onEdit?.(entry)} hitSlop={8} accessibilityLabel={t('common_edit')}>
                 <Icon name="edit" size={16} color={theme.colors.textMuted} />
               </Pressable>
-              <Pressable onPress={() => onDelete(entry)} hitSlop={8} accessibilityLabel={t('common_delete')}>
+              <Pressable onPress={() => onDelete?.(entry)} hitSlop={8} accessibilityLabel={t('common_delete')}>
                 <Icon name="delete" size={16} color={theme.colors.error} />
               </Pressable>
             </Row>
@@ -73,7 +77,7 @@ export function CalendarEntryRow({
         </AppText>
         <Row gap={theme.spacing.xs} wrap style={{rowGap: 4}}>
           <Badge label={TYPE_LABEL[entry.type]} tone={EVENT_TYPE_TONE[entry.type]} />
-          <Badge label={AUDIENCE_LABEL[entry.audience] ?? entry.audience} tone="neutral" />
+          {editable ? <Badge label={AUDIENCE_LABEL[entry.audience] ?? entry.audience} tone="neutral" /> : null}
           {entry.schoolClosed ? <Badge label={`✓ ${t('calendar_schoolClosed')}`} tone="error" /> : null}
         </Row>
         {entry.classes.length > 0 ? (
@@ -81,12 +85,12 @@ export function CalendarEntryRow({
             {entry.classes.join(', ')}
           </AppText>
         ) : null}
-        {entry.description ? (
+        {editable && entry.description ? (
           <AppText variant="caption" color="textSecondary" numberOfLines={3}>
             {entry.description}
           </AppText>
         ) : null}
       </View>
-    </View>
+    </Pressable>
   );
 }

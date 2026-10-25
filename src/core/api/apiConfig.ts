@@ -121,6 +121,7 @@ export const Endpoints = {
     myAttendanceCheckOut: '/api/teacher/my-attendance/check-out',
     resetPassword: '/api/teacher/reset-password',
     profile: '/api/teacher/profile',
+    academicCalendar: '/api/teacher/academic-calendar',
     exams: '/api/teacher/exams',
     exams_scheduleStudents: (scheduleId: string) => `/api/teacher/exams/schedule/${scheduleId}/students`,
     exams_scheduleMarks: (scheduleId: string) => `/api/teacher/exams/schedule/${scheduleId}/marks`,
@@ -146,5 +147,19 @@ export const Endpoints = {
     events: '/api/students/events',
     dashboard: '/api/students/dashboard',
     resetPassword: '/api/students/reset-password',
+    /** Requires `?studentId=` — exams are limited to that child's class. */
+    academicCalendar: '/api/students/academic-calendar',
+  },
+  // Same routes for every role — the backend scopes plans/subscriptions to the logged-in user.
+  subscription: {
+    plans: '/api/subscription/plans',
+    subscribe: '/api/subscription/subscribe',
+    mySubscriptions: '/api/subscription/my-subscriptions',
+    entitlements: '/api/subscription/entitlements',
+    razorpayOrder: (subscriptionId: string) =>
+      `/api/subscription/my-subscriptions/${subscriptionId}/razorpay-order`,
+    razorpayVerify: (subscriptionId: string) =>
+      `/api/subscription/my-subscriptions/${subscriptionId}/razorpay-verify`,
+    cancel: (subscriptionId: string) => `/api/subscription/my-subscriptions/${subscriptionId}/cancel`,
   },
 } as const;

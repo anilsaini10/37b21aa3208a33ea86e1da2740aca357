@@ -18,6 +18,7 @@ import {
 } from '../../../shared/components';
 import {capitalize} from '../../../shared/helpers';
 import {useAuthStore} from '../../auth/authStore';
+import {TestPaymentButton} from '../../subscription/components/TestPaymentButton';
 import type {AdminStackParamList, AdminTabParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 
@@ -26,10 +27,11 @@ type Nav = NativeStackNavigationProp<AdminStackParamList>;
 const MENU: {
   icon: string;
   titleKey: TranslationKey;
-  route: 'Settings' | 'Notifications' | 'ChangePassword';
+  route: 'Settings' | 'Notifications' | 'SubscriptionPlans' | 'ChangePassword';
 }[] = [
   {icon: 'settings', titleKey: 'moreScreen_settings', route: ScreenNames.Settings},
   {icon: 'notification', titleKey: 'moreScreen_notifications', route: ScreenNames.Notifications},
+  {icon: 'card', titleKey: 'subscription_title', route: ScreenNames.SubscriptionPlans},
   {icon: 'lock', titleKey: 'teacherProfile_changePassword', route: ScreenNames.ChangePassword},
 ];
 
@@ -76,6 +78,8 @@ export function AdminProfileScreen(): React.JSX.Element {
           </CustomCard>
 
           <Spacer size={24} />
+          <TestPaymentButton />
+          <Spacer size={12} />
           <CustomButton title={t('common_logout')} variant="danger" iconLeft="logout" onPress={() => logout()} />
           <Spacer size={24} />
         </View>

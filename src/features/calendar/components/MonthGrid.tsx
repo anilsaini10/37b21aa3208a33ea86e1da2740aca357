@@ -2,6 +2,8 @@
  * One month as a 7-column grid (Sun → Sat). Each date is tinted with the colour of the
  * highest-priority entry covering it; Sundays are greyed; today gets an outline.
  * `compact` = the small version used 12-up in the year view.
+ * `dayDots` switches to the dotted style (teacher / parent view): a light tint of the top type,
+ * plus one dot per distinct type on that date, so a day with several entries shows several dots.
  */
 import React from 'react';
 import {Pressable, View} from 'react-native';
@@ -24,6 +26,8 @@ export function MonthGrid({
   onDayPress,
   compact,
   title,
+  dayDots,
+  selectedDate,
 }: {
   year: number;
   /** 1-based */
@@ -32,6 +36,9 @@ export function MonthGrid({
   onDayPress?: (date: string) => void;
   compact?: boolean;
   title?: string;
+  /** Date → distinct entry types on it (priority order). Enables the dotted style. */
+  dayDots?: Map<string, EventType[]>;
+  selectedDate?: string | null;
 }): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
@@ -50,6 +57,9 @@ export function MonthGrid({
       justifyContent: 'center',
     },
     today: {borderWidth: 1.5, borderColor: t2.colors.primary},
+    selected: {borderWidth: 2, borderColor: t2.colors.text},
+    dots: {flexDirection: 'row', columnGap: 2, marginTop: 2, height: 5},
+    dot: {width: 5, height: 5, borderRadius: 2.5},
   }));
 
   const total = daysInMonth(year, month);
@@ -91,20 +101,45 @@ export function MonthGrid({
             const date = toIsoDate(year, month, day);
             const type = dayTypes.get(date);
             const isSunday = di === 0;
-            const bg = type ? EVENT_TYPE_COLOR[type] : isSunday ? theme.colors.surfaceVariant : 'transparent';
-            const fg = type ? '#FFFFFF' : isSunday ? theme.colors.textMuted : theme.colors.text;
+            const dots = dayDots?.get(date) ?? [];
+            const bg = type
+              ? dayDots
+                ? EVENT_TYPE_COLOR[type] + '26'
+                : EVENT_TYPE_COLOR[type]
+              : isSunday
+                ? theme.colors.surfaceVariant
+                : 'transparent';
+            const fg = type
+              ? dayDots
+                ? EVENT_TYPE_COLOR[type]
+                : '#FFFFFF'
+              : isSunday
+                ? theme.colors.textMuted
+                : theme.colors.text;
             return (
               <View key={di} style={styles.cellWrap}>
                 <Pressable
                   disabled={!onDayPress}
                   onPress={() => onDayPress?.(date)}
                   hitSlop={compact ? 2 : 0}
-                  style={[styles.cell, {backgroundColor: bg}, date === today ? styles.today : null]}>
+                  style={[
+                    styles.cell,
+                    {backgroundColor: bg},
+                    date === today ? styles.today : null,
+                    date === selectedDate ? styles.selected : null,
+                  ]}>
                   <AppText
                     variant={compact ? 'label' : 'caption'}
                     style={{color: fg, fontSize: compact ? 9 * theme.typography.scale : undefined}}>
                     {day}
                   </AppText>
+                  {dayDots ? (
+                    <View style={styles.dots}>
+                      {dots.slice(0, 3).map(dotType => (
+                        <View key={dotType} style={[styles.dot, {backgroundColor: EVENT_TYPE_COLOR[dotType]}]} />
+                      ))}
+                    </View>
+                  ) : null}
                 </Pressable>
               </View>
             );

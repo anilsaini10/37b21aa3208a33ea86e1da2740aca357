@@ -136,6 +136,9 @@ PODS:
     - ReactNativeDependencies
     - Yoga
   - PromisesObjC (2.4.1)
+  - razorpay-core-pod (1.0.9)
+  - razorpay-pod (1.5.8):
+    - razorpay-core-pod (= 1.0.9)
   - RCTDeprecation (0.86.0)
   - RCTRequired (0.86.0)
   - RCTSwiftUI (0.86.0)
@@ -1603,6 +1606,29 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - react-native-razorpay (3.0.0):
+    - hermes-engine
+    - razorpay-pod
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - react-native-safe-area-context (5.8.0):
     - hermes-engine
     - RCTRequired
@@ -2499,6 +2525,7 @@ DEPENDENCIES:
   - React-mutationobservernativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/mutationobserver`)
   - "react-native-document-picker (from `../node_modules/@react-native-documents/picker`)"
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
+  - react-native-razorpay (from `../node_modules/react-native-razorpay`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-networking (from `../node_modules/react-native/ReactCommon/react/networking`)
@@ -2560,6 +2587,8 @@ SPEC REPOS:
     - MMKVCore
     - nanopb
     - PromisesObjC
+    - razorpay-core-pod
+    - razorpay-pod
 
 EXTERNAL SOURCES:
   BVLinearGradient:
@@ -2653,6 +2682,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-documents/picker"
   react-native-geolocation:
     :path: "../node_modules/@react-native-community/geolocation"
+  react-native-razorpay:
+    :path: "../node_modules/react-native-razorpay"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   React-NativeModulesApple:
@@ -2766,6 +2797,8 @@ SPEC CHECKSUMS:
   NitroMmkv: 85a251e15c39d7c95fe58cf40786fa126b8d143c
   NitroModules: b4174dd303728e16ad1afb79f64c1a5c69a3b373
   PromisesObjC: 752c3227f599e3467650e47ea36f433eeb10c273
+  razorpay-core-pod: 7ecea8ed3c47751e6a958f6c88126ea068f8c8fc
+  razorpay-pod: 3fc296eacb28a059c55144286ea7c04d33d894f5
   RCTDeprecation: 2a74a2c57675e64419bd89078efde81f7c1de90b
   RCTRequired: 30451112e6fef4e6f31b4e7eee0845156e35e4b0
   RCTSwiftUI: 5aaf0b07e747ba749dc6acc94d8bd41eea4b570f
@@ -2805,6 +2838,7 @@ SPEC CHECKSUMS:
   React-mutationobservernativemodule: f0a0d5ae9b51caf7becbeabf836d716cfedb6bf2
   react-native-document-picker: c3a7536f3ee52525b4714c3720537f941d0cb094
   react-native-geolocation: c41d1ad8e832fa800b4e457c721e348bcc5aa147
+  react-native-razorpay: e6ad1261209cdbac15dd3dab4db2a5f7461fd295
   react-native-safe-area-context: fb5c8ee9f6dd62ef710611b3d370c501f42a4ac0
   React-NativeModulesApple: a092d89b58f635ebfab88048b0eda9fb516819fd
   React-networking: 968bbbe73590149feb1e72b2af4f6a68e4796ece

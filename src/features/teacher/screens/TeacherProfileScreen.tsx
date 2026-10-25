@@ -17,6 +17,7 @@ import {
 } from '../../../shared/components';
 import {capitalize} from '../../../shared/helpers';
 import {useAuthStore} from '../../auth/authStore';
+import {TestPaymentButton} from '../../subscription/components/TestPaymentButton';
 import type {TeacherStackParamList, TeacherTabParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 
@@ -25,7 +26,7 @@ type Nav = NativeStackNavigationProp<TeacherStackParamList>;
 const MENU: {
   icon: string;
   titleKey: TranslationKey;
-  route: 'MyProfile' | 'MySchedule' | 'TeacherExams' | 'Announcements' | 'Events' | 'Chat' | 'Leave' | 'MyLeave' | 'MyAttendance' | 'ChangePassword';
+  route: 'MyProfile' | 'MySchedule' | 'TeacherExams' | 'Announcements' | 'Events' | 'Chat' | 'Leave' | 'MyLeave' | 'MyAttendance' | 'AcademicCalendar' | 'SubscriptionPlans' | 'ChangePassword';
 }[] = [
   {icon: 'profile', titleKey: 'teacherMyProfile_title', route: ScreenNames.MyProfile},
   {icon: 'timetable', titleKey: 'teacherProfile_timetable', route: ScreenNames.MySchedule},
@@ -33,9 +34,11 @@ const MENU: {
   {icon: 'attendance', titleKey: 'teacherProfile_myAttendance', route: ScreenNames.MyAttendance},
   {icon: 'announcement', titleKey: 'teacherProfile_announcements', route: ScreenNames.Announcements},
   {icon: 'event', titleKey: 'eventsManage_headerTitle', route: ScreenNames.Events},
+  {icon: 'calendar', titleKey: 'calendar_title', route: ScreenNames.AcademicCalendar},
   // {icon: 'chat', titleKey: 'teacherProfile_chat', route: ScreenNames.Chat},
   {icon: 'calendar', titleKey: 'teacherProfile_myLeave', route: ScreenNames.MyLeave},
   {icon: 'calendar', titleKey: 'teacherProfile_leaveManagement', route: ScreenNames.Leave},
+  {icon: 'card', titleKey: 'subscription_title', route: ScreenNames.SubscriptionPlans},
   {icon: 'lock', titleKey: 'teacherProfile_changePassword', route: ScreenNames.ChangePassword},
 ];
 
@@ -89,6 +92,8 @@ export function TeacherProfileScreen(): React.JSX.Element {
           </View>
 
           <Spacer size={24} />
+          <TestPaymentButton />
+          <Spacer size={12} />
           <CustomButton title={t('common_logout')} variant="danger" iconLeft="logout" onPress={() => logout()} />
           <Spacer size={24} />
         </View>

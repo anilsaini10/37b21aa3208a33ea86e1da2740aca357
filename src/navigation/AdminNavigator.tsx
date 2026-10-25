@@ -55,6 +55,9 @@ import {TeachersTabScreen} from '../features/admin/screens/TeachersTabScreen';
 import {MoreScreen} from '../features/admin/screens/MoreScreen';
 import {AdminProfileScreen} from '../features/admin/screens/AdminProfileScreen';
 import {ChangePasswordScreen} from '../features/auth/screens/ChangePasswordScreen';
+import {SubscriptionPlansScreen} from '../features/subscription/screens/SubscriptionPlansScreen';
+import {PlanDetailScreen} from '../features/subscription/screens/PlanDetailScreen';
+import {MySubscriptionsScreen} from '../features/subscription/screens/MySubscriptionsScreen';
 import {AnnouncementsScreen} from '../features/communication/screens/AnnouncementsScreen';
 import {AnnouncementFormScreen} from '../features/communication/screens/AnnouncementFormScreen';
 import {NotificationsScreen} from '../features/communication/screens/NotificationsScreen';
@@ -131,6 +134,9 @@ export function AdminNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.FeesStudentsList} component={FeesStudentsListScreen} />
       <Stack.Screen name={ScreenNames.Profile} component={AdminProfileScreen} />
       <Stack.Screen name={ScreenNames.ChangePassword} component={ChangePasswordScreen} />
+      <Stack.Screen name={ScreenNames.SubscriptionPlans} component={SubscriptionPlansScreen} />
+      <Stack.Screen name={ScreenNames.PlanDetail} component={PlanDetailScreen} />
+      <Stack.Screen name={ScreenNames.MySubscriptions} component={MySubscriptionsScreen} />
       <Stack.Screen name={ScreenNames.ClassesManage} component={ClassesManageScreen} />
       <Stack.Screen name={ScreenNames.SubjectsManage} component={SubjectsManageScreen} />
       <Stack.Screen name={ScreenNames.ClassSchedule} component={AdminTimetableScreen} />

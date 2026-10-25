@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Adaptive launcher icon (Android 8+): each launcher masks it to its own shape (circle,
+  squircle, rounded square…) and sizes it for the device, so the icon fills the shape
+  instead of being shrunk inside a white plate. Text sits inside the 66dp safe zone.
+  The monochrome layer is used for Android 13+ themed icons.
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+  <background android:drawable="@color/ic_launcher_background" />
+  <foreground android:drawable="@mipmap/ic_launcher_foreground" />
+  <monochrome android:drawable="@mipmap/ic_launcher_foreground" />
+</adaptive-icon>

@@ -18,6 +18,7 @@ import {
   moreMenuAccentForIndex,
 } from '../../../shared/components';
 import {useAuthStore} from '../../auth/authStore';
+import {TestPaymentButton} from '../../subscription/components/TestPaymentButton';
 import type {AdminStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 
@@ -43,6 +44,7 @@ type NoParamRoute =
   | 'Inventory'
   | 'Reports'
   | 'Settings'
+  | 'SubscriptionPlans'
   | 'Notifications';
 
 interface ModuleItem {
@@ -65,6 +67,7 @@ const MODULES: ModuleItem[] = [
   {labelKey: 'moreScreen_announcements', icon: 'announcement', route: ScreenNames.Announcements},
   {labelKey: 'moreScreen_leave', icon: 'calendar', route: ScreenNames.Leave},
   {labelKey: 'moreScreen_events', icon: 'event', route: ScreenNames.Events},
+  {labelKey: 'subscription_title', icon: 'card', route: ScreenNames.SubscriptionPlans},
   // {labelKey: 'moreScreen_transport', icon: 'transport', route: ScreenNames.Transport},
   // {labelKey: 'moreScreen_library', icon: 'library', route: ScreenNames.Library},
   // {labelKey: 'moreScreen_inventory', icon: 'inventory', route: ScreenNames.Inventory},
@@ -197,6 +200,8 @@ export function MoreScreen(): React.JSX.Element {
             ))}
           </View>
         )}
+        <Spacer size={16} />
+        <TestPaymentButton />
         <Spacer size={24} />
       </ScrollView>
     </Screen>

@@ -39,4 +39,7 @@ export const QueryKeys = {
   transport: ['transport'] as const,
   library: ['library'] as const,
   inventory: ['inventory'] as const,
+  subscriptionPlans: ['subscription', 'plans'] as const,
+  mySubscriptions: ['subscription', 'mine'] as const,
+  entitlements: ['subscription', 'entitlements'] as const,
 } as const;

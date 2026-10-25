@@ -75,3 +75,21 @@ export function useEventTypeLabels(): Record<EventType, string> {
     OTHER: t('eventForm_typeOther'),
   };
 }
+
+/** Filter chips on the teacher / parent calendar — each groups one or more types (client-side filter). */
+export type CalendarFilter = 'ALL' | 'HOLIDAYS' | 'VACATION' | 'EXAMS' | 'EVENTS';
+
+export const CALENDAR_FILTER_TYPES: Record<Exclude<CalendarFilter, 'ALL'>, EventType[]> = {
+  HOLIDAYS: ['HOLIDAY', 'GOVERNMENT_HOLIDAY'],
+  VACATION: ['VACATION'],
+  EXAMS: ['EXAM'],
+  EVENTS: ['MEETING', 'ACTIVITY', 'OTHER'],
+};
+
+/** Chip colour per filter — the colour of the group's main type. */
+export const CALENDAR_FILTER_COLOR: Record<Exclude<CalendarFilter, 'ALL'>, string> = {
+  HOLIDAYS: EVENT_TYPE_COLOR.HOLIDAY,
+  VACATION: EVENT_TYPE_COLOR.VACATION,
+  EXAMS: EVENT_TYPE_COLOR.EXAM,
+  EVENTS: EVENT_TYPE_COLOR.MEETING,
+};

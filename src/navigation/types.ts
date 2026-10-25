@@ -120,6 +120,9 @@ export type AdminStackParamList = {
   FeesStudentsList: {classId: string; className: string; sectionId?: string; sectionName?: string};
   Profile: undefined;
   ChangePassword: undefined;
+  SubscriptionPlans: undefined;
+  PlanDetail: {planId: string};
+  MySubscriptions: undefined;
   ClassesManage: undefined;
   SubjectsManage: undefined;
   ClassSchedule: undefined;
@@ -164,10 +167,15 @@ export type TeacherStackParamList = {
   Events: undefined;
   Notifications: undefined;
   ChangePassword: undefined;
+  SubscriptionPlans: undefined;
+  PlanDetail: {planId: string};
+  MySubscriptions: undefined;
   /** Exam papers the teacher teaches (own sections) or invigilates. */
   TeacherExams: undefined;
   /** Marks entry for one paper — `paper` (from the list) carries `canEnterMarks` / `mySections`. */
   TeacherPaperMarks: {scheduleId: string; paper?: TeacherExamPaper};
+  /** Read-only academic calendar (shared with Parent). */
+  AcademicCalendar: undefined;
 };
 
 // ---- Parent ---------------------------------------------------------------
@@ -193,7 +201,20 @@ export type ParentStackParamList = {
   LeaveApply: {studentId: string; studentName: string};
   Notifications: undefined;
   ChangePassword: undefined;
+  SubscriptionPlans: undefined;
+  PlanDetail: {planId: string};
+  MySubscriptions: undefined;
   FeeReceipt: {invoiceId: string};
+  /** Read-only academic calendar for the selected child. */
+  AcademicCalendar: undefined;
+};
+
+// ---- Subscription (shared by all three role stacks) ------------------------
+/** The routes the shared subscription screens navigate between — present in every role's stack. */
+export type SubscriptionRoutes = {
+  SubscriptionPlans: undefined;
+  PlanDetail: {planId: string};
+  MySubscriptions: undefined;
 };
 
 // ---- Screen prop helpers --------------------------------------------------

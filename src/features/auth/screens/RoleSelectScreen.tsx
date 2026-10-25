@@ -1,8 +1,8 @@
 /** Entry screen — choose which portal to log into. */
 import React from 'react';
-import {Image, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
+import {ScrollView, StatusBar, StyleSheet, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import Svg, {Defs, LinearGradient, Rect, Stop} from 'react-native-svg';
+import Svg, {Defs, LinearGradient, Path, Rect, Stop} from 'react-native-svg';
 import {lightTheme, ThemeContext, useTheme} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {AppText, CustomCard, Icon, LanguageSwitcher, Spacer, Row} from '../../../shared/components';
@@ -43,20 +43,27 @@ export function RoleSelectScreen({navigation}: AuthScreenProps<'RoleSelect'>): R
           style={styles.scroll}
           contentContainerStyle={{paddingBottom: insets.bottom + theme.spacing.xl}}
           showsVerticalScrollIndicator={false}>
-          <View style={styles.hero}>
-            <Image source={Constants.BACKGROUND_IMAGE} resizeMode="cover" style={StyleSheet.absoluteFill} />
-            <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
-              <Defs>
-                <LinearGradient id="heroFade" x1="0" y1="0" x2="0" y2="1">
-                  <Stop offset="0%" stopColor="#000000" stopOpacity={0.2} />
-                  <Stop offset="30%" stopColor={theme.colors.background} stopOpacity={0} />
-                  <Stop offset="55%" stopColor={theme.colors.background} stopOpacity={0} />
-                  <Stop offset="100%" stopColor={theme.colors.background} stopOpacity={1} />
-                </LinearGradient>
-              </Defs>
-              <Rect x={0} y={0} width="100%" height="100%" fill="url(#heroFade)" />
-            </Svg>
-          </View>
+         <View style={styles.hero}>
+  <Svg
+    width="100%"
+    height="100%"
+    viewBox="0 0 100 100"
+    preserveAspectRatio="none"
+    style={StyleSheet.absoluteFill}>
+    <Defs>
+      {/* Top: theme color -> Bottom: white */}
+      <LinearGradient id="heroGradient" x1="0" y1="0" x2="0" y2="1">
+        <Stop offset="0" stopColor={theme.colors.primary} stopOpacity={1} />
+        <Stop offset="1" stopColor="#FFFFFF" stopOpacity={1} />
+      </LinearGradient>
+    </Defs>
+
+    <Path
+      d="M0,0 H100 V75 C72,100 22,80 0,0 Z"
+      fill="url(#heroGradient)"
+    />
+  </Svg>
+</View>
 
           <View style={styles.brand}>
             <View
@@ -116,11 +123,11 @@ const styles = StyleSheet.create({
   },
   hero: {
     height: Constants.HERO_HEIGHT,
-    overflow: 'hidden',
-  },
+    overflow: 'hidden'
+    },
   brand: {
     alignItems: 'center',
-    marginTop: -Constants.LOGO_SIZE / 2,
+    marginTop: -Constants.LOGO_SIZE,
     paddingHorizontal: 24,
   },
   logoCircle: {

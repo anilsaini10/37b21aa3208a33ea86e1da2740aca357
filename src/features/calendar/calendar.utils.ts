@@ -77,6 +77,25 @@ export function buildDayTypeMap(entries: CalendarEntry[]): Map<string, EventType
   return map;
 }
 
+/** Date → distinct entry types covering it, highest priority first (for the per-day dots). */
+export function buildDayDotsMap(entries: CalendarEntry[]): Map<string, EventType[]> {
+  const map = new Map<string, EventType[]>();
+  entries.forEach(entry => {
+    let date = entry.startDate.slice(0, 10);
+    const end = entry.endDate.slice(0, 10);
+    for (let i = 0; date <= end && i < 400; i++) {
+      const types = map.get(date) ?? [];
+      if (!types.includes(entry.type)) {
+        types.push(entry.type);
+        types.sort((a, b) => EVENT_TYPE_PRIORITY[b] - EVENT_TYPE_PRIORITY[a]);
+        map.set(date, types);
+      }
+      date = addDays(date, 1);
+    }
+  });
+  return map;
+}
+
 export function entriesOnDate(entries: CalendarEntry[], date: string): CalendarEntry[] {
   return entries.filter(e => e.startDate.slice(0, 10) <= date && date <= e.endDate.slice(0, 10));
 }

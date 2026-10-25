@@ -27,6 +27,10 @@ import {AnnouncementsScreen} from '../features/communication/screens/Announcemen
 import {EventsScreen} from '../features/events/screens/EventsScreen';
 import {NotificationsScreen} from '../features/communication/screens/NotificationsScreen';
 import {ChangePasswordScreen} from '../features/auth/screens/ChangePasswordScreen';
+import {SubscriptionPlansScreen} from '../features/subscription/screens/SubscriptionPlansScreen';
+import {PlanDetailScreen} from '../features/subscription/screens/PlanDetailScreen';
+import {MySubscriptionsScreen} from '../features/subscription/screens/MySubscriptionsScreen';
+import {SchoolCalendarScreen} from '../features/calendar/screens/SchoolCalendarScreen';
 
 const Tab = createBottomTabNavigator<ParentTabParamList>();
 const Stack = createNativeStackNavigator<ParentStackParamList>();
@@ -76,6 +80,10 @@ export function ParentNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.LeaveApply} component={ParentApplyLeaveScreen} />
       <Stack.Screen name={ScreenNames.Notifications} component={NotificationsScreen} />
       <Stack.Screen name={ScreenNames.ChangePassword} component={ChangePasswordScreen} />
+      <Stack.Screen name={ScreenNames.SubscriptionPlans} component={SubscriptionPlansScreen} />
+      <Stack.Screen name={ScreenNames.PlanDetail} component={PlanDetailScreen} />
+      <Stack.Screen name={ScreenNames.MySubscriptions} component={MySubscriptionsScreen} />
+      <Stack.Screen name={ScreenNames.AcademicCalendar} component={SchoolCalendarScreen} />
       <Stack.Screen name={ScreenNames.FeeReceipt} component={FeeReceiptScreen} />
     </Stack.Navigator>
   );

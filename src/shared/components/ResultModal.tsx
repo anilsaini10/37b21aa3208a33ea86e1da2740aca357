@@ -16,7 +16,8 @@ import {Spacer} from './layout';
 
 export interface ResultModalProps {
   visible: boolean;
-  variant: 'success' | 'error';
+  /** `info` = neutral outcome (e.g. a cancelled payment). */
+  variant: 'success' | 'error' | 'info';
   title: string;
   message?: string;
   onClose: () => void;
@@ -35,7 +36,8 @@ export function ResultModal({
   const {theme} = useTheme();
   const {t} = useLanguage();
   const scale = useRef(new Animated.Value(0)).current;
-  const color = variant === 'success' ? theme.colors.success : theme.colors.error;
+  const color =
+    variant === 'success' ? theme.colors.success : variant === 'info' ? theme.colors.info : theme.colors.error;
 
   useEffect(() => {
     if (visible) {
@@ -68,7 +70,7 @@ export function ResultModal({
       <View style={styles.wrap}>
         <Animated.View
           style={[styles.iconCircle, {backgroundColor: color + '1F', transform: [{scale}]}]}>
-          <Icon name={variant === 'success' ? 'check' : 'close'} size={36} color={color} />
+          <Icon name={variant === 'success' ? 'check' : variant === 'info' ? 'info' : 'close'} size={36} color={color} />
         </Animated.View>
         <Spacer size={theme.spacing.md} />
         <AppText variant="h3" center>
