@@ -42,6 +42,7 @@ export const ScreenNames = {
   SignUp: 'SignUp',
   ForgotPassword: 'ForgotPassword',
   ResetPassword: 'ResetPassword',
+  RequestAdmin: 'RequestAdmin',
 
   // Admin
   Students: 'Students',
@@ -85,6 +86,7 @@ export const ScreenNames = {
   Staff: 'Staff',
   StaffForm: 'StaffForm',
   StaffDetail: 'StaffDetail',
+  RecoveryRequests: 'RecoveryRequests',
 
   // Teacher
   Classes: 'Classes',

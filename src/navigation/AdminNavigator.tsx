@@ -62,6 +62,8 @@ import {AnnouncementsScreen} from '../features/communication/screens/Announcemen
 import {AnnouncementFormScreen} from '../features/communication/screens/AnnouncementFormScreen';
 import {NotificationsScreen} from '../features/communication/screens/NotificationsScreen';
 import {AdminLeaveScreen} from '../features/leave/screens/AdminLeaveScreen';
+import {RecoveryRequestsScreen} from '../features/recovery/screens/RecoveryRequestsScreen';
+import {useRecoveryRequests} from '../features/recovery/recoveryRequests.service';
 
 const Tab = createBottomTabNavigator<AdminTabParamList>();
 const Stack = createNativeStackNavigator<AdminStackParamList>();
@@ -71,11 +73,14 @@ const TAB_ICON: Record<keyof AdminTabParamList, string> = {
   Students: 'students',
   Teachers: 'teacher',
   More: 'settings',
+  RecoveryRequests: 'recovery',
 };
 
 function AdminTabs(): React.JSX.Element {
   const {theme} = useTheme();
   const insets = useSafeAreaInsets();
+  const {data: recoveryData} = useRecoveryRequests({status: 'PENDING', pageSize: 1});
+  const pendingCount = recoveryData?.statusCounts?.PENDING;
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
@@ -91,6 +96,14 @@ function AdminTabs(): React.JSX.Element {
       <Tab.Screen name={ScreenNames.Students} component={StudentsTabScreen} />
       <Tab.Screen name={ScreenNames.Teachers} component={TeachersTabScreen} />
       <Tab.Screen name={ScreenNames.More} component={MoreScreen} />
+      <Tab.Screen
+        name={ScreenNames.RecoveryRequests}
+        component={RecoveryRequestsScreen}
+        options={{
+          tabBarLabel: 'Recovery',
+          tabBarBadge: pendingCount && pendingCount > 0 ? pendingCount : undefined,
+        }}
+      />
     </Tab.Navigator>
   );
 }

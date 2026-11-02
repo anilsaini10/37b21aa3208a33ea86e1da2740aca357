@@ -19,6 +19,36 @@ export type SubscriptionStatus =
 /** Backend role names on plan features (uppercase). */
 export type FeatureRole = 'ADMIN' | 'TEACHER' | 'PARENT';
 
+export type TrialStatus = 'SCHEDULED' | 'ACTIVE' | 'ENDED';
+
+export type FeatureStatusCode = 'FREE' | 'TRIAL' | 'ACTIVE' | 'EXPIRING_SOON' | 'PAYMENT_REQUIRED';
+
+export type LockReason = 'NEVER_SUBSCRIBED' | 'PENDING_PAYMENT' | 'EXPIRED' | 'TRIAL_ENDED';
+
+export interface PlanTrial {
+  startDate: string;
+  endDate: string;
+  startsAt: string;
+  endsAt: string;
+  status: TrialStatus;
+  daysLeft: number;
+}
+
+export interface EntitlementTrial {
+  plan: {id: ID; code: string; name: string; scope: PlanScope; planType: PlanType};
+  startsAt: string;
+  endsAt: string;
+  daysLeft: number;
+}
+
+export interface AvailablePlan {
+  planId: ID;
+  code: string;
+  name: string;
+  planType: PlanType;
+  startingFrom: {amount: number; currency: string; duration: string} | null;
+}
+
 export interface PlanPrice {
   id: ID;
   label: string;
@@ -39,7 +69,7 @@ export interface PlanFeature {
   role: FeatureRole;
   /** null when the feature is for another role. */
   alreadyActive: boolean | null;
-  activeVia: PlanScope[] | null;
+  activeVia: ('SELF' | 'SCHOOL' | 'TRIAL')[] | null;
 }
 
 export interface MySubscriptionSummary {
@@ -58,9 +88,12 @@ export interface SubscriptionPlan {
   description?: string | null;
   scope: PlanScope;
   planType: PlanType;
+  targetRoles: FeatureRole[];
   prices: PlanPrice[];
   startingFrom: {amount: number; currency: string; duration: string} | null;
   features: PlanFeature[];
+  trial: PlanTrial | null;
+  onTrial: boolean;
   coveredBySchool: boolean;
   canSubscribe: boolean;
   action: PlanAction;
@@ -101,19 +134,25 @@ export interface MySubscriptionItem {
 }
 
 export interface EntitlementFeature {
+  featureId?: ID;
   key: string;
   name: string;
-  status: string;
+  description?: string | null;
+  status: FeatureStatusCode | string;
   hasAccess: boolean;
-  expiresAt: string | null;
-  daysLeft: number | null;
-  availableIn?: unknown;
+  expiresAt?: string | null;
+  daysLeft?: number | null;
+  sources?: string[];
+  reason?: LockReason | string;
+  availableIn?: AvailablePlan[];
   [key: string]: unknown;
 }
 
 export interface Entitlements {
   role: string;
   features: EntitlementFeature[];
+  trials: EntitlementTrial[];
+  subscriptions?: unknown[];
 }
 
 export interface RazorpayOrder {

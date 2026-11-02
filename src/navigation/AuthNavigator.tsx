@@ -10,6 +10,7 @@ import {OtpLoginScreen} from '../features/auth/screens/OtpLoginScreen';
 import {SignUpScreen} from '../features/auth/screens/SignUpScreen';
 import {ForgotPasswordScreen} from '../features/auth/screens/ForgotPasswordScreen';
 import {ResetPasswordScreen} from '../features/auth/screens/ResetPasswordScreen';
+import {RequestAdminScreen} from '../features/auth/screens/RequestAdminScreen';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
@@ -23,6 +24,7 @@ export function AuthNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.SignUp} component={SignUpScreen} />
       <Stack.Screen name={ScreenNames.ForgotPassword} component={ForgotPasswordScreen} />
       <Stack.Screen name={ScreenNames.ResetPassword} component={ResetPasswordScreen} />
+      <Stack.Screen name={ScreenNames.RequestAdmin} component={RequestAdminScreen} />
     </Stack.Navigator>
   );
 }

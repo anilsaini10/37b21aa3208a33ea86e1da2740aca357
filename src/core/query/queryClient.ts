@@ -42,4 +42,5 @@ export const QueryKeys = {
   subscriptionPlans: ['subscription', 'plans'] as const,
   mySubscriptions: ['subscription', 'mine'] as const,
   entitlements: ['subscription', 'entitlements'] as const,
+  recoveryRequests: (params?: unknown) => ['admin', 'recoveryRequests', params] as const,
 } as const;

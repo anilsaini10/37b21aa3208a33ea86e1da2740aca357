@@ -11,3 +11,4 @@ export * from './dashboard';
 export * from './school';
 export * from './academicCalendar';
 export * from './subscription';
+export * from './recovery';

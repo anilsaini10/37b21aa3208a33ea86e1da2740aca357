@@ -33,4 +33,19 @@ export const FEATURE_ROLE_LABEL: Record<FeatureRole, TranslationKey> = {
 };
 
 /** My-subscriptions filter tabs → `status` query param. */
-export type SubscriptionFilter = 'ALL' | 'ACTIVE' | 'PENDING_PAYMENT' | 'EXPIRED';
+export type SubscriptionFilter = 'ALL' | 'ACTIVE' | 'UPCOMING' | 'PENDING_PAYMENT' | 'EXPIRED';
+
+export const FEATURE_STATUS_TONE: Record<string, BadgeTone> = {
+  FREE: 'success',
+  TRIAL: 'warning',
+  ACTIVE: 'success',
+  EXPIRING_SOON: 'warning',
+  PAYMENT_REQUIRED: 'error',
+};
+
+export const LOCK_REASON_KEYS: Record<string, TranslationKey> = {
+  NEVER_SUBSCRIBED: 'subscription_lockNeverSubscribed',
+  PENDING_PAYMENT: 'subscription_lockPendingPayment',
+  EXPIRED: 'subscription_lockExpired',
+  TRIAL_ENDED: 'subscription_lockTrialEnded',
+};

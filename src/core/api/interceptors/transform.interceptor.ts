@@ -4,7 +4,7 @@
  * consistent `ApiError` shape.
  */
 import type {AxiosError, AxiosResponse} from 'axios';
-import {notifyUnauthorized} from '../sessionEvents';
+import {notifyUnauthorized, notifyPaymentRequired} from '../sessionEvents';
 
 export interface ApiError {
   status: number;
@@ -41,6 +41,14 @@ export function transformErrorInterceptor(error: AxiosError): Promise<never> {
     code: payload?.error?.code ?? payload?.code,
     details: payload?.error?.details,
   };
+  // Paid feature accessed without an active subscription — refetch entitlements
+  // and show the lock / plans screen instead of treating it as a generic error.
+  if (status === 402) {
+    notifyPaymentRequired({
+      feature: apiError.details?.feature as string | undefined,
+      reason: apiError.details?.reason as string | undefined,
+    });
+  }
   // Token missing/expired — clear the session app-wide so the root navigator
   // swaps back to the login flow, instead of every screen handling this itself.
   if (status === 401) {

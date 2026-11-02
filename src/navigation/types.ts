@@ -48,6 +48,7 @@ export type AuthStackParamList = {
   SignUp: undefined;
   ForgotPassword: undefined;
   ResetPassword: {email: string};
+  RequestAdmin: undefined;
 };
 
 // ---- Admin ----------------------------------------------------------------
@@ -56,6 +57,7 @@ export type AdminTabParamList = {
   Students: undefined;
   Teachers: undefined;
   More: undefined;
+  RecoveryRequests: undefined;
 };
 
 export type AdminStackParamList = {
@@ -135,6 +137,7 @@ export type AdminStackParamList = {
   Staff: undefined;
   StaffForm: {staffId?: string; initial?: Staff} | undefined;
   StaffDetail: {staffId: string; initial?: Staff};
+  RecoveryRequests: undefined;
 };
 
 // ---- Teacher --------------------------------------------------------------

@@ -1,5 +1,5 @@
 /** Teacher dashboard — daily KPIs, quick actions, class-teacher attendance status, schedule, announcements + class performance. */
-import React from 'react';
+import React, {useState} from 'react';
 import {View, ScrollView, RefreshControl} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -33,6 +33,10 @@ import {useEventsFeed} from '../../events/events.service';
 import {useUnreadNotificationsCount} from '../../communication/notifications.service';
 import {TodayCheckInPanel} from '../../attendance/components/TodayCheckInPanel';
 import {MY_ATTENDANCE_TODAY_KEY} from '../../attendance/myStaffAttendance.service';
+import {TrialBanner} from '../../subscription/components/TrialBanner';
+import {SubscriptionPlansModal} from '../../subscription/components/SubscriptionPlansModal';
+import {useHasActiveSubscription} from '../../subscription/useFeature';
+import {useSubscriptionPlans} from '../../subscription/subscription.service';
 import {useQueryClient} from '@tanstack/react-query';
 import type {TeacherStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
@@ -71,6 +75,10 @@ export function TeacherDashboardScreen(): React.JSX.Element {
   const {data: unreadCount} = useUnreadNotificationsCount();
   const qc = useQueryClient();
   const {t} = useLanguage();
+  const [plansModalDismissed, setPlansModalDismissed] = useState(false);
+  const hasActiveSub = useHasActiveSubscription();
+  const {data: subPlans} = useSubscriptionPlans();
+  const showPlansModal = !hasActiveSub && !plansModalDismissed && (subPlans?.length ?? 0) > 0;
   const styles = useThemedStyles(t2 => ({
     scrollContent: {
       padding: t2.spacing.lg,
@@ -157,6 +165,8 @@ export function TeacherDashboardScreen(): React.JSX.Element {
           email={user?.email}
           footer={<TodayCheckInPanel />}
         />
+
+        <TrialBanner />
 
         <StatGrid stats={stats} />
 
@@ -306,6 +316,7 @@ export function TeacherDashboardScreen(): React.JSX.Element {
         </CustomCard> */}
         <Spacer size={24} />
       </ScrollView>
+      <SubscriptionPlansModal visible={showPlansModal} onClose={() => setPlansModalDismissed(true)} />
     </Screen>
   );
 }

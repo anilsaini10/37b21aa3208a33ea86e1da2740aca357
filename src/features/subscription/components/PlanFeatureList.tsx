@@ -42,7 +42,9 @@ export function PlanFeatureList({
         <AppText variant="caption" style={styles.text}>
           {f.name}
         </AppText>
-        {f.alreadyActive ? <Badge label={t('subscription_statusActive')} tone="success" /> : null}
+        {f.alreadyActive ? (
+          <Badge label={t(f.activeVia?.includes('TRIAL') ? 'subscription_featureTrial' : 'subscription_featureActive')} tone={f.activeVia?.includes('TRIAL') ? 'warning' : 'success'} />
+        ) : null}
       </Row>
       {showDescriptions && f.description ? (
         <AppText variant="label" color="textMuted">

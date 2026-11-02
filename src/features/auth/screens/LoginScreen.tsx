@@ -354,6 +354,17 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
               </>
             ) : null}
 
+            {role !== 'admin' ? (
+              <>
+                <Spacer size={10} />
+                <Pressable onPress={() => navigation.navigate(ScreenNames.RequestAdmin)} hitSlop={8} style={{alignSelf: 'center'}}>
+                  <AppText variant="caption" color="primary" style={{fontWeight: '600'}}>
+                    {t('loginScreen_requestAdmin')}
+                  </AppText>
+                </Pressable>
+              </>
+            ) : null}
+
             <Spacer size={22} />
 
           </View>

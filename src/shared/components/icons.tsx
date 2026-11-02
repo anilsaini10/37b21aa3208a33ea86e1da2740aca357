@@ -462,6 +462,20 @@ export const ICONS: Record<string, IconRenderer> = {
       <Circle cx={12} cy={12} r={1.5} fill={p.color} stroke="none" />
     </Frame>
   ),
+  recovery: p => (
+    <Frame {...p}>
+      <Path d="M4 12a8 8 0 0 1 14.3-4.9" />
+      <Polyline points="20 3 20 8 15 8" />
+      <Path d="M20 12a8 8 0 0 1-14.3 4.9" />
+      <Polyline points="4 21 4 16 9 16" />
+    </Frame>
+  ),
+  copy: p => (
+    <Frame {...p}>
+      <Rect x={9} y={9} width={11} height={11} rx={1.5} />
+      <Path d="M5 15H4.5A1.5 1.5 0 0 1 3 13.5V4.5A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5" />
+    </Frame>
+  ),
   globe: p => (
     <Frame {...p}>
       <Circle cx={12} cy={12} r={9} />

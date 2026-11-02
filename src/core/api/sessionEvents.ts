@@ -16,3 +16,15 @@ export function setUnauthorizedHandler(handler: () => void): void {
 export function notifyUnauthorized(): void {
   unauthorizedHandler?.();
 }
+
+let paymentRequiredHandler: ((details: {feature?: string; reason?: string}) => void) | null = null;
+
+/** Called once at app bootstrap to wire up what happens on a 402. */
+export function setPaymentRequiredHandler(handler: (details: {feature?: string; reason?: string}) => void): void {
+  paymentRequiredHandler = handler;
+}
+
+/** Called by the response interceptor whenever any request comes back 402. */
+export function notifyPaymentRequired(details: {feature?: string; reason?: string}): void {
+  paymentRequiredHandler?.(details);
+}

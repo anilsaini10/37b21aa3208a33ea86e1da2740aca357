@@ -37,6 +37,10 @@ import {useParentProfile} from '../../parent/parentStudents.service';
 import {useEventsFeed} from '../../events/events.service';
 import {useAnnouncementsFeed} from '../../communication/announcements.service';
 import {useUnreadNotificationsCount} from '../../communication/notifications.service';
+import {TrialBanner} from '../../subscription/components/TrialBanner';
+import {SubscriptionPlansModal} from '../../subscription/components/SubscriptionPlansModal';
+import {useHasActiveSubscription} from '../../subscription/useFeature';
+import {useSubscriptionPlans} from '../../subscription/subscription.service';
 import type {ParentStackParamList, ParentTabParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {StatCard, ParentChild, AttendanceStatusCode} from '../../../shared/types';
@@ -180,6 +184,10 @@ function ParentDashboardContent({
     refetch: refetchAnnouncements,
   } = useAnnouncementsFeed('parent', {page: 1, pageSize: 3, from: todayIso()});
   const {data: unreadCount} = useUnreadNotificationsCount();
+  const [plansModalDismissed, setPlansModalDismissed] = useState(false);
+  const hasActiveSub = useHasActiveSubscription();
+  const {data: subPlans} = useSubscriptionPlans();
+  const showPlansModal = !hasActiveSub && !plansModalDismissed && (subPlans?.length ?? 0) > 0;
 
   const styles = useThemedStyles(t2 => ({
     scrollContent: {
@@ -287,6 +295,7 @@ function ParentDashboardContent({
           email={user?.email}
         />
         <Spacer size={theme.spacing.md} />
+        <TrialBanner />
 
         <CustomCard>
           <Row gap={theme.spacing.md}>
@@ -380,6 +389,7 @@ function ParentDashboardContent({
         </CustomCard> */}
         <Spacer size={24} />
       </ScrollView>
+      <SubscriptionPlansModal visible={showPlansModal} onClose={() => setPlansModalDismissed(true)} />
     </Screen>
   );
 }

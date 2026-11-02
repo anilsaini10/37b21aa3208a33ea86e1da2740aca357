@@ -1,5 +1,5 @@
 /** Admin dashboard — KPIs, charts, upcoming events. */
-import React from 'react';
+import React, {useState} from 'react';
 import {View, ScrollView, RefreshControl} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useQueryClient} from '@tanstack/react-query';
@@ -32,6 +32,10 @@ import {useAdminEvents} from '../../events/events.service';
 import {useAdminAnnouncements} from '../../communication/announcements.service';
 import {useUnreadNotificationsCount} from '../../communication/notifications.service';
 import {useIsTodayStaffAttendanceMarked} from '../../attendance/adminTeacherAttendance.service';
+import {TrialBanner} from '../../subscription/components/TrialBanner';
+import {SubscriptionPlansModal} from '../../subscription/components/SubscriptionPlansModal';
+import {useHasActiveSubscription} from '../../subscription/useFeature';
+import {useSubscriptionPlans} from '../../subscription/subscription.service';
 import type {AdminStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {AdminAnnouncement, StatCard} from '../../../shared/types';
@@ -75,6 +79,10 @@ export function AdminDashboardScreen(): React.JSX.Element {
   const {data: unreadCount} = useUnreadNotificationsCount();
   const qc = useQueryClient();
   const {t} = useLanguage();
+  const [plansModalDismissed, setPlansModalDismissed] = useState(false);
+  const hasActiveSub = useHasActiveSubscription();
+  const {data: subPlans} = useSubscriptionPlans();
+  const showPlansModal = !hasActiveSub && !plansModalDismissed && (subPlans?.length ?? 0) > 0;
 
   if (
     isLoading ||
@@ -140,16 +148,13 @@ export function AdminDashboardScreen(): React.JSX.Element {
           email={user?.email}
         />
 
-        <StatGrid stats={stats} />
-
-        {/* Today's attendance donuts, school at a glance and attendance by class. */}
-        <AdminDashboardCharts stats={statsData} />
+        <TrialBanner />
 
         {!isTodayMarked ? (
-          <CustomCard 
-          style={{marginTop: theme.spacing.md}}>
+          <CustomCard
+            style={{ marginTop: theme.spacing.sm, marginBottom: theme.spacing.lg, padding: theme.spacing.md }}>
             <Row justify="space-between" align="center" gap={theme.spacing.sm}>
-              <Row gap={theme.spacing.md} align="center" style={{flex: 1}}>
+              <Row gap={theme.spacing.md} align="center" style={{ flex: 1 }}>
                 <View
                   style={{
                     width: 40,
@@ -161,7 +166,7 @@ export function AdminDashboardScreen(): React.JSX.Element {
                   }}>
                   <Icon name="attendance" size={20} color={theme.colors.primary} />
                 </View>
-                <View style={{flex: 1}}>
+                <View style={{ flex: 1 }}>
                   <AppText variant="bodyBold">{t('staffAttendance_dashboardReminderTitle')}</AppText>
                   <AppText variant="caption" color="textSecondary">
                     {t('staffAttendance_dashboardReminderMessage')}
@@ -179,24 +184,7 @@ export function AdminDashboardScreen(): React.JSX.Element {
           </CustomCard>
         ) : null}
 
-        {/* <SectionTitle title={t('adminDashboard_feeCollection')} actionLabel={t('common_details')} onAction={() => navigation.navigate(ScreenNames.Reports)} />
-        <CustomCard>
-          <Row justify="space-between">
-            <View>
-              <AppText variant="caption" color="textSecondary">{t('adminDashboard_collected')}</AppText>
-              <AppText variant="h2" color="success">{formatCurrency(data.feeCollected)}</AppText>
-            </View>
-            <View>
-              <AppText variant="caption" color="textSecondary">{t('adminDashboard_pending')}</AppText>
-              <AppText variant="h2" color="error">{formatCurrency(data.feePending)}</AppText>
-            </View>
-          </Row>
-          <Spacer size={12} />
-          <LineChart series={data.feeCollectionTrend} color={theme.colors.success} />
-          <AppText variant="label" color="textMuted" center>
-            {t('adminDashboard_monthlyCollectionLatest', {amount: formatCompact(data.feeCollected)})}
-          </AppText>
-        </CustomCard> */}
+        <StatGrid stats={stats} />
 
         <SectionTitle title={t('adminDashboard_upcomingEvents')} actionLabel={t('common_seeAll')} onAction={() => navigation.navigate(ScreenNames.Events)} />
         <CustomCard padded={false} style={{paddingHorizontal: theme.spacing.lg}}>
@@ -243,8 +231,14 @@ export function AdminDashboardScreen(): React.JSX.Element {
             ))
           )}
         </CustomCard>
+
+        {/* Today's attendance donuts, school at a glance and attendance by class. */}
+        <AdminDashboardCharts stats={statsData} />
+
+
         <Spacer size={24} />
       </ScrollView>
+      <SubscriptionPlansModal visible={showPlansModal} onClose={() => setPlansModalDismissed(true)} />
     </Screen>
   );
 }

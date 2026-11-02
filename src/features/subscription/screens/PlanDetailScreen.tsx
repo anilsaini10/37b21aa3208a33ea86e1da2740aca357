@@ -129,6 +129,22 @@ export function PlanDetailScreen(): React.JSX.Element {
           ) : null}
         </CustomCard>
 
+        {plan.trial && plan.trial.status !== 'ENDED' ? (
+          <CustomCard style={{backgroundColor: theme.colors.warning + '15', marginTop: theme.spacing.sm}}>
+            {plan.onTrial ? (
+              <>
+                <Badge label={t('subscription_trialBadge', {count: plan.trial.daysLeft})} tone="warning" />
+                <Spacer size={theme.spacing.xs} />
+                <AppText variant="caption" color="textSecondary">
+                  {t('subscription_trialInfoBox', {date: plan.trial.endDate})}
+                </AppText>
+              </>
+            ) : plan.trial.status === 'SCHEDULED' ? (
+              <Badge label={t('subscription_trialScheduled', {date: plan.trial.startDate})} tone="info" />
+            ) : null}
+          </CustomCard>
+        ) : null}
+
         <SectionTitle title={t('subscription_includes')} />
         <CustomCard>
           <PlanFeatureList features={plan.features} showDescriptions />
@@ -205,6 +221,11 @@ export function PlanDetailScreen(): React.JSX.Element {
             disabled={isBusy}
             onPress={() => payForPlan(plan, selected.id)}
           />
+          {plan.mySubscription?.status === 'UPCOMING' && plan.onTrial && plan.mySubscription.startDate ? (
+            <AppText variant="label" color="success" center style={{marginTop: theme.spacing.xs}}>
+              {t('subscription_paidStartsOn', {date: formatDate(plan.mySubscription.startDate)})}
+            </AppText>
+          ) : null}
         </View>
       ) : null}
 

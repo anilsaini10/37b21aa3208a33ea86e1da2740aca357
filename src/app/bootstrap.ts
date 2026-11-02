@@ -18,7 +18,8 @@ import {
   currentDevicePlatform,
 } from '../core/notifications';
 import {useAuthStore} from '../features/auth/authStore';
-import {setUnauthorizedHandler} from '../core/api/sessionEvents';
+import {setUnauthorizedHandler, setPaymentRequiredHandler} from '../core/api/sessionEvents';
+import {queryClient} from '../core/query/queryClient';
 import {logger} from '../core/utils/logger';
 
 let done = false;
@@ -93,6 +94,11 @@ export function bootstrap(): void {
   // Any request coming back 401 (missing/expired token) clears the session
   // app-wide — the root navigator swaps back to the login flow on its own.
   setUnauthorizedHandler(() => useAuthStore.getState().forceLogout());
+
+  // 402 PAYMENT_REQUIRED — refetch entitlements so the lock screen shows current data.
+  setPaymentRequiredHandler(() => {
+    queryClient.invalidateQueries({queryKey: ['subscription', 'entitlements']});
+  });
 
   requestNotificationPermission().catch(e => {
     // Local notifications unavailable (e.g. simulator without entitlements, or denied) — non-fatal.

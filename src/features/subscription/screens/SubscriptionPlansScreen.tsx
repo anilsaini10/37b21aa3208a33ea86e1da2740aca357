@@ -106,7 +106,9 @@ export function SubscriptionPlansScreen(): React.JSX.Element {
         ? t('subscription_completePayment')
         : plan.action === 'RENEW'
           ? t('subscription_renew')
-          : t('subscription_subscribe');
+          : plan.onTrial
+            ? t('subscription_subscribeNow')
+            : t('subscription_subscribe');
     return (
       <View style={styles.actionRow}>
         <CustomButton title={label} size="sm" loading={busy} disabled={isBusy} onPress={() => onAction(plan)} />
@@ -140,12 +142,25 @@ export function SubscriptionPlansScreen(): React.JSX.Element {
           </View>
           {sub ? <SubscriptionStatusBadge status={sub.status} daysLeft={sub.daysLeft} startDate={sub.startDate} /> : null}
         </Row>
+        {plan.onTrial && plan.trial ? (
+          <Badge label={t('subscription_trialBadge', {count: plan.trial.daysLeft})} tone="warning" />
+        ) : plan.trial?.status === 'SCHEDULED' ? (
+          <Badge label={t('subscription_trialScheduled', {date: plan.trial.startDate})} tone="info" />
+        ) : null}
+        {plan.onTrial && plan.startingFrom && plan.trial ? (
+          <AppText variant="label" color="textMuted">
+            {t('subscription_trialSubtitle', {date: plan.trial.endDate, amount: formatPaise(plan.startingFrom.amount), duration: plan.startingFrom.duration})}
+          </AppText>
+        ) : null}
+        {sub?.status === 'UPCOMING' && plan.onTrial && sub.startDate ? (
+          <Badge label={t('subscription_paidStartsOn', {date: formatDate(sub.startDate)})} tone="success" />
+        ) : null}
         {plan.description ? (
           <AppText variant="caption" color="textSecondary" numberOfLines={2}>
             {plan.description}
           </AppText>
         ) : null}
-        {plan.startingFrom ? (
+        {plan.startingFrom && !plan.onTrial ? (
           <>
             <Spacer size={theme.spacing.xs} />
             <AppText variant="bodyBold" color="primary">
@@ -186,10 +201,17 @@ export function SubscriptionPlansScreen(): React.JSX.Element {
     if (plans.length === 0) {
       return <EmptyState icon="card" title={t('subscription_emptyTitle')} message={t('subscription_emptyMessage')} />;
     }
-    const base = plans.filter(p => p.planType !== 'ADDON');
+    const school = isAdmin ? plans.filter(p => p.planType !== 'ADDON' && p.scope === 'SCHOOL') : [];
+    const base = plans.filter(p => p.planType !== 'ADDON' && (!isAdmin || p.scope !== 'SCHOOL'));
     const addons = plans.filter(p => p.planType === 'ADDON');
     return (
       <>
+        {isAdmin && school.length > 0 ? (
+          <>
+            <SectionTitle title={t('subscription_sectionSchool')} />
+            {school.map(renderPlan)}
+          </>
+        ) : null}
         {base.length > 0 ? (
           <>
             <SectionTitle title={t('subscription_sectionPlans')} />

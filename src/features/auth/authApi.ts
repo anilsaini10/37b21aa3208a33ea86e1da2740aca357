@@ -208,6 +208,25 @@ export const authApi = {
     }
   },
 
+  async requestAdmin(body: {
+    name: string;
+    email: string;
+    phone1: string;
+    phone2: string;
+    phone3: string;
+  }): Promise<{message: string}> {
+    try {
+      const {data} = await axiosClient.post<{success: boolean; data: {message: string}}>(
+        Endpoints.auth.accountRecovery,
+        body,
+      );
+      return data.data;
+    } catch (e) {
+      logger.warn('authApi.requestAdmin failed', e);
+      rethrowApiError(e, 'Something went wrong. Please try again.');
+    }
+  },
+
   async logout(): Promise<void> {
     return respond(undefined);
   },
