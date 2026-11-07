@@ -106,6 +106,31 @@ export const ScreenNames = {
   ChildTimetable: 'ChildTimetable',
   Results: 'Results',
   ReportCard: 'ReportCard',
+
+  // Syllabus — Admin
+  SyllabusDashboard: 'SyllabusDashboard',
+  AdminSubjects: 'AdminSubjects',
+  AdminChapters: 'AdminChapters',
+  AdminPlanList: 'AdminPlanList',
+  CreatePlan: 'CreatePlan',
+  AdminPlanDetail: 'AdminPlanDetail',
+  ClassProgress: 'ClassProgress',
+  TeacherProgressReport: 'TeacherProgressReport',
+  DelayedChapters: 'DelayedChapters',
+  ApprovalQueue: 'ApprovalQueue',
+
+  // Syllabus — Teacher
+  TeacherMySyllabus: 'TeacherMySyllabus',
+  TeacherClassesSubjects: 'TeacherClassesSubjects',
+  TeacherOverallProgress: 'TeacherOverallProgress',
+  TeacherSyllabusPlanDetail: 'TeacherSyllabusPlanDetail',
+  TeacherChapterDetail: 'TeacherChapterDetail',
+
+  // Syllabus — Parent
+  ParentSyllabusOverview: 'ParentSyllabusOverview',
+  ParentSubjectProgress: 'ParentSubjectProgress',
+  ParentChapterDetail: 'ParentChapterDetail',
+  ParentOverallProgress: 'ParentOverallProgress',
 } as const;
 
 export type ScreenName = (typeof ScreenNames)[keyof typeof ScreenNames];

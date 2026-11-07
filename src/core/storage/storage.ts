@@ -58,4 +58,5 @@ export const StorageKeys = {
   SYNC_QUEUE: 'offline.syncQueue',
   CACHE_PREFIX: 'cache.',
   PUSH_DEVICE_TOKEN: 'notifications.deviceToken',
+  PERMISSIONS_CACHE: 'permissions.cache',
 } as const;

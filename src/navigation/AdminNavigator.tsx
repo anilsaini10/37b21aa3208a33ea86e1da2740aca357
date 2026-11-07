@@ -8,6 +8,8 @@ import {Icon} from '../shared/components';
 import type {AdminStackParamList, AdminTabParamList} from './types';
 import {ScreenNames} from './ScreenNames';
 import {floatingTabBarStyle} from './floatingTabBar';
+import {PermissionGuard} from '../features/auth/PermissionGuard';
+import {P} from '../core/config/permissions';
 
 import {AdminDashboardScreen} from '../features/dashboard/screens/AdminDashboardScreen';
 import {StudentsListScreen} from '../features/students/screens/StudentsListScreen';
@@ -63,7 +65,16 @@ import {AnnouncementFormScreen} from '../features/communication/screens/Announce
 import {NotificationsScreen} from '../features/communication/screens/NotificationsScreen';
 import {AdminLeaveScreen} from '../features/leave/screens/AdminLeaveScreen';
 import {RecoveryRequestsScreen} from '../features/recovery/screens/RecoveryRequestsScreen';
-import {useRecoveryRequests} from '../features/recovery/recoveryRequests.service';
+import {SyllabusDashboardScreen} from '../features/syllabus/screens/SyllabusDashboardScreen';
+import {AdminSubjectsScreen} from '../features/syllabus/screens/AdminSubjectsScreen';
+import {AdminChaptersScreen} from '../features/syllabus/screens/AdminChaptersScreen';
+import {AdminPlanListScreen} from '../features/syllabus/screens/AdminPlanListScreen';
+import {CreatePlanScreen} from '../features/syllabus/screens/CreatePlanScreen';
+import {AdminPlanDetailScreen} from '../features/syllabus/screens/AdminPlanDetailScreen';
+import {ClassProgressScreen} from '../features/syllabus/screens/ClassProgressScreen';
+import {TeacherProgressScreen} from '../features/syllabus/screens/TeacherProgressScreen';
+import {DelayedChaptersScreen} from '../features/syllabus/screens/DelayedChaptersScreen';
+import {ApprovalQueueScreen} from '../features/syllabus/screens/ApprovalQueueScreen';
 
 const Tab = createBottomTabNavigator<AdminTabParamList>();
 const Stack = createNativeStackNavigator<AdminStackParamList>();
@@ -73,14 +84,11 @@ const TAB_ICON: Record<keyof AdminTabParamList, string> = {
   Students: 'students',
   Teachers: 'teacher',
   More: 'settings',
-  RecoveryRequests: 'recovery',
 };
 
 function AdminTabs(): React.JSX.Element {
   const {theme} = useTheme();
   const insets = useSafeAreaInsets();
-  const {data: recoveryData} = useRecoveryRequests({status: 'PENDING', pageSize: 1});
-  const pendingCount = recoveryData?.statusCounts?.PENDING;
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
@@ -88,7 +96,6 @@ function AdminTabs(): React.JSX.Element {
         tabBarActiveTintColor: theme.colors.tabActive,
         tabBarInactiveTintColor: theme.colors.tabInactive,
         tabBarStyle: floatingTabBarStyle(theme, insets),
-        // Slightly larger than the library default (~10) — scales with the user's font-size setting.
         tabBarLabelStyle: {fontSize: 11 * theme.typography.scale},
         tabBarIcon: ({color}) => <Icon name={TAB_ICON[route.name]} size={24} color={color} />,
       })}>
@@ -96,14 +103,6 @@ function AdminTabs(): React.JSX.Element {
       <Tab.Screen name={ScreenNames.Students} component={StudentsTabScreen} />
       <Tab.Screen name={ScreenNames.Teachers} component={TeachersTabScreen} />
       <Tab.Screen name={ScreenNames.More} component={MoreScreen} />
-      <Tab.Screen
-        name={ScreenNames.RecoveryRequests}
-        component={RecoveryRequestsScreen}
-        options={{
-          tabBarLabel: 'Recovery',
-          tabBarBadge: pendingCount && pendingCount > 0 ? pendingCount : undefined,
-        }}
-      />
     </Tab.Navigator>
   );
 }
@@ -115,13 +114,13 @@ export function AdminNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.StudentsList} component={StudentsListScreen} />
       <Stack.Screen name={ScreenNames.StudentDetail} component={StudentDetailScreen} />
       <Stack.Screen name={ScreenNames.StudentForm} component={StudentFormScreen} />
-      <Stack.Screen name={ScreenNames.Fees} component={FeesListScreen} />
-      <Stack.Screen name={ScreenNames.TeacherForm} component={TeacherFormScreen} />
+      <Stack.Screen name={ScreenNames.Fees}>{() => <PermissionGuard permission={P.FEES_COLLECT}><FeesListScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.TeacherForm}>{() => <PermissionGuard permission={P.TEACHERS_MANAGE}><TeacherFormScreen /></PermissionGuard>}</Stack.Screen>
       <Stack.Screen name={ScreenNames.TeacherDetail} component={TeacherDetailScreen} />
-      <Stack.Screen name={ScreenNames.TeacherEdit} component={TeacherEditScreen} />
-      <Stack.Screen name={ScreenNames.Attendance} component={AttendanceReportScreen} />
+      <Stack.Screen name={ScreenNames.TeacherEdit}>{(props: any) => <PermissionGuard permission={P.TEACHERS_MANAGE}><TeacherEditScreen {...props} /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.Attendance}>{() => <PermissionGuard permission={P.ATTENDANCE_VIEW}><AttendanceReportScreen /></PermissionGuard>}</Stack.Screen>
       <Stack.Screen name={ScreenNames.ClassAttendance} component={ClassAttendanceScreen} />
-      <Stack.Screen name={ScreenNames.Exams} component={ExamsListScreen} />
+      <Stack.Screen name={ScreenNames.Exams}>{() => <PermissionGuard permission={P.EXAMS_MANAGE}><ExamsListScreen /></PermissionGuard>}</Stack.Screen>
       <Stack.Screen name={ScreenNames.ExamForm} component={ExamFormScreen} />
       <Stack.Screen name={ScreenNames.ExamClasses} component={ExamClassesScreen} />
       <Stack.Screen name={ScreenNames.ExamReport} component={ExamReportScreen} />
@@ -141,7 +140,7 @@ export function AdminNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.Library} component={LibraryScreen} />
       <Stack.Screen name={ScreenNames.Inventory} component={InventoryScreen} />
       <Stack.Screen name={ScreenNames.Reports} component={ReportsScreen} />
-      <Stack.Screen name={ScreenNames.Settings} component={SettingsScreen} />
+      <Stack.Screen name={ScreenNames.Settings}>{() => <PermissionGuard permission={P.SCHOOL_SETTINGS}><SettingsScreen /></PermissionGuard>}</Stack.Screen>
       <Stack.Screen name={ScreenNames.Notifications} component={NotificationsScreen} />
       <Stack.Screen name={ScreenNames.FeeReceipt} component={FeeReceiptScreen} />
       <Stack.Screen name={ScreenNames.FeesStudentsList} component={FeesStudentsListScreen} />
@@ -155,12 +154,23 @@ export function AdminNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.ClassSchedule} component={AdminTimetableScreen} />
       <Stack.Screen name={ScreenNames.PeriodForm} component={PeriodFormScreen} />
       <Stack.Screen name={ScreenNames.TeacherSchedule} component={TeacherScheduleScreen} />
-      <Stack.Screen name={ScreenNames.Leave} component={AdminLeaveScreen} />
+      <Stack.Screen name={ScreenNames.Leave}>{() => <PermissionGuard permission={P.LEAVE_APPROVE}><AdminLeaveScreen /></PermissionGuard>}</Stack.Screen>
       <Stack.Screen name={ScreenNames.MarkStaffAttendance} component={MarkStaffAttendanceScreen} />
       <Stack.Screen name={ScreenNames.StaffAttendanceRegister} component={StaffAttendanceRegisterScreen} />
       <Stack.Screen name={ScreenNames.Staff} component={StaffListScreen} />
       <Stack.Screen name={ScreenNames.StaffForm} component={StaffFormScreen} />
       <Stack.Screen name={ScreenNames.StaffDetail} component={StaffDetailScreen} />
+      <Stack.Screen name={ScreenNames.RecoveryRequests}>{() => <PermissionGuard permission={P.RECOVERY_APPROVE}><RecoveryRequestsScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.SyllabusDashboard}>{() => <PermissionGuard permission={P.SYLLABUS_VIEW}><SyllabusDashboardScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.AdminSubjects}>{() => <PermissionGuard permission={P.SYLLABUS_MANAGE}><AdminSubjectsScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.AdminChapters}>{() => <PermissionGuard permission={P.SYLLABUS_MANAGE}><AdminChaptersScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.AdminPlanList}>{() => <PermissionGuard permission={P.SYLLABUS_MANAGE}><AdminPlanListScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.CreatePlan}>{() => <PermissionGuard permission={P.SYLLABUS_MANAGE}><CreatePlanScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.AdminPlanDetail}>{() => <PermissionGuard permission={P.SYLLABUS_VIEW}><AdminPlanDetailScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.ClassProgress}>{() => <PermissionGuard permission={P.SYLLABUS_VIEW}><ClassProgressScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.TeacherProgressReport}>{() => <PermissionGuard permission={P.SYLLABUS_VIEW}><TeacherProgressScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.DelayedChapters}>{() => <PermissionGuard permission={P.SYLLABUS_VIEW}><DelayedChaptersScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.ApprovalQueue}>{() => <PermissionGuard permission={P.SYLLABUS_MANAGE}><ApprovalQueueScreen /></PermissionGuard>}</Stack.Screen>
     </Stack.Navigator>
   );
 }

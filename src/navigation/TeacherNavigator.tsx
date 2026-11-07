@@ -8,6 +8,8 @@ import {Icon} from '../shared/components';
 import type {TeacherStackParamList, TeacherTabParamList} from './types';
 import {ScreenNames} from './ScreenNames';
 import {floatingTabBarStyle} from './floatingTabBar';
+import {PermissionGuard} from '../features/auth/PermissionGuard';
+import {P} from '../core/config/permissions';
 
 import {TeacherDashboardScreen} from '../features/dashboard/screens/TeacherDashboardScreen';
 import {HomeworkListScreen} from '../features/homework/screens/HomeworkListScreen';
@@ -38,6 +40,11 @@ import {MySubscriptionsScreen} from '../features/subscription/screens/MySubscrip
 import {SchoolCalendarScreen} from '../features/calendar/screens/SchoolCalendarScreen';
 import {TeacherExamsScreen} from '../features/exams/screens/TeacherExamsScreen';
 import {TeacherPaperMarksScreen} from '../features/exams/screens/TeacherPaperMarksScreen';
+import {TeacherMySyllabusScreen} from '../features/syllabus/screens/TeacherMySyllabusScreen';
+import {TeacherClassesSubjectsScreen} from '../features/syllabus/screens/TeacherClassesSubjectsScreen';
+import {TeacherOverallProgressScreen} from '../features/syllabus/screens/TeacherOverallProgressScreen';
+import {TeacherPlanDetailScreen} from '../features/syllabus/screens/TeacherPlanDetailScreen';
+import {TeacherChapterDetailScreen} from '../features/syllabus/screens/TeacherChapterDetailScreen';
 
 const Tab = createBottomTabNavigator<TeacherTabParamList>();
 const Stack = createNativeStackNavigator<TeacherStackParamList>();
@@ -74,18 +81,32 @@ export function TeacherNavigator(): React.JSX.Element {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen name={ScreenNames.Tabs} component={TeacherTabs} />
-      <Stack.Screen name={ScreenNames.MarkAttendance} component={MarkAttendanceScreen} />
-      <Stack.Screen name={ScreenNames.HomeworkForm} component={HomeworkFormScreen} />
-      <Stack.Screen name={ScreenNames.HomeworkDetail} component={HomeworkDetailScreen} />
-      <Stack.Screen name={ScreenNames.HomeworkSubmissions} component={HomeworkSubmissionsScreen} />
+      <Stack.Screen name={ScreenNames.MarkAttendance}>
+        {() => <PermissionGuard permission={P.ATTENDANCE_MARK}><MarkAttendanceScreen /></PermissionGuard>}
+      </Stack.Screen>
+      <Stack.Screen name={ScreenNames.HomeworkForm}>
+        {() => <PermissionGuard permission={P.HOMEWORK_ASSIGN}><HomeworkFormScreen /></PermissionGuard>}
+      </Stack.Screen>
+      <Stack.Screen name={ScreenNames.HomeworkDetail}>
+        {() => <PermissionGuard permission={P.HOMEWORK_ASSIGN}><HomeworkDetailScreen /></PermissionGuard>}
+      </Stack.Screen>
+      <Stack.Screen name={ScreenNames.HomeworkSubmissions}>
+        {() => <PermissionGuard permission={P.HOMEWORK_ASSIGN}><HomeworkSubmissionsScreen /></PermissionGuard>}
+      </Stack.Screen>
       <Stack.Screen name={ScreenNames.Timetable} component={TimetableScreen} />
       <Stack.Screen name={ScreenNames.MySchedule} component={MyScheduleScreen} />
       <Stack.Screen name={ScreenNames.ClassStudents} component={ClassStudentsScreen} />
       <Stack.Screen name={ScreenNames.StudentDetail} component={StudentDetailScreen} />
       <Stack.Screen name={ScreenNames.StudentAttendanceHistory} component={StudentAttendanceHistoryScreen} />
-      <Stack.Screen name={ScreenNames.Leave} component={TeacherLeaveScreen} />
-      <Stack.Screen name={ScreenNames.MyLeave} component={MyLeaveScreen} />
-      <Stack.Screen name={ScreenNames.MyLeaveApply} component={MyLeaveApplyScreen} />
+      <Stack.Screen name={ScreenNames.Leave}>
+        {() => <PermissionGuard permission={P.LEAVE_APPROVE}><TeacherLeaveScreen /></PermissionGuard>}
+      </Stack.Screen>
+      <Stack.Screen name={ScreenNames.MyLeave}>
+        {() => <PermissionGuard permission={P.LEAVE_VIEW}><MyLeaveScreen /></PermissionGuard>}
+      </Stack.Screen>
+      <Stack.Screen name={ScreenNames.MyLeaveApply}>
+        {() => <PermissionGuard permission={P.LEAVE_VIEW}><MyLeaveApplyScreen /></PermissionGuard>}
+      </Stack.Screen>
       <Stack.Screen name={ScreenNames.MyAttendance} component={MyAttendanceScreen} />
       <Stack.Screen name={ScreenNames.MyProfile} component={MyProfileScreen} />
       <Stack.Screen name={ScreenNames.Chat} component={ChatScreen} />
@@ -97,8 +118,27 @@ export function TeacherNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.PlanDetail} component={PlanDetailScreen} />
       <Stack.Screen name={ScreenNames.MySubscriptions} component={MySubscriptionsScreen} />
       <Stack.Screen name={ScreenNames.AcademicCalendar} component={SchoolCalendarScreen} />
-      <Stack.Screen name={ScreenNames.TeacherExams} component={TeacherExamsScreen} />
-      <Stack.Screen name={ScreenNames.TeacherPaperMarks} component={TeacherPaperMarksScreen} />
+      <Stack.Screen name={ScreenNames.TeacherExams}>
+        {() => <PermissionGuard permission={P.EXAMS_VIEW}><TeacherExamsScreen /></PermissionGuard>}
+      </Stack.Screen>
+      <Stack.Screen name={ScreenNames.TeacherPaperMarks}>
+        {() => <PermissionGuard permission={P.EXAMS_VIEW}><TeacherPaperMarksScreen /></PermissionGuard>}
+      </Stack.Screen>
+      <Stack.Screen name={ScreenNames.TeacherMySyllabus}>
+        {() => <PermissionGuard permission={P.SYLLABUS_VIEW}><TeacherMySyllabusScreen /></PermissionGuard>}
+      </Stack.Screen>
+      <Stack.Screen name={ScreenNames.TeacherClassesSubjects}>
+        {() => <PermissionGuard permission={P.SYLLABUS_VIEW}><TeacherClassesSubjectsScreen /></PermissionGuard>}
+      </Stack.Screen>
+      <Stack.Screen name={ScreenNames.TeacherOverallProgress}>
+        {() => <PermissionGuard permission={P.SYLLABUS_VIEW}><TeacherOverallProgressScreen /></PermissionGuard>}
+      </Stack.Screen>
+      <Stack.Screen name={ScreenNames.TeacherSyllabusPlanDetail}>
+        {() => <PermissionGuard permission={P.SYLLABUS_VIEW}><TeacherPlanDetailScreen /></PermissionGuard>}
+      </Stack.Screen>
+      <Stack.Screen name={ScreenNames.TeacherChapterDetail}>
+        {() => <PermissionGuard permission={P.SYLLABUS_VIEW}><TeacherChapterDetailScreen /></PermissionGuard>}
+      </Stack.Screen>
     </Stack.Navigator>
   );
 }

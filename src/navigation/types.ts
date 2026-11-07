@@ -57,7 +57,6 @@ export type AdminTabParamList = {
   Students: undefined;
   Teachers: undefined;
   More: undefined;
-  RecoveryRequests: undefined;
 };
 
 export type AdminStackParamList = {
@@ -138,6 +137,16 @@ export type AdminStackParamList = {
   StaffForm: {staffId?: string; initial?: Staff} | undefined;
   StaffDetail: {staffId: string; initial?: Staff};
   RecoveryRequests: undefined;
+  SyllabusDashboard: undefined;
+  AdminSubjects: undefined;
+  AdminChapters: undefined;
+  AdminPlanList: undefined;
+  CreatePlan: undefined;
+  AdminPlanDetail: {planId: string};
+  ClassProgress: undefined;
+  TeacherProgressReport: undefined;
+  DelayedChapters: undefined;
+  ApprovalQueue: undefined;
 };
 
 // ---- Teacher --------------------------------------------------------------
@@ -179,6 +188,11 @@ export type TeacherStackParamList = {
   TeacherPaperMarks: {scheduleId: string; paper?: TeacherExamPaper};
   /** Read-only academic calendar (shared with Parent). */
   AcademicCalendar: undefined;
+  TeacherMySyllabus: undefined;
+  TeacherClassesSubjects: undefined;
+  TeacherOverallProgress: undefined;
+  TeacherSyllabusPlanDetail: {planId: string};
+  TeacherChapterDetail: {planId: string; planChapterId: string};
 };
 
 // ---- Parent ---------------------------------------------------------------
@@ -210,6 +224,10 @@ export type ParentStackParamList = {
   FeeReceipt: {invoiceId: string};
   /** Read-only academic calendar for the selected child. */
   AcademicCalendar: undefined;
+  ParentSyllabusOverview: undefined;
+  ParentSubjectProgress: {subjectId: string; studentId: string};
+  ParentChapterDetail: {planChapterId: string; studentId: string};
+  ParentOverallProgress: undefined;
 };
 
 // ---- Subscription (shared by all three role stacks) ------------------------

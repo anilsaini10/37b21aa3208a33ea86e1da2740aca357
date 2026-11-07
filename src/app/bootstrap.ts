@@ -18,6 +18,7 @@ import {
   currentDevicePlatform,
 } from '../core/notifications';
 import {useAuthStore} from '../features/auth/authStore';
+import {usePermissionsStore, startPermissionsAppStateListener} from '../features/auth/permissionsStore';
 import {setUnauthorizedHandler, setPaymentRequiredHandler} from '../core/api/sessionEvents';
 import {queryClient} from '../core/query/queryClient';
 import {logger} from '../core/utils/logger';
@@ -91,9 +92,22 @@ export function bootstrap(): void {
   }
   useAuthStore.getState().hydrate();
 
+  // Hydrate cached permissions if a session was restored.
+  const hydratedUser = useAuthStore.getState().user;
+  if (hydratedUser) {
+    usePermissionsStore.getState().hydrateFromCache(hydratedUser.id);
+    usePermissionsStore.getState().fetch(hydratedUser.id);
+  }
+
+  // Re-fetch permissions when the app comes back to the foreground (if stale).
+  startPermissionsAppStateListener(() => useAuthStore.getState().user?.id);
+
   // Any request coming back 401 (missing/expired token) clears the session
   // app-wide — the root navigator swaps back to the login flow on its own.
-  setUnauthorizedHandler(() => useAuthStore.getState().forceLogout());
+  setUnauthorizedHandler(() => {
+    usePermissionsStore.getState().clear();
+    useAuthStore.getState().forceLogout();
+  });
 
   // 402 PAYMENT_REQUIRED — refetch entitlements so the lock screen shows current data.
   setPaymentRequiredHandler(() => {

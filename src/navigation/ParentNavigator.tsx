@@ -31,6 +31,12 @@ import {SubscriptionPlansScreen} from '../features/subscription/screens/Subscrip
 import {PlanDetailScreen} from '../features/subscription/screens/PlanDetailScreen';
 import {MySubscriptionsScreen} from '../features/subscription/screens/MySubscriptionsScreen';
 import {SchoolCalendarScreen} from '../features/calendar/screens/SchoolCalendarScreen';
+import {PermissionGuard} from '../features/auth/PermissionGuard';
+import {P} from '../core/config/permissions';
+import {ParentSyllabusOverviewScreen} from '../features/syllabus/screens/ParentSyllabusOverviewScreen';
+import {ParentSubjectProgressScreen} from '../features/syllabus/screens/ParentSubjectProgressScreen';
+import {ParentChapterDetailScreen} from '../features/syllabus/screens/ParentChapterDetailScreen';
+import {ParentOverallProgressScreen} from '../features/syllabus/screens/ParentOverallProgressScreen';
 
 const Tab = createBottomTabNavigator<ParentTabParamList>();
 const Stack = createNativeStackNavigator<ParentStackParamList>();
@@ -69,22 +75,46 @@ export function ParentNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.Tabs} component={ParentTabs} />
       <Stack.Screen name={ScreenNames.ChildProfile} component={ChildProfileScreen} />
       <Stack.Screen name={ScreenNames.ChildTimetable} component={ChildTimetableScreen} />
-      <Stack.Screen name={ScreenNames.Results} component={ResultsScreen} />
-      <Stack.Screen name={ScreenNames.ReportCard} component={ReportCardScreen} />
-      <Stack.Screen name={ScreenNames.Fees} component={ParentFeesScreen} />
+      <Stack.Screen name={ScreenNames.Results}>
+        {() => <PermissionGuard permission={P.EXAMS_VIEW}><ResultsScreen /></PermissionGuard>}
+      </Stack.Screen>
+      <Stack.Screen name={ScreenNames.ReportCard}>
+        {() => <PermissionGuard permission={P.EXAMS_VIEW}><ReportCardScreen /></PermissionGuard>}
+      </Stack.Screen>
+      <Stack.Screen name={ScreenNames.Fees}>
+        {() => <PermissionGuard permission={P.FEES_MODULE}><ParentFeesScreen /></PermissionGuard>}
+      </Stack.Screen>
       <Stack.Screen name={ScreenNames.Timetable} component={TimetableScreen} />
       <Stack.Screen name={ScreenNames.Announcements} component={AnnouncementsScreen} />
       <Stack.Screen name={ScreenNames.Events} component={EventsScreen} />
       <Stack.Screen name={ScreenNames.Chat} component={ChatScreen} />
-      <Stack.Screen name={ScreenNames.Leave} component={ParentLeaveScreen} />
-      <Stack.Screen name={ScreenNames.LeaveApply} component={ParentApplyLeaveScreen} />
+      <Stack.Screen name={ScreenNames.Leave}>
+        {() => <PermissionGuard permission={P.LEAVE_VIEW}><ParentLeaveScreen /></PermissionGuard>}
+      </Stack.Screen>
+      <Stack.Screen name={ScreenNames.LeaveApply}>
+        {() => <PermissionGuard permission={P.LEAVE_VIEW}><ParentApplyLeaveScreen /></PermissionGuard>}
+      </Stack.Screen>
       <Stack.Screen name={ScreenNames.Notifications} component={NotificationsScreen} />
       <Stack.Screen name={ScreenNames.ChangePassword} component={ChangePasswordScreen} />
       <Stack.Screen name={ScreenNames.SubscriptionPlans} component={SubscriptionPlansScreen} />
       <Stack.Screen name={ScreenNames.PlanDetail} component={PlanDetailScreen} />
       <Stack.Screen name={ScreenNames.MySubscriptions} component={MySubscriptionsScreen} />
       <Stack.Screen name={ScreenNames.AcademicCalendar} component={SchoolCalendarScreen} />
-      <Stack.Screen name={ScreenNames.FeeReceipt} component={FeeReceiptScreen} />
+      <Stack.Screen name={ScreenNames.FeeReceipt}>
+        {() => <PermissionGuard permission={P.FEES_MODULE}><FeeReceiptScreen /></PermissionGuard>}
+      </Stack.Screen>
+      <Stack.Screen name={ScreenNames.ParentSyllabusOverview}>
+        {() => <PermissionGuard permission={P.SYLLABUS_VIEW}><ParentSyllabusOverviewScreen /></PermissionGuard>}
+      </Stack.Screen>
+      <Stack.Screen name={ScreenNames.ParentSubjectProgress}>
+        {() => <PermissionGuard permission={P.SYLLABUS_VIEW}><ParentSubjectProgressScreen /></PermissionGuard>}
+      </Stack.Screen>
+      <Stack.Screen name={ScreenNames.ParentChapterDetail}>
+        {() => <PermissionGuard permission={P.SYLLABUS_VIEW}><ParentChapterDetailScreen /></PermissionGuard>}
+      </Stack.Screen>
+      <Stack.Screen name={ScreenNames.ParentOverallProgress}>
+        {() => <PermissionGuard permission={P.SYLLABUS_VIEW}><ParentOverallProgressScreen /></PermissionGuard>}
+      </Stack.Screen>
     </Stack.Navigator>
   );
 }

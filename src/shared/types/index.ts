@@ -12,3 +12,4 @@ export * from './school';
 export * from './academicCalendar';
 export * from './subscription';
 export * from './recovery';
+export * from './syllabus';

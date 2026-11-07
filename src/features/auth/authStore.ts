@@ -11,8 +11,8 @@ import {authApi, type SignupInput} from './authApi';
 import {extractErrorDetails} from '../../core/api/apiError';
 import type {AuthSession, AuthUser, UserRole} from '../../shared/types';
 import type {PermissionKey} from '../../core/config/permissions';
-import {hasPermission} from '../../core/config/permissions';
 import {deviceTokenApi, getDeviceToken, currentDevicePlatform} from '../../core/notifications';
+import {usePermissionsStore} from './permissionsStore';
 import {logger} from '../../core/utils/logger';
 
 interface AuthState {
@@ -82,6 +82,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     persistSession(session);
     set({user: session.user, isAuthenticated: true, error: null, errorCode: null, errorDetails: null});
     registerDeviceTokenBestEffort();
+    usePermissionsStore.getState().fetch(session.user.id);
   },
 
   signup: async (input: SignupInput) => {
@@ -91,6 +92,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       persistSession(session);
       set({user: session.user, isAuthenticated: true, isLoading: false});
       registerDeviceTokenBestEffort();
+      usePermissionsStore.getState().fetch(session.user.id);
       return true;
     } catch (e) {
       const message = (e as {message?: string}).message ?? 'Signup failed. Please try again.';
@@ -107,6 +109,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       persistSession(session);
       set({user: session.user, isAuthenticated: true, isLoading: false});
       registerDeviceTokenBestEffort();
+      usePermissionsStore.getState().fetch(session.user.id);
       return true;
     } catch (e) {
       const message = (e as {message?: string}).message ?? 'Login failed. Please try again.';
@@ -123,6 +126,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       persistSession(session);
       set({user: session.user, isAuthenticated: true, isLoading: false});
       registerDeviceTokenBestEffort();
+      usePermissionsStore.getState().fetch(session.user.id);
       return true;
     } catch (e) {
       const message = (e as {message?: string}).message ?? 'Login failed. Please try again.';
@@ -143,18 +147,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
     await authApi.logout();
     clearSession();
+    usePermissionsStore.getState().clear();
     set({user: null, isAuthenticated: false, error: null, errorCode: null, errorDetails: null});
   },
 
   forceLogout: () => {
     clearSession();
+    usePermissionsStore.getState().clear();
     set({user: null, isAuthenticated: false, error: null, errorCode: null, errorDetails: null});
   },
 
   clearError: () => set({error: null, errorCode: null, errorDetails: null}),
 
   can: (permission) => {
-    const user = get().user;
-    return user ? hasPermission(user.permissions, permission) : false;
+    return usePermissionsStore.getState().can(permission);
   },
 }));

@@ -31,6 +31,9 @@ import {
 import {formatCurrency, formatDate} from '../../../core/utils/format';
 import {attendancePercentageTone} from '../../../shared/helpers';
 import {useAuthStore} from '../../auth/authStore';
+import {usePermissions} from '../../auth/usePermissions';
+import {P} from '../../../core/config/permissions';
+import {usePermissionGate} from '../../auth/usePermissionGate';
 import {useParentDashboard} from '../dashboard.service';
 import {useParentDashboardStats} from '../parentDashboardStats.service';
 import {useParentProfile} from '../../parent/parentStudents.service';
@@ -160,6 +163,8 @@ function ParentDashboardContent({
   const navigation = useNavigation<Nav>();
   const tabNavigation = useNavigation<TabNav>();
   const user = useAuthStore(s => s.user);
+  const {refresh: refreshPermissions} = usePermissions();
+  const {gate, PermissionModal} = usePermissionGate();
   const {t} = useLanguage();
 
   const {
@@ -284,6 +289,7 @@ function ParentDashboardContent({
               refetchStats();
               refetchEvents();
               refetchAnnouncements();
+              refreshPermissions();
             }}
           />
         }>
@@ -331,10 +337,10 @@ function ParentDashboardContent({
         <SectionTitle title={t('parentDashboard_quickLinks')} />
         <Row gap={theme.spacing.md}>
           <View style={styles.flexOne}>
-            <CustomButton title={t('parentDashboard_results')} variant="outline" onPress={() => navigation.navigate(ScreenNames.Results)} />
+            <CustomButton title={t('parentDashboard_results')} variant="outline" onPress={gate(P.EXAMS_VIEW, () => navigation.navigate(ScreenNames.Results))} />
           </View>
           <View style={styles.flexOne}>
-            <CustomButton title={t('parentDashboard_timetable')} variant="outline" onPress={() => navigation.navigate(ScreenNames.ChildTimetable)} />
+            <CustomButton title={t('parentDashboard_timetable')} variant="outline" onPress={gate(P.TIMETABLE_VIEW, () => navigation.navigate(ScreenNames.ChildTimetable))} />
           </View>
         </Row>
 
@@ -390,6 +396,7 @@ function ParentDashboardContent({
         <Spacer size={24} />
       </ScrollView>
       <SubscriptionPlansModal visible={showPlansModal} onClose={() => setPlansModalDismissed(true)} />
+      <PermissionModal />
     </Screen>
   );
 }

@@ -1,69 +1,121 @@
 /**
- * Role-based access control (RBAC).
+ * Permission constants — keys match the backend response from
+ * GET /api/auth/permissions → data.permissions.
  *
- * Permission keys are the single source of truth for what each role may do.
- * Navigation guards + UI use `hasPermission()` to gate features.
+ * SuperAdmin bypasses all checks (handled in the store).
+ * School-level module toggles (e.g. attendanceModule) gate entire features;
+ * role-level keys gate granular actions within an enabled module.
  */
-import type {UserRole} from '../../shared/types/user';
 
-export const Permissions = {
-  STUDENT_MANAGE: 'student.manage',
-  TEACHER_MANAGE: 'teacher.manage',
-  FEE_MANAGE: 'fee.manage',
-  FEE_VIEW: 'fee.view',
-  ATTENDANCE_MARK: 'attendance.mark',
-  ATTENDANCE_VIEW: 'attendance.view',
-  EXAM_MANAGE: 'exam.manage',
-  EXAM_VIEW: 'exam.view',
-  HOMEWORK_MANAGE: 'homework.manage',
-  HOMEWORK_VIEW: 'homework.view',
-  ANNOUNCEMENT_MANAGE: 'announcement.manage',
-  TRANSPORT_MANAGE: 'transport.manage',
-  LIBRARY_MANAGE: 'library.manage',
-  INVENTORY_MANAGE: 'inventory.manage',
-  REPORTS_VIEW: 'reports.view',
-  SETTINGS_MANAGE: 'settings.manage',
-  CHAT: 'chat',
-  LEAVE_APPLY: 'leave.apply',
-  LEAVE_APPROVE: 'leave.approve',
+export const P = {
+  // Attendance
+  ATTENDANCE_VIEW: 'attendanceView',
+  ATTENDANCE_MARK: 'attendanceMark',
+  ATTENDANCE_HISTORY: 'attendanceHistory',
+  TEACHER_ATTENDANCE_VIEW: 'teacherAttendanceView',
+  TEACHER_ATTENDANCE_MARK: 'teacherAttendanceMark',
+
+  // Academics
+  CLASSES_VIEW: 'classesView',
+  CLASSES_MANAGE: 'classesManage',
+  SUBJECTS_VIEW: 'subjectsView',
+  SUBJECTS_MANAGE: 'subjectsManage',
+  TIMETABLE_VIEW: 'timetableView',
+  TIMETABLE_MANAGE: 'timetableManage',
+  CALENDAR_VIEW: 'calendarView',
+  CALENDAR_MANAGE: 'calendarManage',
+
+  // Exams
+  EXAMS_VIEW: 'examsView',
+  EXAMS_MANAGE: 'examsManage',
+  MARKS_ENTRY: 'marksEntry',
+  MARKS_VIEW: 'marksView',
+
+  // People
+  STUDENTS_VIEW: 'studentsView',
+  STUDENTS_MANAGE: 'studentsManage',
+  STUDENT_ID_CARD: 'studentIdCard',
+  TEACHERS_VIEW: 'teachersView',
+  TEACHERS_MANAGE: 'teachersManage',
+  STAFF_VIEW: 'staffView',
+  STAFF_MANAGE: 'staffManage',
+  ROLE_ACCOUNTS_VIEW: 'roleAccountsView',
+  ROLE_ACCOUNTS_MANAGE: 'roleAccountsManage',
+
+  // Analytics
+  REPORTS_VIEW: 'reportsView',
+  REPORT_FORMAT: 'reportFormat',
+  ANALYTICS_STUDENTS: 'analyticsStudents',
+  ANALYTICS_ATTENDANCE: 'analyticsAttendance',
+  ANALYTICS_ACADEMICS: 'analyticsAcademics',
+  ANALYTICS_TEACHERS: 'analyticsTeachers',
+  ANALYTICS_HOMEWORK: 'analyticsHomework',
+  ANALYTICS_COMPARISONS: 'analyticsComparisons',
+  ANALYTICS_ALERTS: 'analyticsAlerts',
+  ANALYTICS_INTERVENTIONS: 'analyticsInterventions',
+
+  // Communication
+  ANNOUNCEMENTS_VIEW: 'announcementsView',
+  ANNOUNCEMENTS_MANAGE: 'announcementsManage',
+  EVENTS_VIEW: 'eventsView',
+  EVENTS_MANAGE: 'eventsManage',
+  NOTIFICATIONS_VIEW: 'notificationsView',
+  NOTIFICATIONS_SEND: 'notificationsSend',
+
+  // Requests
+  LEAVE_VIEW: 'leaveView',
+  LEAVE_APPROVE: 'leaveApprove',
+  RECOVERY_VIEW: 'recoveryView',
+  RECOVERY_APPROVE: 'recoveryApprove',
+
+  // Availability
+  AVAILABILITY_VIEW: 'availabilityView',
+
+  // Fees
+  FEES_MODULE: 'feesModule',
+  FEES_COLLECT: 'feesCollect',
+  RECEIPT_PRINT: 'receiptPrint',
+  MAX_DISCOUNT_PERCENT: 'maxDiscountPercent',
+
+  // Salary
+  SALARY_VIEW: 'salaryView',
+
+  // Settings
+  SCHOOL_SETTINGS: 'schoolSettings',
+  ROLE_PERMISSIONS: 'rolePermissions',
+
+  // School-level module toggles
+  ATTENDANCE_MODULE: 'attendanceModule',
+  TEACHER_ATTENDANCE_MODULE: 'teacherAttendanceModule',
+  TIMETABLE_MODULE: 'timetableModule',
+  EXAMS_MODULE: 'examsModule',
+  CALENDAR_MODULE: 'calendarModule',
+  STUDENTS_MODULE: 'studentsModule',
+  TEACHERS_MODULE: 'teachersModule',
+  STAFF_MODULE: 'staffModule',
+  ROLE_ACCOUNTS_MODULE: 'roleAccountsModule',
+  MARKS_ENTRY_MODULE: 'marksEntryModule',
+  ANALYTICS_MODULE: 'analyticsModule',
+  ANNOUNCEMENTS_MODULE: 'announcementsModule',
+  EVENTS_MODULE: 'eventsModule',
+  NOTIFICATIONS_MODULE: 'notificationsModule',
+  LEAVE_MODULE: 'leaveModule',
+  RECOVERY_MODULE: 'recoveryModule',
+  AVAILABILITY_MODULE: 'availabilityModule',
+  SCHOOL_SETTINGS_MODULE: 'schoolSettingsModule',
+
+  // Syllabus
+  SYLLABUS_VIEW: 'syllabusView',
+  SYLLABUS_MANAGE: 'syllabusManage',
+
+  // App-specific (not in backend catalog but used in-app)
+  HOMEWORK_ASSIGN: 'homeworkAssign',
+  HOMEWORK_VIEW: 'homeworkView',
+  PROFILE_VIEW: 'profileView',
+  DASHBOARD_VIEW: 'dashboardView',
+  SUBSCRIPTION_VIEW: 'subscriptionView',
 } as const;
 
-export type PermissionKey = (typeof Permissions)[keyof typeof Permissions];
+export type PermissionKey = (typeof P)[keyof typeof P];
 
-const ADMIN_PERMISSIONS: PermissionKey[] = Object.values(Permissions);
-
-const TEACHER_PERMISSIONS: PermissionKey[] = [
-  Permissions.ATTENDANCE_MARK,
-  Permissions.ATTENDANCE_VIEW,
-  Permissions.EXAM_MANAGE,
-  Permissions.EXAM_VIEW,
-  Permissions.HOMEWORK_MANAGE,
-  Permissions.HOMEWORK_VIEW,
-  Permissions.ANNOUNCEMENT_MANAGE,
-  Permissions.REPORTS_VIEW,
-  Permissions.CHAT,
-  Permissions.LEAVE_APPLY,
-];
-
-const PARENT_PERMISSIONS: PermissionKey[] = [
-  Permissions.FEE_VIEW,
-  Permissions.ATTENDANCE_VIEW,
-  Permissions.EXAM_VIEW,
-  Permissions.HOMEWORK_VIEW,
-  Permissions.CHAT,
-  Permissions.LEAVE_APPLY,
-];
-
-export const ROLE_PERMISSIONS: Record<UserRole, PermissionKey[]> = {
-  admin: ADMIN_PERMISSIONS,
-  teacher: TEACHER_PERMISSIONS,
-  parent: PARENT_PERMISSIONS,
-};
-
-export function permissionsForRole(role: UserRole): PermissionKey[] {
-  return ROLE_PERMISSIONS[role] ?? [];
-}
-
-export function hasPermission(granted: string[], required: PermissionKey): boolean {
-  return granted.includes(required);
-}
+export const PERMISSIONS = P;

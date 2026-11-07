@@ -25,6 +25,7 @@ export const Endpoints = {
     accountRecovery: '/api/account-recovery/requests',
     refresh: '/api/auth/refresh',
     logout: '/api/auth/logout',
+    permissions: '/api/auth/permissions',
   },
   schools: {
     search: '/api/schools',
@@ -48,6 +49,10 @@ export const Endpoints = {
   subjects: {
     list: '/api/subjects',
     create: '/api/subjects',
+    byId: (subjectId: string) => `/api/subjects/${subjectId}`,
+    toggleStatus: (subjectId: string) => `/api/subjects/${subjectId}/status`,
+    assignClasses: (subjectId: string) => `/api/subjects/${subjectId}/classes`,
+    byClass: (classId: string) => `/api/subjects/by-class/${classId}`,
   },
   admin: {
     dashboard: '/api/admin/dashboard',
@@ -154,6 +159,38 @@ export const Endpoints = {
     resetPassword: '/api/students/reset-password',
     /** Requires `?studentId=` — exams are limited to that child's class. */
     academicCalendar: '/api/students/academic-calendar',
+  },
+  adminSyllabus: {
+    chapters: '/api/admin/syllabus/chapters',
+    chapterById: (chapterId: string) => `/api/admin/syllabus/chapters/${chapterId}`,
+    chapterStatus: (chapterId: string) => `/api/admin/syllabus/chapters/${chapterId}/status`,
+    chaptersReorder: '/api/admin/syllabus/chapters/reorder',
+    plans: '/api/admin/syllabus/plans',
+    planById: (planId: string) => `/api/admin/syllabus/plans/${planId}`,
+    planChapter: (planId: string, chapterId: string) => `/api/admin/syllabus/plans/${planId}/chapters/${chapterId}`,
+    dashboard: '/api/admin/syllabus/dashboard',
+    classProgress: '/api/admin/syllabus/reports/class-progress',
+    teacherProgress: '/api/admin/syllabus/reports/teacher-progress',
+    delayedChapters: '/api/admin/syllabus/reports/delayed-chapters',
+    approvals: '/api/admin/syllabus/approvals',
+    approvalById: (approvalId: string) => `/api/admin/syllabus/approvals/${approvalId}`,
+    approvalCorrect: (planChapterId: string) => `/api/admin/syllabus/approvals/correct/${planChapterId}`,
+  },
+  teacherSyllabus: {
+    list: '/api/teacher/syllabus',
+    classesSubjects: '/api/teacher/syllabus/classes-subjects',
+    progress: '/api/teacher/syllabus/progress',
+    planById: (planId: string) => `/api/teacher/syllabus/plan/${planId}`,
+    chapterDetail: (planId: string, planChapterId: string) => `/api/teacher/syllabus/plan/${planId}/chapter/${planChapterId}`,
+    startChapter: (planId: string, planChapterId: string) => `/api/teacher/syllabus/plan/${planId}/chapter/${planChapterId}/start`,
+    submitProgress: (planId: string, planChapterId: string) => `/api/teacher/syllabus/plan/${planId}/chapter/${planChapterId}/progress`,
+    completeChapter: (planId: string, planChapterId: string) => `/api/teacher/syllabus/plan/${planId}/chapter/${planChapterId}/complete`,
+  },
+  parentSyllabus: {
+    overview: '/api/students/syllabus',
+    subjectDetail: (subjectId: string) => `/api/students/syllabus/subject/${subjectId}`,
+    chapterDetail: (planChapterId: string) => `/api/students/syllabus/chapter/${planChapterId}`,
+    progress: '/api/students/syllabus/progress',
   },
   // Same routes for every role — the backend scopes plans/subscriptions to the logged-in user.
   subscription: {

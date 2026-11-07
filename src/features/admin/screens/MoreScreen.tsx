@@ -18,6 +18,8 @@ import {
   moreMenuAccentForIndex,
 } from '../../../shared/components';
 import {useAuthStore} from '../../auth/authStore';
+import {P, type PermissionKey} from '../../../core/config/permissions';
+import {usePermissionGate} from '../../auth/usePermissionGate';
 import {TestPaymentButton} from '../../subscription/components/TestPaymentButton';
 import type {AdminStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
@@ -45,53 +47,62 @@ type NoParamRoute =
   | 'Reports'
   | 'Settings'
   | 'SubscriptionPlans'
-  | 'Notifications';
+  | 'Notifications'
+  | 'RecoveryRequests'
+  | 'SyllabusDashboard';
 
 interface ModuleItem {
   labelKey: TranslationKey;
   icon: string;
   route: NoParamRoute;
+  permission?: PermissionKey;
 }
 
 const MODULES: ModuleItem[] = [
   {labelKey: 'teacherProfile_profile', icon: 'profile', route: ScreenNames.Profile},
-  // {labelKey: 'feesList_headerTitle', icon: 'fee', route: ScreenNames.Fees},
-  {labelKey: 'moreScreen_classes', icon: 'class', route: ScreenNames.ClassesManage},
-  // {labelKey: 'moreScreen_subjects', icon: 'homework', route: ScreenNames.SubjectsManage},
-  {labelKey: 'moreScreen_classSchedule', icon: 'timetable', route: ScreenNames.ClassSchedule},
-  {labelKey: 'moreScreen_teacherSchedule', icon: 'timetable', route: ScreenNames.TeacherSchedule},
-  {labelKey: 'moreScreen_staff', icon: 'staff', route: ScreenNames.Staff},
-  {labelKey: 'moreScreen_attendance', icon: 'attendance', route: ScreenNames.Attendance},
-  {labelKey: 'moreScreen_exams', icon: 'exam', route: ScreenNames.Exams},
-  {labelKey: 'calendar_title', icon: 'calendar', route: ScreenNames.AcademicCalendar},
-  {labelKey: 'moreScreen_announcements', icon: 'announcement', route: ScreenNames.Announcements},
-  {labelKey: 'moreScreen_leave', icon: 'calendar', route: ScreenNames.Leave},
-  {labelKey: 'moreScreen_events', icon: 'event', route: ScreenNames.Events},
+  // {labelKey: 'feesList_headerTitle', icon: 'fee', route: ScreenNames.Fees, permission: P.FEES_COLLECT},
+  {labelKey: 'moreScreen_classes', icon: 'class', route: ScreenNames.ClassesManage, permission: P.CLASSES_MANAGE},
+  // {labelKey: 'moreScreen_subjects', icon: 'homework', route: ScreenNames.SubjectsManage, permission: P.SUBJECTS_MANAGE},
+  {labelKey: 'moreScreen_classSchedule', icon: 'timetable', route: ScreenNames.ClassSchedule, permission: P.TIMETABLE_MANAGE},
+  {labelKey: 'moreScreen_teacherSchedule', icon: 'timetable', route: ScreenNames.TeacherSchedule, permission: P.TIMETABLE_MANAGE},
+  {labelKey: 'moreScreen_staff', icon: 'staff', route: ScreenNames.Staff, permission: P.STAFF_MANAGE},
+  {labelKey: 'moreScreen_attendance', icon: 'attendance', route: ScreenNames.Attendance, permission: P.ATTENDANCE_VIEW},
+  {labelKey: 'moreScreen_exams', icon: 'exam', route: ScreenNames.Exams, permission: P.EXAMS_MANAGE},
+  {labelKey: 'calendar_title', icon: 'calendar', route: ScreenNames.AcademicCalendar, permission: P.CALENDAR_MANAGE},
+  {labelKey: 'moreScreen_announcements', icon: 'announcement', route: ScreenNames.Announcements, permission: P.ANNOUNCEMENTS_MANAGE},
+  {labelKey: 'moreScreen_leave', icon: 'calendar', route: ScreenNames.Leave, permission: P.LEAVE_APPROVE},
+  {labelKey: 'moreScreen_recovery', icon: 'recovery', route: ScreenNames.RecoveryRequests, permission: P.RECOVERY_APPROVE},
+  {labelKey: 'syllabus_title', icon: 'homework', route: ScreenNames.SyllabusDashboard, permission: P.SYLLABUS_VIEW},
+  {labelKey: 'moreScreen_events', icon: 'event', route: ScreenNames.Events, permission: P.EVENTS_MANAGE},
   {labelKey: 'subscription_title', icon: 'card', route: ScreenNames.SubscriptionPlans},
   // {labelKey: 'moreScreen_transport', icon: 'transport', route: ScreenNames.Transport},
   // {labelKey: 'moreScreen_library', icon: 'library', route: ScreenNames.Library},
   // {labelKey: 'moreScreen_inventory', icon: 'inventory', route: ScreenNames.Inventory},
-  // {labelKey: 'moreScreen_reports', icon: 'reports', route: ScreenNames.Reports},
-  {labelKey: 'moreScreen_settings', icon: 'settings', route: ScreenNames.Settings},
+  // {labelKey: 'moreScreen_reports', icon: 'reports', route: ScreenNames.Reports, permission: P.REPORTS_VIEW},
+  {labelKey: 'moreScreen_settings', icon: 'settings', route: ScreenNames.Settings, permission: P.SCHOOL_SETTINGS},
   // {labelKey: 'moreScreen_notifications', icon: 'notification', route: ScreenNames.Notifications},
 ];
-
-const INDEXED_MODULES = MODULES.map((m, index) => ({...m, index}));
 
 export function MoreScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
   const {t} = useLanguage();
   const user = useAuthStore(s => s.user);
+  const {gate, PermissionModal} = usePermissionGate();
   const [search, setSearch] = useState('');
+
+  const allModules = useMemo(
+    () => MODULES.map((m, index) => ({...m, index})),
+    [],
+  );
 
   const filteredModules = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) {
-      return INDEXED_MODULES;
+      return allModules;
     }
-    return INDEXED_MODULES.filter(m => t(m.labelKey).toLowerCase().includes(query));
-  }, [search, t]);
+    return allModules.filter(m => t(m.labelKey).toLowerCase().includes(query));
+  }, [search, t, allModules]);
 
   const styles = useThemedStyles(t2 => ({
     screen: theme.dark ? {} : {backgroundColor: '#F8F7FF'},
@@ -194,7 +205,7 @@ export function MoreScreen(): React.JSX.Element {
                   icon={m.icon}
                   title={t(m.labelKey)}
                   accentColor={m.route === ScreenNames.Settings ? theme.colors.textMuted : moreMenuAccentForIndex(m.index)}
-                  onPress={() => navigation.navigate(m.route)}
+                  onPress={gate(m.permission, () => navigation.navigate(m.route))}
                 />
               </View>
             ))}
@@ -204,6 +215,7 @@ export function MoreScreen(): React.JSX.Element {
         <TestPaymentButton />
         <Spacer size={24} />
       </ScrollView>
+      <PermissionModal />
     </Screen>
   );
 }

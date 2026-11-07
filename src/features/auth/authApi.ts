@@ -2,7 +2,6 @@ import {respond} from '../../core/mock/mockApi';
 import {axiosClient} from '../../core/api/axiosClient';
 import {Endpoints} from '../../core/api/apiConfig';
 import {rethrowApiError} from '../../core/api/apiError';
-import {permissionsForRole} from '../../core/config/permissions';
 import {generateId} from '../../core/utils/misc';
 import {logger} from '../../core/utils/logger';
 import type {AuthSession, AuthTokens, AuthUser, UserRole} from '../../shared/types';
@@ -68,7 +67,7 @@ function toAuthUser(
     createdAt: new Date().toISOString(),
     schoolId: raw.schoolId ?? fallback.schoolId ?? generateId('sch'),
     schoolName: raw.schoolName ?? fallback.schoolName ?? '',
-    permissions: permissionsForRole(role),
+    permissions: [],
   };
 }
 

@@ -38,6 +38,9 @@ import {SubscriptionPlansModal} from '../../subscription/components/Subscription
 import {useHasActiveSubscription} from '../../subscription/useFeature';
 import {useSubscriptionPlans} from '../../subscription/subscription.service';
 import {useQueryClient} from '@tanstack/react-query';
+import {usePermissions} from '../../auth/usePermissions';
+import {P} from '../../../core/config/permissions';
+import {usePermissionGate} from '../../auth/usePermissionGate';
 import type {TeacherStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {StatCard} from '../../../shared/types';
@@ -54,6 +57,8 @@ export function TeacherDashboardScreen(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
   const user = useAuthStore(s => s.user);
+  const {refresh: refreshPermissions} = usePermissions();
+  const {gate, PermissionModal} = usePermissionGate();
   const {data, isLoading} = useTeacherDashboard();
   const {
     data: dashboardStats,
@@ -153,6 +158,7 @@ export function TeacherDashboardScreen(): React.JSX.Element {
               refetchStats();
               refetchAnnouncements();
               refetchEvents();
+              refreshPermissions();
               qc.invalidateQueries({queryKey: MY_ATTENDANCE_TODAY_KEY});
             }}
           />
@@ -224,7 +230,7 @@ export function TeacherDashboardScreen(): React.JSX.Element {
         <CustomButton
           title={t('teacherDashboard_createHomework')}
           iconLeft="homework"
-          onPress={() => navigation.navigate(ScreenNames.HomeworkForm, {})}
+          onPress={gate(P.HOMEWORK_ASSIGN, () => navigation.navigate(ScreenNames.HomeworkForm, {}))}
         />
 
         <SectionTitle title={t('teacherDashboard_todaysSchedule')} />
@@ -317,6 +323,7 @@ export function TeacherDashboardScreen(): React.JSX.Element {
         <Spacer size={24} />
       </ScrollView>
       <SubscriptionPlansModal visible={showPlansModal} onClose={() => setPlansModalDismissed(true)} />
+      <PermissionModal />
     </Screen>
   );
 }

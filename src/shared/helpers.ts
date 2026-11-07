@@ -1,6 +1,16 @@
 /** Small view-model helpers shared across feature screens. */
 import type {BadgeTone} from './components/Badge';
-import type {AttendanceStatus, ExamResultStatus, FeeStatus, HomeworkStatus, Status} from './types';
+import type {
+  ApprovalStatus,
+  AttendanceStatus,
+  ChapterProgressStatus,
+  ExamResultStatus,
+  FeeStatus,
+  HomeworkStatus,
+  PlanStatus,
+  ScheduleStatus,
+  Status,
+} from './types';
 
 export function feeStatusTone(status: FeeStatus): BadgeTone {
   switch (status) {
@@ -85,4 +95,65 @@ export function homeworkStatusTone(status: HomeworkStatus): BadgeTone {
 
 export function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+export function chapterProgressTone(status: ChapterProgressStatus): BadgeTone {
+  switch (status) {
+    case 'COMPLETED':
+      return 'success';
+    case 'IN_PROGRESS':
+      return 'info';
+    case 'NOT_STARTED':
+    default:
+      return 'neutral';
+  }
+}
+
+export function planStatusTone(status: PlanStatus): BadgeTone {
+  switch (status) {
+    case 'ACTIVE':
+      return 'info';
+    case 'COMPLETED':
+      return 'success';
+    case 'ARCHIVED':
+      return 'warning';
+    case 'DRAFT':
+    default:
+      return 'neutral';
+  }
+}
+
+export function scheduleStatusTone(status: ScheduleStatus): BadgeTone {
+  switch (status) {
+    case 'AHEAD':
+      return 'success';
+    case 'ON_TRACK':
+      return 'info';
+    case 'DELAYED':
+      return 'error';
+    default:
+      return 'neutral';
+  }
+}
+
+export function approvalStatusTone(status: ApprovalStatus): BadgeTone {
+  switch (status) {
+    case 'APPROVED':
+      return 'success';
+    case 'REJECTED':
+      return 'error';
+    case 'PENDING':
+    default:
+      return 'warning';
+  }
+}
+
+export function progressBarColor(percentage: number): string {
+  if (percentage > 75) return '#22C55E';
+  if (percentage >= 40) return '#F59E0B';
+  return '#EF4444';
+}
+
+export function formatSessionYear(year: number): string {
+  return `${year}-${String(year + 1).slice(2)}`;
 }

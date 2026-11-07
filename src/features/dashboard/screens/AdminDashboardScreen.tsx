@@ -36,6 +36,7 @@ import {TrialBanner} from '../../subscription/components/TrialBanner';
 import {SubscriptionPlansModal} from '../../subscription/components/SubscriptionPlansModal';
 import {useHasActiveSubscription} from '../../subscription/useFeature';
 import {useSubscriptionPlans} from '../../subscription/subscription.service';
+import {usePermissions} from '../../auth/usePermissions';
 import type {AdminStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {AdminAnnouncement, StatCard} from '../../../shared/types';
@@ -79,6 +80,7 @@ export function AdminDashboardScreen(): React.JSX.Element {
   const {data: unreadCount} = useUnreadNotificationsCount();
   const qc = useQueryClient();
   const {t} = useLanguage();
+  const {refresh: refreshPermissions} = usePermissions();
   const [plansModalDismissed, setPlansModalDismissed] = useState(false);
   const hasActiveSub = useHasActiveSubscription();
   const {data: subPlans} = useSubscriptionPlans();
@@ -134,7 +136,7 @@ export function AdminDashboardScreen(): React.JSX.Element {
               refetchStats();
               refetchEvents();
               refetchAnnouncements();
-              // Chart data (today's student + teacher attendance).
+              refreshPermissions();
               qc.invalidateQueries({queryKey: ['adminAttendanceClasses']});
               qc.invalidateQueries({queryKey: ['staffAttendance']});
             }}

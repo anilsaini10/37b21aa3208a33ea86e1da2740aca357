@@ -6,6 +6,8 @@ import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import type {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
 import {useThemedStyles} from '../../../core/theme';
 import {useLanguage, type TranslationKey} from '../../../core/i18n';
+import {P, type PermissionKey} from '../../../core/config/permissions';
+import {usePermissionGate} from '../../auth/usePermissionGate';
 import {
   Screen,
   CustomButton,
@@ -26,19 +28,21 @@ type Nav = NativeStackNavigationProp<TeacherStackParamList>;
 const MENU: {
   icon: string;
   titleKey: TranslationKey;
-  route: 'MyProfile' | 'MySchedule' | 'TeacherExams' | 'Announcements' | 'Events' | 'Chat' | 'Leave' | 'MyLeave' | 'MyAttendance' | 'AcademicCalendar' | 'SubscriptionPlans' | 'ChangePassword';
+  route: 'MyProfile' | 'MySchedule' | 'TeacherExams' | 'Announcements' | 'Events' | 'Chat' | 'Leave' | 'MyLeave' | 'MyAttendance' | 'AcademicCalendar' | 'SubscriptionPlans' | 'ChangePassword' | 'TeacherMySyllabus';
+  permission?: PermissionKey;
 }[] = [
-  {icon: 'profile', titleKey: 'teacherMyProfile_title', route: ScreenNames.MyProfile},
-  {icon: 'timetable', titleKey: 'teacherProfile_timetable', route: ScreenNames.MySchedule},
-  {icon: 'exam', titleKey: 'teacherExams_title', route: ScreenNames.TeacherExams},
-  {icon: 'attendance', titleKey: 'teacherProfile_myAttendance', route: ScreenNames.MyAttendance},
-  {icon: 'announcement', titleKey: 'teacherProfile_announcements', route: ScreenNames.Announcements},
-  {icon: 'event', titleKey: 'eventsManage_headerTitle', route: ScreenNames.Events},
-  {icon: 'calendar', titleKey: 'calendar_title', route: ScreenNames.AcademicCalendar},
+  {icon: 'profile', titleKey: 'teacherMyProfile_title', route: ScreenNames.MyProfile, permission: P.PROFILE_VIEW},
+  {icon: 'homework', titleKey: 'syllabus_mySyllabus', route: ScreenNames.TeacherMySyllabus, permission: P.SYLLABUS_VIEW},
+  {icon: 'timetable', titleKey: 'teacherProfile_timetable', route: ScreenNames.MySchedule, permission: P.TIMETABLE_VIEW},
+  {icon: 'exam', titleKey: 'teacherExams_title', route: ScreenNames.TeacherExams, permission: P.EXAMS_VIEW},
+  {icon: 'attendance', titleKey: 'teacherProfile_myAttendance', route: ScreenNames.MyAttendance, permission: P.ATTENDANCE_VIEW},
+  {icon: 'announcement', titleKey: 'teacherProfile_announcements', route: ScreenNames.Announcements, permission: P.ANNOUNCEMENTS_VIEW},
+  {icon: 'event', titleKey: 'eventsManage_headerTitle', route: ScreenNames.Events, permission: P.EVENTS_VIEW},
+  {icon: 'calendar', titleKey: 'calendar_title', route: ScreenNames.AcademicCalendar, permission: P.CALENDAR_VIEW},
   // {icon: 'chat', titleKey: 'teacherProfile_chat', route: ScreenNames.Chat},
-  {icon: 'calendar', titleKey: 'teacherProfile_myLeave', route: ScreenNames.MyLeave},
-  {icon: 'calendar', titleKey: 'teacherProfile_leaveManagement', route: ScreenNames.Leave},
-  {icon: 'card', titleKey: 'subscription_title', route: ScreenNames.SubscriptionPlans},
+  {icon: 'calendar', titleKey: 'teacherProfile_myLeave', route: ScreenNames.MyLeave, permission: P.LEAVE_VIEW},
+  {icon: 'calendar', titleKey: 'teacherProfile_leaveManagement', route: ScreenNames.Leave, permission: P.LEAVE_APPROVE},
+  {icon: 'card', titleKey: 'subscription_title', route: ScreenNames.SubscriptionPlans, permission: P.SUBSCRIPTION_VIEW},
   {icon: 'lock', titleKey: 'teacherProfile_changePassword', route: ScreenNames.ChangePassword},
 ];
 
@@ -63,6 +67,7 @@ export function TeacherProfileScreen(): React.JSX.Element {
   const {t} = useLanguage();
   const user = useAuthStore(s => s.user);
   const logout = useAuthStore(s => s.logout);
+  const {gate, PermissionModal} = usePermissionGate();
 
   return (
     <Screen padded={false}>
@@ -85,7 +90,7 @@ export function TeacherProfileScreen(): React.JSX.Element {
                   icon={item.icon}
                   title={t(item.titleKey)}
                   accentColor={moreMenuAccentForIndex(index)}
-                  onPress={() => navigation.navigate(item.route)}
+                  onPress={gate(item.permission, () => navigation.navigate(item.route))}
                 />
               </View>
             ))}
@@ -98,6 +103,7 @@ export function TeacherProfileScreen(): React.JSX.Element {
           <Spacer size={24} />
         </View>
       </ScrollView>
+      <PermissionModal />
     </Screen>
   );
 }

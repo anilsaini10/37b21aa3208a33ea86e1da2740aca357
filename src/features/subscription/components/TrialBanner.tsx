@@ -21,9 +21,12 @@ function isDismissedToday(): boolean {
   }
 }
 
+const TRIAL_WARN_DAYS = 7;
+
 function pickUrgentTrial(trials: EntitlementTrial[]): EntitlementTrial | null {
-  if (trials.length === 0) return null;
-  return trials.reduce((a, b) => (a.daysLeft <= b.daysLeft ? a : b));
+  const urgent = trials.filter(t => t.daysLeft <= TRIAL_WARN_DAYS);
+  if (urgent.length === 0) return null;
+  return urgent.reduce((a, b) => (a.daysLeft <= b.daysLeft ? a : b));
 }
 
 export function TrialBanner(): React.JSX.Element | null {
