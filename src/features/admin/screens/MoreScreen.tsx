@@ -72,8 +72,10 @@ const MODULES: ModuleItem[] = [
   {labelKey: 'moreScreen_announcements', icon: 'announcement', route: ScreenNames.Announcements, permission: P.ANNOUNCEMENTS_MANAGE},
   {labelKey: 'moreScreen_leave', icon: 'calendar', route: ScreenNames.Leave, permission: P.LEAVE_APPROVE},
   {labelKey: 'moreScreen_recovery', icon: 'recovery', route: ScreenNames.RecoveryRequests, permission: P.RECOVERY_APPROVE},
-  {labelKey: 'syllabus_title', icon: 'homework', route: ScreenNames.SyllabusDashboard, permission: P.SYLLABUS_VIEW},
+
+  {labelKey: 'syllabus_title', icon: 'homework', route: ScreenNames.SyllabusDashboard, permission: P.SYLLABUS_DASHBOARD_VIEW},
   {labelKey: 'moreScreen_events', icon: 'event', route: ScreenNames.Events, permission: P.EVENTS_MANAGE},
+  
   {labelKey: 'subscription_title', icon: 'card', route: ScreenNames.SubscriptionPlans},
   // {labelKey: 'moreScreen_transport', icon: 'transport', route: ScreenNames.Transport},
   // {labelKey: 'moreScreen_library', icon: 'library', route: ScreenNames.Library},

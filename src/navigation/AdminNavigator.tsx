@@ -161,15 +161,15 @@ export function AdminNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.StaffForm} component={StaffFormScreen} />
       <Stack.Screen name={ScreenNames.StaffDetail} component={StaffDetailScreen} />
       <Stack.Screen name={ScreenNames.RecoveryRequests}>{() => <PermissionGuard permission={P.RECOVERY_APPROVE}><RecoveryRequestsScreen /></PermissionGuard>}</Stack.Screen>
-      <Stack.Screen name={ScreenNames.SyllabusDashboard}>{() => <PermissionGuard permission={P.SYLLABUS_VIEW}><SyllabusDashboardScreen /></PermissionGuard>}</Stack.Screen>
-      <Stack.Screen name={ScreenNames.AdminSubjects}>{() => <PermissionGuard permission={P.SYLLABUS_MANAGE}><AdminSubjectsScreen /></PermissionGuard>}</Stack.Screen>
-      <Stack.Screen name={ScreenNames.AdminChapters}>{() => <PermissionGuard permission={P.SYLLABUS_MANAGE}><AdminChaptersScreen /></PermissionGuard>}</Stack.Screen>
-      <Stack.Screen name={ScreenNames.AdminPlanList}>{() => <PermissionGuard permission={P.SYLLABUS_MANAGE}><AdminPlanListScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.SyllabusDashboard}>{() => <PermissionGuard permission={P.SYLLABUS_DASHBOARD_VIEW}><SyllabusDashboardScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.AdminSubjects}>{() => <PermissionGuard permission={P.SYLLABUS_CHAPTER_MANAGE}><AdminSubjectsScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.AdminChapters}>{() => <PermissionGuard permission={P.SYLLABUS_CHAPTER_MANAGE}><AdminChaptersScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.AdminPlanList}>{() => <PermissionGuard permission={P.SYLLABUS_PLAN_VIEW}><AdminPlanListScreen /></PermissionGuard>}</Stack.Screen>
       <Stack.Screen name={ScreenNames.CreatePlan}>{() => <PermissionGuard permission={P.SYLLABUS_MANAGE}><CreatePlanScreen /></PermissionGuard>}</Stack.Screen>
-      <Stack.Screen name={ScreenNames.AdminPlanDetail}>{() => <PermissionGuard permission={P.SYLLABUS_VIEW}><AdminPlanDetailScreen /></PermissionGuard>}</Stack.Screen>
-      <Stack.Screen name={ScreenNames.ClassProgress}>{() => <PermissionGuard permission={P.SYLLABUS_VIEW}><ClassProgressScreen /></PermissionGuard>}</Stack.Screen>
-      <Stack.Screen name={ScreenNames.TeacherProgressReport}>{() => <PermissionGuard permission={P.SYLLABUS_VIEW}><TeacherProgressScreen /></PermissionGuard>}</Stack.Screen>
-      <Stack.Screen name={ScreenNames.DelayedChapters}>{() => <PermissionGuard permission={P.SYLLABUS_VIEW}><DelayedChaptersScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.AdminPlanDetail}>{() => <PermissionGuard permission={P.SYLLABUS_PLAN_VIEW}><AdminPlanDetailScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.ClassProgress}>{() => <PermissionGuard permission={P.SYLLABUS_CLASS_PROGRESS_VIEW}><ClassProgressScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.TeacherProgressReport}>{() => <PermissionGuard permission={P.SYLLABUS_TEACHER_PROGRESS_VIEW}><TeacherProgressScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.DelayedChapters}>{() => <PermissionGuard permission={P.SYLLABUS_DELAYED_VIEW}><DelayedChaptersScreen /></PermissionGuard>}</Stack.Screen>
       <Stack.Screen name={ScreenNames.ApprovalQueue}>{() => <PermissionGuard permission={P.SYLLABUS_MANAGE}><ApprovalQueueScreen /></PermissionGuard>}</Stack.Screen>
     </Stack.Navigator>
   );

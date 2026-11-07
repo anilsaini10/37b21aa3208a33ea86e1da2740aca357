@@ -25,6 +25,19 @@ export const P = {
   CALENDAR_VIEW: 'calendarView',
   CALENDAR_MANAGE: 'calendarManage',
 
+  // Syllabus
+  SYLLABUS_DASHBOARD_VIEW:        'syllabusDashboardView',
+  SYLLABUS_CHAPTER_VIEW:          'syllabusChapterView',
+  SYLLABUS_CHAPTER_MANAGE:        'syllabusChapterManage',
+  SYLLABUS_PLAN_VIEW:             'syllabusPlanView',
+  SYLLABUS_PLAN_MANAGE:           'syllabusPlanManage',
+  SYLLABUS_CLASS_PROGRESS_VIEW:   'syllabusClassProgressView',
+  SYLLABUS_TEACHER_PROGRESS_VIEW: 'syllabusTeacherProgressView',
+  SYLLABUS_DELAYED_VIEW:          'syllabusDelayedView',
+  SYLLABUS_APPROVAL_VIEW:         'syllabusApprovalView',
+  SYLLABUS_APPROVAL_MANAGE:       'syllabusApprovalManage',
+  SYLLABUS_MANAGE:                'syllabusManage',
+
   // Exams
   EXAMS_VIEW: 'examsView',
   EXAMS_MANAGE: 'examsManage',
@@ -103,10 +116,6 @@ export const P = {
   RECOVERY_MODULE: 'recoveryModule',
   AVAILABILITY_MODULE: 'availabilityModule',
   SCHOOL_SETTINGS_MODULE: 'schoolSettingsModule',
-
-  // Syllabus
-  SYLLABUS_VIEW: 'syllabusView',
-  SYLLABUS_MANAGE: 'syllabusManage',
 
   // App-specific (not in backend catalog but used in-app)
   HOMEWORK_ASSIGN: 'homeworkAssign',
