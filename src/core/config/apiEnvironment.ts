@@ -19,7 +19,7 @@ const API_URLS: Record<ApiEnvironment, string> = {
 };
 
 // 👇 Switch here: 'live' or 'demo'.
-export const ACTIVE_API_ENV = 'demo' as ApiEnvironment;
+export const ACTIVE_API_ENV = 'live' as ApiEnvironment;
 
 /** Server root for an environment (defaults to the active one), without a trailing `/` or `/api`. */
 export function getBaseUrl(env: ApiEnvironment = ACTIVE_API_ENV): string {

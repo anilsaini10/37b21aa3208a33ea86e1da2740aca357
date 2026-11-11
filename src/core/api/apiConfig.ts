@@ -26,6 +26,7 @@ export const Endpoints = {
     refresh: '/api/auth/refresh',
     logout: '/api/auth/logout',
     permissions: '/api/auth/permissions',
+    profilePhoto: '/api/auth/profile-photo',
   },
   schools: {
     search: '/api/schools',

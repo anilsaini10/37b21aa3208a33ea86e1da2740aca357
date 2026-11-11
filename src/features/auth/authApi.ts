@@ -26,6 +26,7 @@ interface AuthApiUser {
   role?: string;
   schoolId?: string;
   schoolName?: string;
+  profilePhoto?: string;
 }
 interface AuthApiResponse {
   user: AuthApiUser;
@@ -67,6 +68,7 @@ function toAuthUser(
     createdAt: new Date().toISOString(),
     schoolId: raw.schoolId ?? fallback.schoolId ?? generateId('sch'),
     schoolName: raw.schoolName ?? fallback.schoolName ?? '',
+    profilePhoto: raw.profilePhoto,
     permissions: [],
   };
 }
@@ -223,6 +225,22 @@ export const authApi = {
     } catch (e) {
       logger.warn('authApi.requestAdmin failed', e);
       rethrowApiError(e, 'Something went wrong. Please try again.');
+    }
+  },
+
+  async uploadProfilePhoto(uri: string, type: string, name: string): Promise<AuthApiUser> {
+    try {
+      const formData = new FormData();
+      formData.append('profilePhoto', {uri, type, name} as any);
+      const {data} = await axiosClient.patch<{user: AuthApiUser}>(
+        Endpoints.auth.profilePhoto,
+        formData,
+        {headers: {'Content-Type': 'multipart/form-data'}},
+      );
+      return data.user;
+    } catch (e) {
+      logger.warn('authApi.uploadProfilePhoto failed', e);
+      rethrowApiError(e, 'Failed to upload profile photo. Please try again.');
     }
   },
 

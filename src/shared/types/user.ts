@@ -16,6 +16,7 @@ export interface BaseUser {
 export interface AuthUser extends BaseUser {
   schoolId: ID;
   schoolName: string;
+  profilePhoto?: string;
   /** Permission keys granted to this user (RBAC). */
   permissions: string[];
 }

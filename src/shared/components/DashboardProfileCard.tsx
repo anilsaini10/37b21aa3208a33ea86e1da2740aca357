@@ -1,17 +1,16 @@
-/**
- * Dashboard profile card — gradient identity summary shown at the top of every
- * role's dashboard (Admin/Teacher/Parent): avatar, name, school, role badge,
- * today's date, email.
- */
-import React from 'react';
-import {View} from 'react-native';
+import React, {useState} from 'react';
+import {TouchableOpacity, View, Image, ActivityIndicator} from 'react-native';
 import {useTheme} from '../../core/theme';
 import {useLanguage, type TranslationKey} from '../../core/i18n';
+import {useAuthStore} from '../../features/auth/authStore';
 import {AppText} from './AppText';
 import {Avatar} from './Avatar';
 import {CustomCard} from './CustomCard';
 import {Icon} from './Icon';
 import {Divider, Row, Spacer} from './layout';
+import {ImagePickerSheet} from './ImagePickerSheet';
+import {useImagePicker} from '../utils/useImagePicker';
+import type {ImageSource} from '../utils/useImagePicker';
 
 const DAY_KEYS: TranslationKey[] = [
   'common_daySun', 'common_dayMon', 'common_dayTue', 'common_dayWed',
@@ -29,7 +28,6 @@ export interface DashboardProfileCardProps {
   schoolName?: string;
   roleLabel: string;
   email?: string;
-  /** Extra role-specific content under the date/email row — e.g. the teacher's check-in panel. */
   footer?: React.ReactNode;
 }
 
@@ -46,10 +44,56 @@ export function DashboardProfileCard({
   const now = new Date();
   const todayLabel = `${t(DAY_KEYS[now.getDay()])}, ${now.getDate()} ${t(MONTH_KEYS[now.getMonth()])} ${now.getFullYear()}`;
 
+  const user = useAuthStore(s => s.user);
+  const updateProfilePhoto = useAuthStore(s => s.updateProfilePhoto);
+
+  const [sheetVisible, setSheetVisible] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const {pick} = useImagePicker();
+
+  const displayPhoto = user?.profilePhoto ?? avatarUri;
+
+  async function handleImageSelect(source: ImageSource) {
+    try {
+      const img = await pick(source);
+      if (!img) return;
+      setUploading(true);
+      await updateProfilePhoto(img.uri, img.type, img.name);
+    } catch (e: any) {
+      if (e?.code !== 'CANCELLED') console.warn(e);
+    } finally {
+      setUploading(false);
+    }
+  }
+
   return (
     <CustomCard style={{marginBottom: theme.spacing.md, borderColor: 'transparent'}}>
       <Row gap={theme.spacing.md} align="flex-start">
-        <Avatar name={name} uri={avatarUri} size={56} />
+        <TouchableOpacity onPress={() => setSheetVisible(true)} disabled={uploading}>
+          <View>
+            {displayPhoto ? (
+              <Image
+                source={{uri: displayPhoto}}
+                style={{width: 56, height: 56, borderRadius: 100}}
+                resizeMode="cover"
+              />
+            ) : (
+              <Avatar name={name} uri={avatarUri} size={56} />
+            )}
+            {uploading && (
+              <View
+                style={{
+                  ...({position: 'absolute', top: 0, left: 0, right: 0, bottom: 0} as const),
+                  borderRadius: 100,
+                  backgroundColor: 'rgba(0,0,0,0.4)',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <ActivityIndicator size="small" color="#fff" />
+              </View>
+            )}
+          </View>
+        </TouchableOpacity>
         <View style={{flex: 1}}>
           <Row justify="space-between" align="flex-start" gap={theme.spacing.sm}>
             <View style={{flex: 1}}>
@@ -105,6 +149,11 @@ export function DashboardProfileCard({
           {footer}
         </>
       ) : null}
+      <ImagePickerSheet
+        visible={sheetVisible}
+        onClose={() => setSheetVisible(false)}
+        onSelect={handleImageSelect}
+      />
     </CustomCard>
   );
 }

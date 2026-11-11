@@ -483,4 +483,19 @@ export const ICONS: Record<string, IconRenderer> = {
       <Path d="M12 3c2.5 2.5 4 5.8 4 9s-1.5 6.5-4 9c-2.5-2.5-4-5.8-4-9s1.5-6.5 4-9Z" />
     </Frame>
   ),
+
+  camera: p => (
+    <Frame {...p}>
+      <Path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+      <Circle cx={12} cy={13} r={4} />
+    </Frame>
+  ),
+
+  image: p => (
+    <Frame {...p}>
+      <Rect x={3} y={3} width={18} height={18} rx={2} ry={2} />
+      <Circle cx={8.5} cy={8.5} r={1.5} />
+      <Polyline points="21 15 16 10 5 21" />
+    </Frame>
+  ),
 };

@@ -39,6 +39,7 @@ interface AuthState {
   /** Clears the session locally without calling the logout endpoint — used when the
    * backend itself has already invalidated the session (e.g. a 401 on any request). */
   forceLogout: () => void;
+  updateProfilePhoto: (uri: string, type: string, name: string) => Promise<string | null>;
   clearError: () => void;
   can: (permission: PermissionKey) => boolean;
 }
@@ -155,6 +156,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     clearSession();
     usePermissionsStore.getState().clear();
     set({user: null, isAuthenticated: false, error: null, errorCode: null, errorDetails: null});
+  },
+
+  updateProfilePhoto: async (uri, type, name) => {
+    try {
+      const apiUser = await authApi.uploadProfilePhoto(uri, type, name);
+      const photoUrl = apiUser.profilePhoto ?? null;
+      const current = get().user;
+      if (current && photoUrl) {
+        const updated = {...current, profilePhoto: photoUrl};
+        set({user: updated});
+        storage.setObject(StorageKeys.AUTH_USER, updated);
+      }
+      return photoUrl;
+    } catch (e) {
+      logger.warn('updateProfilePhoto failed', e);
+      return null;
+    }
   },
 
   clearError: () => set({error: null, errorCode: null, errorDetails: null}),
