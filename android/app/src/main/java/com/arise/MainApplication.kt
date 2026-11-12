@@ -8,6 +8,11 @@ import com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 
 import com.arise.imagePicker.ImagePickerPackage
+import com.arise.crashHandler.CrashHandlerPackage
+import com.arise.cacheManager.CacheManagerPackage
+import com.arise.networkMonitor.NetworkMonitorPackage
+import com.arise.geolocation.GeolocationPackage
+import com.arise.share.SharePackage
 
 class MainApplication : Application(), ReactApplication {
 
@@ -20,6 +25,11 @@ class MainApplication : Application(), ReactApplication {
           // add(MyReactNativePackage())
 
           add(ImagePickerPackage())
+          add(CrashHandlerPackage())
+          add(CacheManagerPackage())
+          add(NetworkMonitorPackage())
+          add(GeolocationPackage())
+          add(SharePackage())
         },
     )
   }

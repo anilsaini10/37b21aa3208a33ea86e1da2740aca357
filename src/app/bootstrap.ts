@@ -22,6 +22,9 @@ import {usePermissionsStore, startPermissionsAppStateListener} from '../features
 import {setUnauthorizedHandler, setPaymentRequiredHandler} from '../core/api/sessionEvents';
 import {queryClient} from '../core/query/queryClient';
 import {logger} from '../core/utils/logger';
+import {setupGlobalErrorHandler} from '../core/utils/crashHandler';
+import {flushPendingCrashReports, resetAppStartTime} from '../core/utils/crashReportService';
+import {networkStore} from '../core/network';
 
 let done = false;
 
@@ -120,4 +123,16 @@ export function bootstrap(): void {
   });
 
   setupPushNotifications();
+
+  setupGlobalErrorHandler();
+  resetAppStartTime();
+
+  networkStore.start();
+
+  // Flush any crash reports from previous session (native crashes + queued JS errors).
+  if (useAuthStore.getState().isAuthenticated) {
+    flushPendingCrashReports().catch(e => {
+      logger.warn('Failed to flush pending crash reports', e);
+    });
+  }
 }

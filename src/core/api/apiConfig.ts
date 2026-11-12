@@ -28,6 +28,7 @@ export const Endpoints = {
     permissions: '/api/auth/permissions',
     profilePhoto: '/api/auth/profile-photo',
   },
+  crashReports: '/api/crash-reports',
   schools: {
     search: '/api/schools',
   },

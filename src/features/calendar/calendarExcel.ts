@@ -7,7 +7,7 @@
  * the backend normalises them.
  */
 import * as XLSX from 'xlsx';
-import Share from 'react-native-share';
+import AriseShare from '@core/native/AriseShare';
 import type {CalendarImportRow} from '../../shared/types';
 
 export const TEMPLATE_HEADERS = ['title', 'description', 'eventType', 'audience', 'startDate', 'endDate'] as const;
@@ -114,10 +114,9 @@ export async function shareCalendarTemplate(): Promise<void> {
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, sheet, 'Calendar');
   const base64 = XLSX.write(workbook, {type: 'base64', bookType: 'xlsx'});
-  await Share.open({
+  await AriseShare.open({
     url: `data:${XLSX_MIME};base64,${base64}`,
     filename: 'academic-calendar-template',
     type: XLSX_MIME,
-    failOnCancel: false,
   });
 }

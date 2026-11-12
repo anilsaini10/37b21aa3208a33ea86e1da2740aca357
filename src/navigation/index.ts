@@ -5,3 +5,4 @@ export * from './AuthNavigator';
 export * from './AdminNavigator';
 export * from './TeacherNavigator';
 export * from './ParentNavigator';
+export * from './navigationRef';

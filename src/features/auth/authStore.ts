@@ -14,6 +14,7 @@ import type {PermissionKey} from '../../core/config/permissions';
 import {deviceTokenApi, getDeviceToken, currentDevicePlatform} from '../../core/notifications';
 import {usePermissionsStore} from './permissionsStore';
 import {logger} from '../../core/utils/logger';
+import {cacheManager} from '../../core/utils/cacheManager';
 
 interface AuthState {
   user: AuthUser | null;
@@ -56,6 +57,13 @@ function clearSession(): void {
   storage.delete(StorageKeys.AUTH_USER);
 }
 
+function cacheProfilePhotoBestEffort(user: AuthUser): void {
+  const url = user.profilePhoto;
+  if (url && !url.startsWith('file://')) {
+    cacheManager.cacheImage(url).catch(() => {});
+  }
+}
+
 /** Best-effort — a failed push registration shouldn't block or fail login/signup. */
 function registerDeviceTokenBestEffort(): void {
   getDeviceToken()
@@ -76,6 +84,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const token = storage.getString(StorageKeys.AUTH_TOKEN);
     if (user && token) {
       set({user, isAuthenticated: true});
+      cacheProfilePhotoBestEffort(user);
     }
   },
 
@@ -83,6 +92,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     persistSession(session);
     set({user: session.user, isAuthenticated: true, error: null, errorCode: null, errorDetails: null});
     registerDeviceTokenBestEffort();
+    cacheProfilePhotoBestEffort(session.user);
     usePermissionsStore.getState().fetch(session.user.id);
   },
 
@@ -93,6 +103,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       persistSession(session);
       set({user: session.user, isAuthenticated: true, isLoading: false});
       registerDeviceTokenBestEffort();
+      cacheProfilePhotoBestEffort(session.user);
       usePermissionsStore.getState().fetch(session.user.id);
       return true;
     } catch (e) {
@@ -110,6 +121,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       persistSession(session);
       set({user: session.user, isAuthenticated: true, isLoading: false});
       registerDeviceTokenBestEffort();
+      cacheProfilePhotoBestEffort(session.user);
       usePermissionsStore.getState().fetch(session.user.id);
       return true;
     } catch (e) {
@@ -127,6 +139,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       persistSession(session);
       set({user: session.user, isAuthenticated: true, isLoading: false});
       registerDeviceTokenBestEffort();
+      cacheProfilePhotoBestEffort(session.user);
       usePermissionsStore.getState().fetch(session.user.id);
       return true;
     } catch (e) {
@@ -167,6 +180,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const updated = {...current, profilePhoto: photoUrl};
         set({user: updated});
         storage.setObject(StorageKeys.AUTH_USER, updated);
+        cacheProfilePhotoBestEffort(updated);
       }
       return photoUrl;
     } catch (e) {

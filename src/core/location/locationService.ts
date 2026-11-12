@@ -6,7 +6,7 @@
  * location is off, or the fix times out. Callers carry on without a location.
  */
 import {PermissionsAndroid, Platform} from 'react-native';
-import Geolocation from '@react-native-community/geolocation';
+import AriseGeolocation from '@core/native/AriseGeolocation';
 
 export interface Coordinates {
   latitude: number;
@@ -17,12 +17,6 @@ const POSITION_TIMEOUT_MS = 10_000;
 /** A fix this recent is good enough — avoids waiting on GPS twice in a row. */
 const MAX_POSITION_AGE_MS = 30_000;
 
-Geolocation.setRNConfiguration({
-  skipPermissionRequests: false,
-  authorizationLevel: 'whenInUse',
-  locationProvider: 'auto',
-});
-
 async function ensurePermission(): Promise<boolean> {
   if (Platform.OS === 'android') {
     try {
@@ -32,12 +26,8 @@ async function ensurePermission(): Promise<boolean> {
       return false;
     }
   }
-  return new Promise(resolve => {
-    Geolocation.requestAuthorization(
-      () => resolve(true),
-      () => resolve(false),
-    );
-  });
+  // iOS: permission is requested by the native module itself via Info.plist.
+  return true;
 }
 
 function isValid(c: Coordinates): boolean {
@@ -54,22 +44,17 @@ export async function getCurrentCoordinates(): Promise<Coordinates | null> {
   if (!(await ensurePermission())) {
     return null;
   }
-  return new Promise(resolve => {
-    // Safety net — some devices never call back when location services are off.
-    const fallback = setTimeout(() => resolve(null), POSITION_TIMEOUT_MS + 2_000);
-    Geolocation.getCurrentPosition(
-      pos => {
-        clearTimeout(fallback);
-        const coords = {latitude: pos.coords.latitude, longitude: pos.coords.longitude};
-        resolve(isValid(coords) ? coords : null);
-      },
-      () => {
-        clearTimeout(fallback);
-        resolve(null);
-      },
-      {enableHighAccuracy: true, timeout: POSITION_TIMEOUT_MS, maximumAge: MAX_POSITION_AGE_MS},
+  try {
+    const pos = await AriseGeolocation.getCurrentPosition(
+      true,
+      POSITION_TIMEOUT_MS,
+      MAX_POSITION_AGE_MS,
     );
-  });
+    const coords = {latitude: pos.coords.latitude, longitude: pos.coords.longitude};
+    return isValid(coords) ? coords : null;
+  } catch {
+    return null;
+  }
 }
 
 /** URL that opens the device's maps app at a point (Apple Maps on iOS, the `geo:` handler on Android). */

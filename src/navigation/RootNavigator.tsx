@@ -4,12 +4,15 @@
  * the user to the correct stack automatically.
  */
 import React from 'react';
+import {View, StyleSheet} from 'react-native';
 import {NavigationContainer, DefaultTheme, DarkTheme} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {useTheme} from '../core/theme';
 import {useAuthStore} from '../features/auth/authStore';
+import {OfflineBanner} from '../shared/components';
 import type {RootStackParamList} from './types';
 import {ScreenNames} from './ScreenNames';
+import {navigationRef} from './navigationRef';
 import {AuthNavigator} from './AuthNavigator';
 import {AdminNavigator} from './AdminNavigator';
 import {TeacherNavigator} from './TeacherNavigator';
@@ -36,18 +39,25 @@ export function RootNavigator(): React.JSX.Element {
   };
 
   return (
-    <NavigationContainer theme={navTheme}>
-      <Stack.Navigator screenOptions={{headerShown: false}}>
-        {!isAuthenticated ? (
-          <Stack.Screen name={ScreenNames.Auth} component={AuthNavigator} />
-        ) : role === 'admin' ? (
-          <Stack.Screen name={ScreenNames.Admin} component={AdminNavigator} />
-        ) : role === 'teacher' ? (
-          <Stack.Screen name={ScreenNames.Teacher} component={TeacherNavigator} />
-        ) : (
-          <Stack.Screen name={ScreenNames.Parent} component={ParentNavigator} />
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+    <View style={rootStyles.flex}>
+      <NavigationContainer ref={navigationRef} theme={navTheme}>
+        <Stack.Navigator screenOptions={{headerShown: false}}>
+          {!isAuthenticated ? (
+            <Stack.Screen name={ScreenNames.Auth} component={AuthNavigator} />
+          ) : role === 'admin' ? (
+            <Stack.Screen name={ScreenNames.Admin} component={AdminNavigator} />
+          ) : role === 'teacher' ? (
+            <Stack.Screen name={ScreenNames.Teacher} component={TeacherNavigator} />
+          ) : (
+            <Stack.Screen name={ScreenNames.Parent} component={ParentNavigator} />
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+      <OfflineBanner />
+    </View>
   );
 }
+
+const rootStyles = StyleSheet.create({
+  flex: {flex: 1},
+});

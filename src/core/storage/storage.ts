@@ -59,4 +59,5 @@ export const StorageKeys = {
   CACHE_PREFIX: 'cache.',
   PUSH_DEVICE_TOKEN: 'notifications.deviceToken',
   PERMISSIONS_CACHE: 'permissions.cache',
+  CRASH_REPORT_QUEUE: 'crashReport.queue',
 } as const;

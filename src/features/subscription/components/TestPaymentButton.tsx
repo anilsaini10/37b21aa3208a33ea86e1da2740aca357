@@ -27,27 +27,27 @@ function findTestPrice(plans: SubscriptionPlan[] | undefined): {plan: Subscripti
 }
 
 export function TestPaymentButton(): React.JSX.Element {
-  const {t} = useLanguage();
-  const {refetch} = useSubscriptionPlans();
-  const {payForPlan, isBusy, result, clearResult} = useRazorpayCheckout();
-  const [noPlan, setNoPlan] = React.useState(false);
-  const [loadingPlans, setLoadingPlans] = React.useState(false);
+  // const {t} = useLanguage();
+  // const {refetch} = useSubscriptionPlans();
+  // const {payForPlan, isBusy, result, clearResult} = useRazorpayCheckout();
+  // const [noPlan, setNoPlan] = React.useState(false);
+  // const [loadingPlans, setLoadingPlans] = React.useState(false);
 
-  const onPress = async () => {
-    setLoadingPlans(true);
-    const {data} = await refetch();
-    setLoadingPlans(false);
-    const target = findTestPrice(data);
-    if (!target) {
-      setNoPlan(true);
-      return;
-    }
-    await payForPlan(target.plan, target.price.id);
-  };
+  // const onPress = async () => {
+  //   setLoadingPlans(true);
+  //   const {data} = await refetch();
+  //   setLoadingPlans(false);
+  //   const target = findTestPrice(data);
+  //   if (!target) {
+  //     setNoPlan(true);
+  //     return;
+  //   }
+  //   await payForPlan(target.plan, target.price.id);
+  // };
 
   return (
     <>
-      <CustomButton
+      {/* <CustomButton
         title={`${t('payment_payButton')} ₹${TEST_AMOUNT_PAISE / 100}`}
         variant="outline"
         iconLeft="fee"
@@ -64,7 +64,7 @@ export function TestPaymentButton(): React.JSX.Element {
           clearResult();
           setNoPlan(false);
         }}
-      />
+      /> */}
     </>
   );
 }

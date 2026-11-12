@@ -1,5 +1,5 @@
 /**
- * Sharing to other apps — thin wrapper around react-native-share.
+ * Sharing to other apps — thin wrapper around our AriseShare native module.
  *
  * Covers plain text and file (PDF, image, ...) sharing through the native
  * share sheet. Everything shown — message, title, file path, mime type — is
@@ -7,20 +7,19 @@
  * needs to hand content off to another app (WhatsApp, email, Drive, ...).
  *
  * File sharing on Android requires a content:// URI (a bare file:// path is
- * rejected by most apps since Android 7) — react-native-share handles that
- * via its own bundled FileProvider, so callers just pass a normal file path.
+ * rejected by most apps since Android 7) — our native module handles that
+ * via the app's FileProvider, so callers just pass a normal file path.
  */
-import Share from 'react-native-share';
+import AriseShare from '@core/native/AriseShare';
 import {generatePdfFromHtml} from './pdfService';
 
 /** Open the native share sheet with plain text (and an optional link). */
 export async function shareText(message: string, options?: {title?: string; url?: string}): Promise<void> {
   try {
-    await Share.open({
+    await AriseShare.open({
       message,
       title: options?.title,
       url: options?.url,
-      failOnCancel: false,
     });
   } catch {
     // User dismissed the share sheet — not an error.
@@ -57,12 +56,11 @@ export interface ShareFileInput {
 export async function shareFile(input: ShareFileInput): Promise<void> {
   const url = input.filePath.startsWith('file://') ? input.filePath : `file://${input.filePath}`;
   try {
-    await Share.open({
+    await AriseShare.open({
       url,
       type: input.mimeType,
       title: input.title,
       message: input.message,
-      failOnCancel: false,
     });
   } catch {
     // User dismissed the share sheet — not an error.

@@ -3,6 +3,7 @@ import {TouchableOpacity, View, Image, ActivityIndicator} from 'react-native';
 import {useTheme} from '../../core/theme';
 import {useLanguage, type TranslationKey} from '../../core/i18n';
 import {useAuthStore} from '../../features/auth/authStore';
+import {useCachedImage} from '../../core/utils/useCachedImage';
 import {AppText} from './AppText';
 import {Avatar} from './Avatar';
 import {CustomCard} from './CustomCard';
@@ -51,7 +52,8 @@ export function DashboardProfileCard({
   const [uploading, setUploading] = useState(false);
   const {pick} = useImagePicker();
 
-  const displayPhoto = user?.profilePhoto ?? avatarUri;
+  const remotePhoto = user?.profilePhoto ?? avatarUri;
+  const displayPhoto = useCachedImage(remotePhoto);
 
   async function handleImageSelect(source: ImageSource) {
     try {

@@ -2,6 +2,7 @@
 import React from 'react';
 import {Image, View} from 'react-native';
 import {useThemedStyles} from '../../core/theme';
+import {useCachedImage} from '../../core/utils/useCachedImage';
 import {AppText} from './AppText';
 import {initials} from '../../core/utils/format';
 
@@ -14,6 +15,8 @@ export interface AvatarProps {
 }
 
 export function Avatar({name, uri, size = 44, color}: AvatarProps): React.JSX.Element {
+  const cachedUri = useCachedImage(uri);
+
   const styles = useThemedStyles(theme => ({
     image: {backgroundColor: theme.colors.surfaceVariant},
     circle: {
@@ -26,8 +29,8 @@ export function Avatar({name, uri, size = 44, color}: AvatarProps): React.JSX.El
 
   const sizeStyle = {width: size, height: size, borderRadius: size / 2};
 
-  if (uri) {
-    return <Image source={{uri}} style={[styles.image, sizeStyle]} />;
+  if (cachedUri) {
+    return <Image source={{uri: cachedUri}} style={[styles.image, sizeStyle]} />;
   }
 
   return (
