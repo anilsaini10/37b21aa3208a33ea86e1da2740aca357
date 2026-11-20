@@ -9,6 +9,7 @@ export function usePermissionGate() {
 
   const gate = useCallback(
     (permission: PermissionKey | undefined, callback: () => void) => {
+      console.log('permission gate', permission, can(permission));
       return () => {
         if (!permission || can(permission)) {
           callback();

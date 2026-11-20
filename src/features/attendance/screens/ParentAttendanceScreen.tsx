@@ -1,4 +1,4 @@
-/** Parent attendance — pick a child (when there's more than one), then see that child's attendance history. */
+/** Parent attendance — child's attendance history with inline child switcher. */
 import React, {useState} from 'react';
 import {View, ScrollView} from 'react-native';
 import {useTheme, useThemedStyles} from '../../../core/theme';
@@ -7,20 +7,18 @@ import {
   Screen,
   CustomHeader,
   CustomCard,
-  ListRow,
-  Badge,
   AppText,
+  Badge,
   Row,
   Spacer,
-  Divider,
   CustomTable,
   Loader,
   EmptyState,
+  ChildSwitcher,
 } from '../../../shared/components';
 import type {BadgeTone, TableColumn} from '../../../shared/components';
 import {DateRangeFilter} from './AttendanceReportScreen';
 import {formatDateDMY} from '../../../core/utils/format';
-import {attendancePercentageTone} from '../../../shared/helpers';
 import {useParentProfile} from '../../parent/parentStudents.service';
 import {useParentAttendance} from '../../parent/parentAttendance.service';
 import type {AttendanceStatusCode, ParentChild, StudentAttendanceHistoryRecord} from '../../../shared/types';
@@ -99,60 +97,15 @@ export function ParentAttendanceScreen(): React.JSX.Element {
     );
   }
 
-  if (children.length === 1) {
-    return <ChildAttendance child={children[0]} />;
-  }
-
-  const activeChild = children.find(c => c.id === activeChildId);
-  if (!activeChild) {
-    return <ChildrenList children={children} onSelect={setActiveChildId} />;
-  }
-  return <ChildAttendance child={activeChild} onBack={() => setActiveChildId(null)} />;
-}
-
-function ChildrenList({
-  children,
-  onSelect,
-}: {
-  children: ParentChild[];
-  onSelect: (id: string) => void;
-}): React.JSX.Element {
-  const {theme} = useTheme();
-  const {t} = useLanguage();
-  const styles = useThemedStyles(t2 => ({
-    scrollContent: {padding: t2.spacing.lg},
-    card: {paddingHorizontal: t2.spacing.lg},
-  }));
+  const child = children.find(c => c.id === activeChildId) ?? children[0];
 
   return (
-    <Screen padded={false}>
-      <CustomHeader title={t('parentAttendance_title')} />
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <AppText variant="caption" color="textSecondary">
-          {t('parentAttendance_selectChild')}
-        </AppText>
-        <Spacer size={theme.spacing.sm} />
-        <CustomCard padded={false} style={styles.card}>
-          {children.map((child, i) => (
-            <View key={child.id}>
-              {i > 0 ? <Divider /> : null}
-              <ListRow
-                avatarName={child.name}
-                title={child.name}
-                subtitle={t('mySchedule_classSection', {className: child.className, sectionName: child.sectionName})}
-                onPress={() => onSelect(child.id)}
-                right={
-                  <Badge
-                    label={`${child.attendancePercentage}%`}
-                    tone={attendancePercentageTone(child.attendancePercentage)}
-                  />
-                }
-              />
-            </View>
-          ))}
-        </CustomCard>
-      </ScrollView>
-    </Screen>
+    <ChildAttendance
+      child={child}
+      allChildren={children}
+      activeChildId={child.id}
+      onSelectChild={setActiveChildId}
+    />
   );
 }
 

@@ -106,6 +106,7 @@ export const ScreenNames = {
   ChildTimetable: 'ChildTimetable',
   Results: 'Results',
   ReportCard: 'ReportCard',
+  AdmitCard: 'AdmitCard',
 
   // Syllabus — Admin
   SyllabusDashboard: 'SyllabusDashboard',
@@ -131,6 +132,15 @@ export const ScreenNames = {
   ParentSubjectProgress: 'ParentSubjectProgress',
   ParentChapterDetail: 'ParentChapterDetail',
   ParentOverallProgress: 'ParentOverallProgress',
+
+  // Parent Queries
+  ParentQueries: 'ParentQueries',
+  ParentQueryDetail: 'ParentQueryDetail',
+  SubmitQuery: 'SubmitQuery',
+
+  // Admin Parent Queries
+  AdminParentQueries: 'AdminParentQueries',
+  AdminQueryDetail: 'AdminQueryDetail',
 } as const;
 
 export type ScreenName = (typeof ScreenNames)[keyof typeof ScreenNames];

@@ -10,6 +10,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {useTheme} from '../core/theme';
 import {useAuthStore} from '../features/auth/authStore';
 import {OfflineBanner} from '../shared/components';
+import {SessionExpiredModal} from '../shared/components/SessionExpiredModal';
 import type {RootStackParamList} from './types';
 import {ScreenNames} from './ScreenNames';
 import {navigationRef} from './navigationRef';
@@ -54,6 +55,7 @@ export function RootNavigator(): React.JSX.Element {
         </Stack.Navigator>
       </NavigationContainer>
       <OfflineBanner />
+      <SessionExpiredModal />
     </View>
   );
 }

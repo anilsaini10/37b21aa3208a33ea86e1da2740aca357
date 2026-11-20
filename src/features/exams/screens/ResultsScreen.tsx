@@ -1,15 +1,16 @@
 /** Exams — every exam for the active child's class, split into Upcoming / Ongoing and Completed; tap one for its date sheet + results. */
 import React, {useCallback, useEffect, useState} from 'react';
-import {Pressable, RefreshControl, ScrollView, View} from 'react-native';
+import {RefreshControl, ScrollView, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme, useThemedStyles} from '../../../core/theme';
+import {useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   CustomHeader,
   CustomCard,
   CustomButton,
+  ChildSwitcher,
   AppText,
   Icon,
   Row,
@@ -54,16 +55,6 @@ export function ResultsScreen(): React.JSX.Element {
     refetchProfile();
   }, [refetchProfile]);
 
-  const styles = useThemedStyles(t2 => ({
-    switcherWrap: {paddingHorizontal: t2.spacing.lg, paddingTop: t2.spacing.md},
-    switcherContent: {columnGap: t2.spacing.sm},
-    childPill: {
-      paddingHorizontal: t2.spacing.lg,
-      paddingVertical: t2.spacing.sm,
-      borderRadius: t2.radius.pill,
-    },
-  }));
-
   if (isProfileLoading || !profile) {
     return <Loader message={t('results_loading')} />;
   }
@@ -74,28 +65,11 @@ export function ResultsScreen(): React.JSX.Element {
   return (
     <Screen padded={false}>
       <CustomHeader title={t('results_title')} onBack={() => navigation.goBack()} />
-      {children.length > 1 ? (
-        <View style={styles.switcherWrap}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.switcherContent}>
-            {children.map(c => {
-              const active = c.id === child.id;
-              return (
-                <Pressable
-                  key={c.id}
-                  onPress={() => setActiveChildId(c.id)}
-                  style={[
-                    styles.childPill,
-                    {backgroundColor: active ? theme.colors.primary : theme.colors.surfaceVariant},
-                  ]}>
-                  <AppText variant="label" style={{color: active ? theme.colors.onPrimary : theme.colors.textSecondary}}>
-                    {c.name}
-                  </AppText>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-        </View>
-      ) : null}
+      <ChildSwitcher
+        children={children}
+        activeChildId={child?.id ?? ''}
+        onSelect={setActiveChildId}
+      />
       {!child ? (
         <EmptyState icon="grade" title={t('childProfile_noChildrenTitle')} message={t('childProfile_noChildrenMessage')} />
       ) : (
@@ -147,6 +121,7 @@ function ExamsList({childId, onNotYourChild}: {childId: string; onNotYourChild: 
 
   const examCard = (exam: ParentExam): React.JSX.Element => {
     const open = (): void => navigation.navigate(ScreenNames.ReportCard, {examId: exam.examId, studentId: childId});
+    const openAdmitCard = (): void => navigation.navigate(ScreenNames.AdmitCard, {examId: exam.examId, studentId: childId});
     const range = dateRangeLabel(exam);
     return (
       <CustomCard key={exam.examId} style={styles.examCard} onPress={open}>
@@ -166,7 +141,10 @@ function ExamsList({childId, onNotYourChild}: {childId: string; onNotYourChild: 
               </AppText>
             </Row>
           </View>
-          <CustomButton title={t('parentExams_view')} size="sm" variant="outline" fullWidth={false} onPress={open} />
+          <View style={{alignItems: 'flex-end', gap: 6}}>
+            <CustomButton title={t('parentExams_view')} size="sm" variant="outline" fullWidth={false} onPress={open} />
+            <CustomButton title={t('admitCard_button')} size="sm" variant="secondary" fullWidth={false} onPress={openAdmitCard} iconLeft="download" />
+          </View>
         </Row>
       </CustomCard>
     );

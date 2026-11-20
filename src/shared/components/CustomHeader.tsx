@@ -3,6 +3,7 @@ import React from 'react';
 import {Pressable, View} from 'react-native';
 import {useTheme, useThemedStyles} from '../../core/theme';
 import {AppText} from './AppText';
+import {BackButton} from './BackButton';
 import {Icon} from './Icon';
 
 export interface HeaderAction {
@@ -67,9 +68,7 @@ export function CustomHeader({
   return (
     <View style={styles.header}>
       {onBack ? (
-        <Pressable onPress={onBack} hitSlop={10} style={styles.backButton}>
-          <Icon name="back" size={26} color={theme.colors.text} />
-        </Pressable>
+        <BackButton onPress={onBack} style={styles.backButton} />
       ) : null}
 
       <View style={styles.titleBlock}>

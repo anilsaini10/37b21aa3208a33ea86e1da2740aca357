@@ -19,6 +19,7 @@ export async function fetchMyPermissions(): Promise<PermissionsApiResponse> {
     const {data} = await axiosClient.get<PermissionsApiResponse>(
       Endpoints.auth.permissions,
     );
+    console.log('fetched permissions', data);
     return data;
   } catch (e) {
     logger.warn('fetchMyPermissions failed', e);

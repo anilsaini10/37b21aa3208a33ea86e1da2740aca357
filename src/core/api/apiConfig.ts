@@ -102,6 +102,8 @@ export const Endpoints = {
     accountRecovery_byId: (id: string) => `/api/admin/account-recovery/requests/${id}`,
     accountRecovery_reset: (id: string) => `/api/admin/account-recovery/requests/${id}/reset`,
     accountRecovery_reject: (id: string) => `/api/admin/account-recovery/requests/${id}/reject`,
+    parentQueries: '/api/admin/parent-queries',
+    parentQuery_byId: (queryId: string) => `/api/admin/parent-queries/${queryId}`,
     reports: '/api/admin/reports',
     settings: '/api/admin/settings',
     leave: '/api/admin/leave',
@@ -161,6 +163,8 @@ export const Endpoints = {
     resetPassword: '/api/students/reset-password',
     /** Requires `?studentId=` — exams are limited to that child's class. */
     academicCalendar: '/api/students/academic-calendar',
+    parentQueries: '/api/students/parent-queries',
+    parentQuery_byId: (queryId: string) => `/api/students/parent-queries/${queryId}`,
   },
   adminSyllabus: {
     chapters: '/api/admin/syllabus/chapters',

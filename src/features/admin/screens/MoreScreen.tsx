@@ -49,7 +49,8 @@ type NoParamRoute =
   | 'SubscriptionPlans'
   | 'Notifications'
   | 'RecoveryRequests'
-  | 'SyllabusDashboard';
+  | 'SyllabusDashboard'
+  | 'AdminParentQueries';
 
 interface ModuleItem {
   labelKey: TranslationKey;
@@ -75,7 +76,8 @@ const MODULES: ModuleItem[] = [
 
   {labelKey: 'syllabus_title', icon: 'homework', route: ScreenNames.SyllabusDashboard, permission: P.SYLLABUS_DASHBOARD_VIEW},
   {labelKey: 'moreScreen_events', icon: 'event', route: ScreenNames.Events, permission: P.EVENTS_MANAGE},
-  
+  {labelKey: 'adminQuery_title', icon: 'query', route: ScreenNames.AdminParentQueries},
+
   {labelKey: 'subscription_title', icon: 'card', route: ScreenNames.SubscriptionPlans},
   // {labelKey: 'moreScreen_transport', icon: 'transport', route: ScreenNames.Transport},
   // {labelKey: 'moreScreen_library', icon: 'library', route: ScreenNames.Library},

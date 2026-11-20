@@ -75,6 +75,8 @@ import {ClassProgressScreen} from '../features/syllabus/screens/ClassProgressScr
 import {TeacherProgressScreen} from '../features/syllabus/screens/TeacherProgressScreen';
 import {DelayedChaptersScreen} from '../features/syllabus/screens/DelayedChaptersScreen';
 import {ApprovalQueueScreen} from '../features/syllabus/screens/ApprovalQueueScreen';
+import {AdminParentQueriesScreen} from '../features/admin/screens/AdminParentQueriesScreen';
+import {AdminQueryDetailScreen} from '../features/admin/screens/AdminQueryDetailScreen';
 
 const Tab = createBottomTabNavigator<AdminTabParamList>();
 const Stack = createNativeStackNavigator<AdminStackParamList>();
@@ -171,6 +173,8 @@ export function AdminNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.TeacherProgressReport}>{() => <PermissionGuard permission={P.SYLLABUS_TEACHER_PROGRESS_VIEW}><TeacherProgressScreen /></PermissionGuard>}</Stack.Screen>
       <Stack.Screen name={ScreenNames.DelayedChapters}>{() => <PermissionGuard permission={P.SYLLABUS_DELAYED_VIEW}><DelayedChaptersScreen /></PermissionGuard>}</Stack.Screen>
       <Stack.Screen name={ScreenNames.ApprovalQueue}>{() => <PermissionGuard permission={P.SYLLABUS_MANAGE}><ApprovalQueueScreen /></PermissionGuard>}</Stack.Screen>
+      <Stack.Screen name={ScreenNames.AdminParentQueries} component={AdminParentQueriesScreen} />
+      <Stack.Screen name={ScreenNames.AdminQueryDetail} component={AdminQueryDetailScreen} />
     </Stack.Navigator>
   );
 }

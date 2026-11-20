@@ -8,13 +8,13 @@
  * render it as the screen's first child, with no header above it.
  */
 import React from 'react';
-import {Pressable, StyleSheet, View} from 'react-native';
-import Svg, {Defs, LinearGradient, Rect, Stop} from 'react-native-svg';
+import {Image, TouchableOpacity, View} from 'react-native';
 import {palette, useTheme, useThemedStyles} from '../../core/theme';
+import {useCachedImage} from '../../core/utils/useCachedImage';
 import {AppText} from './AppText';
 import {Avatar} from './Avatar';
 import {CustomCard} from './CustomCard';
-import {Icon} from './Icon';
+import {BackButton} from './BackButton';
 import {Row} from './layout';
 
 const HERO_HEIGHT = 150;
@@ -30,6 +30,10 @@ export interface ProfileHeroProps {
   onBack?: () => void;
   /** Shown to the right of the back button, e.g. "Profile". */
   title?: string;
+  /** Called when the user taps the avatar. */
+  onAvatarPress?: () => void;
+  /** Uploaded profile photo URL (takes priority over avatarUri for display). */
+  profilePhoto?: string;
 }
 
 export function ProfileHero({
@@ -39,6 +43,8 @@ export function ProfileHero({
   badgeLabel,
   onBack,
   title,
+  onAvatarPress,
+  profilePhoto,
 }: ProfileHeroProps): React.JSX.Element {
   const {theme} = useTheme();
   const styles = useThemedStyles(t => ({
@@ -92,26 +98,24 @@ export function ProfileHero({
   }));
 
   const visibleLines = lines.filter((line): line is string => !!line);
+  const displayPhoto = useCachedImage(profilePhoto ?? avatarUri);
+
+  const avatarElement = displayPhoto ? (
+    <Image
+      source={{uri: displayPhoto}}
+      style={{width: AVATAR_SIZE, height: AVATAR_SIZE, borderRadius: AVATAR_SIZE / 2}}
+      resizeMode="cover"
+    />
+  ) : (
+    <Avatar name={name} uri={avatarUri} size={AVATAR_SIZE} />
+  );
 
   return (
     <View>
       <View style={styles.hero}>
-        {/* <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
-          <Defs>
-            <LinearGradient id="profileHeroFade" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0%" stopColor="#000000" stopOpacity={0.15} />
-              <Stop offset="3%" stopColor={theme.colors.background} stopOpacity={0} />
-              <Stop offset="45%" stopColor={theme.colors.background} stopOpacity={0} />
-              <Stop offset="100%" stopColor={theme.colors.background} stopOpacity={1} />
-            </LinearGradient>
-          </Defs>
-          <Rect x={0} y={0} width="100%" height="100%" fill="url(#profileHeroFade)" />
-        </Svg> */}
         {onBack ? (
           <Row style={styles.topBar}>
-            <Pressable onPress={onBack} hitSlop={10} style={styles.backButton}>
-              <Icon name="back" size={20} color={palette.white} />
-            </Pressable>
+            <BackButton onPress={onBack} color={palette.white} style={styles.backButton} />
             {title ? (
               <AppText variant="headerTitle" style={styles.title}>
                 {title}
@@ -124,7 +128,13 @@ export function ProfileHero({
       <View style={styles.brand}>
         <CustomCard>
           <Row gap={theme.spacing.md} align="flex-start">
-            <Avatar name={name} uri={avatarUri} size={AVATAR_SIZE} />
+            {onAvatarPress ? (
+              <TouchableOpacity onPress={onAvatarPress} activeOpacity={0.7}>
+                {avatarElement}
+              </TouchableOpacity>
+            ) : (
+              avatarElement
+            )}
             <View style={styles.nameBlock}>
               <AppText variant="h2" numberOfLines={1}>
                 {name}

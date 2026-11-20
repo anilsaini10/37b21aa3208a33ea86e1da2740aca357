@@ -105,10 +105,9 @@ export function bootstrap(): void {
   // Re-fetch permissions when the app comes back to the foreground (if stale).
   startPermissionsAppStateListener(() => useAuthStore.getState().user?.id);
 
-  // Any request coming back 401 (missing/expired token) clears the session
-  // app-wide — the root navigator swaps back to the login flow on its own.
+  // Any request coming back 401 (missing/expired token) shows the session-expired
+  // modal — the user taps "Re-login" to clear everything and land on the auth screen.
   setUnauthorizedHandler(() => {
-    usePermissionsStore.getState().clear();
     useAuthStore.getState().forceLogout();
   });
 

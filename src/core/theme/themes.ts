@@ -24,7 +24,7 @@ const components = (radiusScale = 1): ComponentTokens => ({
   },
   card: {
     radius: radius.lg * radiusScale,
-    padding: spacing.lg,
+    padding: spacing.md,
     elevation: 2,
   },
   header: {

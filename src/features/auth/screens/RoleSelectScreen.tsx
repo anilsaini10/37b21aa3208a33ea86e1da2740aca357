@@ -75,7 +75,7 @@ export function RoleSelectScreen({navigation}: AuthScreenProps<'RoleSelect'>): R
             </View>
             <Spacer size={14} />
             <AppText variant="h1" center>
-              Greenwood School
+              NoughtOne
             </AppText>
             <AppText variant="caption" color="textSecondary" center>
               {/* {t('schoolManagementSystem')} */}

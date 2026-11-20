@@ -37,6 +37,10 @@ import {ParentSyllabusOverviewScreen} from '../features/syllabus/screens/ParentS
 import {ParentSubjectProgressScreen} from '../features/syllabus/screens/ParentSubjectProgressScreen';
 import {ParentChapterDetailScreen} from '../features/syllabus/screens/ParentChapterDetailScreen';
 import {ParentOverallProgressScreen} from '../features/syllabus/screens/ParentOverallProgressScreen';
+import {AdmitCardScreen} from '../features/exams/screens/AdmitCardScreen';
+import {ParentQueriesScreen} from '../features/parent/screens/ParentQueriesScreen';
+import {QueryDetailScreen} from '../features/parent/screens/QueryDetailScreen';
+import {SubmitQueryScreen} from '../features/parent/screens/SubmitQueryScreen';
 
 const Tab = createBottomTabNavigator<ParentTabParamList>();
 const Stack = createNativeStackNavigator<ParentStackParamList>();
@@ -81,6 +85,9 @@ export function ParentNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.ReportCard}>
         {() => <PermissionGuard permission={P.EXAMS_VIEW}><ReportCardScreen /></PermissionGuard>}
       </Stack.Screen>
+      <Stack.Screen name={ScreenNames.AdmitCard}>
+        {() => <PermissionGuard permission={P.EXAMS_VIEW}><AdmitCardScreen /></PermissionGuard>}
+      </Stack.Screen>
       <Stack.Screen name={ScreenNames.Fees}>
         {() => <PermissionGuard permission={P.FEES_MODULE}><ParentFeesScreen /></PermissionGuard>}
       </Stack.Screen>
@@ -115,6 +122,9 @@ export function ParentNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.ParentOverallProgress}>
         {() => <PermissionGuard permission={P.SYLLABUS_VIEW}><ParentOverallProgressScreen /></PermissionGuard>}
       </Stack.Screen>
+      <Stack.Screen name={ScreenNames.ParentQueries} component={ParentQueriesScreen} />
+      <Stack.Screen name={ScreenNames.ParentQueryDetail} component={QueryDetailScreen} />
+      <Stack.Screen name={ScreenNames.SubmitQuery} component={SubmitQueryScreen} />
     </Stack.Navigator>
   );
 }

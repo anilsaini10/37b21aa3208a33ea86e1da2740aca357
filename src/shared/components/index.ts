@@ -1,4 +1,5 @@
 export * from './AppText';
+export * from './BackButton';
 export * from './Icon';
 export * from './ChevronRight';
 export * from './layout';
@@ -38,4 +39,6 @@ export * from './ListRow';
 export * from './LanguageSwitcher';
 export * from './AriseLogo';
 export * from './ImagePickerSheet';
+export * from './ProfileImageModal';
+export * from './ChildSwitcher';
 export * from './OfflineBanner';

@@ -498,4 +498,12 @@ export const ICONS: Record<string, IconRenderer> = {
       <Polyline points="21 15 16 10 5 21" />
     </Frame>
   ),
+
+  query: p => (
+    <Frame {...p}>
+      <Path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      <Path d="M12 8a1.5 1.5 0 0 1 1.5 1.5c0 .83-.67 1.17-1.17 1.67-.17.17-.33.37-.33.83" />
+      <Circle cx={12} cy={14.5} r={0.5} fill={p.color} />
+    </Frame>
+  ),
 };

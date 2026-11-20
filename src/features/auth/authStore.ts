@@ -15,6 +15,7 @@ import {deviceTokenApi, getDeviceToken, currentDevicePlatform} from '../../core/
 import {usePermissionsStore} from './permissionsStore';
 import {logger} from '../../core/utils/logger';
 import {cacheManager} from '../../core/utils/cacheManager';
+import {queryClient} from '../../core/query/queryClient';
 
 interface AuthState {
   user: AuthUser | null;
@@ -25,6 +26,8 @@ interface AuthState {
   errorCode: string | null;
   /** Backend `details` payload for the last failed auth action (e.g. `{attemptsLeft}` for `INVALID_OTP`), if any. */
   errorDetails: Record<string, unknown> | null;
+  /** True when the backend returned 401 — shows the session-expired modal. */
+  sessionExpired: boolean;
 
   hydrate: () => void;
   setSession: (session: AuthSession) => void;
@@ -37,9 +40,10 @@ interface AuthState {
   ) => Promise<boolean>;
   loginWithOtp: (role: UserRole, phone: string, otp: string, schoolId?: string) => Promise<boolean>;
   logout: () => Promise<void>;
-  /** Clears the session locally without calling the logout endpoint — used when the
-   * backend itself has already invalidated the session (e.g. a 401 on any request). */
+  /** Marks the session as expired (shows the modal) without immediately clearing state. */
   forceLogout: () => void;
+  /** Called when the user taps "Re-login" — clears everything and navigates to auth. */
+  confirmForceLogout: () => void;
   updateProfilePhoto: (uri: string, type: string, name: string) => Promise<string | null>;
   clearError: () => void;
   can: (permission: PermissionKey) => boolean;
@@ -78,6 +82,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   error: null,
   errorCode: null,
   errorDetails: null,
+  sessionExpired: false,
 
   hydrate: () => {
     const user = storage.getObject<AuthUser>(StorageKeys.AUTH_USER);
@@ -166,9 +171,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   forceLogout: () => {
+    if (get().sessionExpired) return;
+    set({sessionExpired: true});
+  },
+
+  confirmForceLogout: () => {
+    const deviceToken = storage.getString(StorageKeys.PUSH_DEVICE_TOKEN);
+    if (deviceToken) {
+      deviceTokenApi.unregister(deviceToken).catch(e => {
+        logger.warn('Failed to unregister device token on session expiry', e);
+      });
+    }
     clearSession();
     usePermissionsStore.getState().clear();
-    set({user: null, isAuthenticated: false, error: null, errorCode: null, errorDetails: null});
+    queryClient.clear();
+    storage.delete(StorageKeys.PUSH_DEVICE_TOKEN);
+    storage.delete(StorageKeys.PERMISSIONS_CACHE);
+    set({user: null, isAuthenticated: false, sessionExpired: false, error: null, errorCode: null, errorDetails: null});
   },
 
   updateProfilePhoto: async (uri, type, name) => {

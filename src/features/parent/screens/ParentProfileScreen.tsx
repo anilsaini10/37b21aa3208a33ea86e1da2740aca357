@@ -1,5 +1,5 @@
 /** Parent profile — photo hero identity, navigation menu, logout. */
-import React from 'react';
+import React, {useState} from 'react';
 import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -10,6 +10,7 @@ import {
   Screen,
   CustomButton,
   ProfileHero,
+  ProfileImageModal,
   MoreMenuTile,
   moreMenuAccentForIndex,
   Spacer,
@@ -20,13 +21,14 @@ import {usePermissionGate} from '../../auth/usePermissionGate';
 import {TestPaymentButton} from '../../subscription/components/TestPaymentButton';
 import type {ParentStackParamList, ParentTabParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
+import {useCachedImage} from '../../../core/utils/useCachedImage';
 
 type Nav = NativeStackNavigationProp<ParentStackParamList>;
 
-type MenuRoute = 'ChildProfile' | 'ChildTimetable' | 'Results' | 'Fees' | 'Announcements' | 'Events' | 'Chat' | 'Leave' | 'AcademicCalendar' | 'SubscriptionPlans' | 'ChangePassword' | 'ParentSyllabusOverview';
+type MenuRoute = 'ChildProfile' | 'ChildTimetable' | 'Results' | 'Fees' | 'Announcements' | 'Events' | 'Chat' | 'Leave' | 'AcademicCalendar' | 'SubscriptionPlans' | 'ChangePassword' | 'ParentSyllabusOverview' | 'ParentQueries';
 
 const MENU: {labelKey: TranslationKey; icon: string; route: MenuRoute; permission?: PermissionKey}[] = [
-  {labelKey: 'parentProfile_childProfile', icon: 'student', route: ScreenNames.ChildProfile, permission: P.PROFILE_VIEW},
+  {labelKey: 'parentProfile_childProfile', icon: 'student', route: ScreenNames.ChildProfile},
   {labelKey: 'results_title', icon: 'exam', route: ScreenNames.Results, permission: P.EXAMS_VIEW},
   {labelKey: 'teacherProfile_timetable', icon: 'timetable', route: ScreenNames.ChildTimetable, permission: P.TIMETABLE_VIEW},
   {labelKey: 'syllabus_childSyllabus', icon: 'homework', route: ScreenNames.ParentSyllabusOverview, permission: P.SYLLABUS_VIEW},
@@ -36,6 +38,7 @@ const MENU: {labelKey: TranslationKey; icon: string; route: MenuRoute; permissio
   {labelKey: 'calendar_title', icon: 'calendar', route: ScreenNames.AcademicCalendar, permission: P.CALENDAR_VIEW},
   // {labelKey: 'parentProfile_chatWithTeacher', icon: 'chat', route: ScreenNames.Chat},
   {labelKey: 'parentProfile_leaveApplication', icon: 'calendar', route: ScreenNames.Leave, permission: P.LEAVE_VIEW},
+  {labelKey: 'parentQuery_title', icon: 'query', route: ScreenNames.ParentQueries},
   {labelKey: 'subscription_title', icon: 'card', route: ScreenNames.SubscriptionPlans, permission: P.SUBSCRIPTION_VIEW},
   {labelKey: 'teacherProfile_changePassword', icon: 'lock', route: ScreenNames.ChangePassword},
 ];
@@ -47,6 +50,10 @@ export function ParentProfileScreen(): React.JSX.Element {
   const user = useAuthStore(s => s.user);
   const logout = useAuthStore(s => s.logout);
   const {gate, PermissionModal} = usePermissionGate();
+
+  const [imageModalVisible, setImageModalVisible] = useState(false);
+  const displayPhoto = useCachedImage(user?.profilePhoto ?? user?.avatarUrl);
+
   const styles = useThemedStyles(t2 => ({
     content: {
       padding: t2.spacing.lg,
@@ -69,10 +76,12 @@ export function ParentProfileScreen(): React.JSX.Element {
         <ProfileHero
           name={user?.name ?? t('parentProfile_parent')}
           avatarUri={user?.avatarUrl}
+          profilePhoto={user?.profilePhoto}
           lines={[user?.phone, user?.email]}
           badgeLabel={t('parentProfile_parent')}
           onBack={() => tabNavigation.navigate(ScreenNames.Dashboard)}
           title={t('parentProfile_profile')}
+          onAvatarPress={() => setImageModalVisible(true)}
         />
 
         <View style={styles.content}>
@@ -98,6 +107,11 @@ export function ParentProfileScreen(): React.JSX.Element {
         </View>
       </ScrollView>
       <PermissionModal />
+      <ProfileImageModal
+        visible={imageModalVisible}
+        onClose={() => setImageModalVisible(false)}
+        currentImageUri={displayPhoto}
+      />
     </Screen>
   );
 }

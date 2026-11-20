@@ -147,6 +147,8 @@ export type AdminStackParamList = {
   TeacherProgressReport: undefined;
   DelayedChapters: undefined;
   ApprovalQueue: undefined;
+  AdminParentQueries: undefined;
+  AdminQueryDetail: {queryId: string};
 };
 
 // ---- Teacher --------------------------------------------------------------
@@ -209,6 +211,7 @@ export type ParentStackParamList = {
   ChildTimetable: undefined;
   Results: undefined;
   ReportCard: {examId: string; studentId: string};
+  AdmitCard: {examId: string; studentId: string};
   Fees: undefined;
   Timetable: undefined;
   Announcements: undefined;
@@ -228,6 +231,9 @@ export type ParentStackParamList = {
   ParentSubjectProgress: {subjectId: string; studentId: string};
   ParentChapterDetail: {planChapterId: string; studentId: string};
   ParentOverallProgress: undefined;
+  ParentQueries: undefined;
+  ParentQueryDetail: {queryId: string};
+  SubmitQuery: undefined;
 };
 
 // ---- Subscription (shared by all three role stacks) ------------------------

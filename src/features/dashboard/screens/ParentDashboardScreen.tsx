@@ -27,6 +27,7 @@ import {
   Divider,
   EmptyState,
   DashboardProfileCard,
+  ChildSwitcher,
 } from '../../../shared/components';
 import {formatCurrency, formatDate} from '../../../core/utils/format';
 import {attendancePercentageTone} from '../../../shared/helpers';
@@ -95,60 +96,15 @@ export function ParentDashboardScreen(): React.JSX.Element {
     );
   }
 
-  if (children.length === 1) {
-    return <ParentDashboardContent child={children[0]} />;
-  }
-
-  const activeChild = children.find(c => c.id === activeChildId);
-  if (!activeChild) {
-    return <ChildrenList children={children} onSelect={setActiveChildId} />;
-  }
-  return <ParentDashboardContent child={activeChild} onSwitchChild={() => setActiveChildId(null)} />;
-}
-
-function ChildrenList({
-  children,
-  onSelect,
-}: {
-  children: ParentChild[];
-  onSelect: (id: string) => void;
-}): React.JSX.Element {
-  const {theme} = useTheme();
-  const {t} = useLanguage();
-  const styles = useThemedStyles(t2 => ({
-    scrollContent: {padding: t2.spacing.lg},
-    card: {paddingHorizontal: t2.spacing.lg},
-  }));
+  const child = children.find(c => c.id === activeChildId) ?? children[0];
 
   return (
-    <Screen padded={false}>
-      <CustomHeader title={t('parentDashboard_title')} />
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <AppText variant="caption" color="textSecondary">
-          {t('parentAttendance_selectChild')}
-        </AppText>
-        <Spacer size={theme.spacing.sm} />
-        <CustomCard padded={false} style={styles.card}>
-          {children.map((child, i) => (
-            <View key={child.id}>
-              {i > 0 ? <Divider /> : null}
-              <ListRow
-                avatarName={child.name}
-                title={child.name}
-                subtitle={t('mySchedule_classSection', {className: child.className, sectionName: child.sectionName})}
-                onPress={() => onSelect(child.id)}
-                right={
-                  <Badge
-                    label={`${child.attendancePercentage}%`}
-                    tone={attendancePercentageTone(child.attendancePercentage)}
-                  />
-                }
-              />
-            </View>
-          ))}
-        </CustomCard>
-      </ScrollView>
-    </Screen>
+    <ParentDashboardContent
+      child={child}
+      allChildren={children}
+      activeChildId={child.id}
+      onSelectChild={setActiveChildId}
+    />
   );
 }
 

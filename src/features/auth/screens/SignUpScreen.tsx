@@ -4,7 +4,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Svg, {Defs, LinearGradient, Rect, Stop} from 'react-native-svg';
 import {lightTheme, ThemeContext, useTheme} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
-import {AppText, CustomCard, CustomInput, Icon, Spacer} from '../../../shared/components';
+import {AppText, BackButton, CustomCard, CustomInput, Icon, Spacer} from '../../../shared/components';
 import {useAuthStore} from '../authStore';
 import {isValidEmail} from '../../../shared/utils/validators';
 import type {AuthScreenProps} from '../../../navigation/types';
@@ -116,9 +116,7 @@ export function SignUpScreen({navigation}: AuthScreenProps<'SignUp'>): React.JSX
           showsVerticalScrollIndicator={false}>
           <View style={{paddingTop: insets.top + theme.spacing.sm, paddingHorizontal: theme.spacing.lg}}>
             <Row>
-              <Pressable onPress={() => navigation.goBack()} hitSlop={10} style={styles.backButton}>
-                <Icon name="back" size={20} color={theme.colors.text} />
-              </Pressable>
+              <BackButton onPress={() => navigation.goBack()} style={styles.backButton} />
               <AppText variant="headerTitle" style={styles.headerTitle}>
                 {title}
               </AppText>

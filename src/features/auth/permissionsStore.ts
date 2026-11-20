@@ -15,6 +15,21 @@ interface PermissionsCache {
   fetchedAt: number;
 }
 
+function mergePermissions(
+  raw: Record<string, unknown>,
+  role: Record<string, unknown>,
+  school: Record<string, unknown>,
+  blockedBySchool: string[],
+  blockedByRoleLimit: string[],
+): Record<string, unknown> {
+  const merged: Record<string, unknown> = {...school, ...role, ...raw};
+  const blocked = new Set([...blockedBySchool, ...blockedByRoleLimit]);
+  for (const key of blocked) {
+    delete merged[key];
+  }
+  return merged;
+}
+
 interface PermissionsState {
   permissions: Record<string, unknown>;
   role: string | null;
@@ -68,15 +83,22 @@ export const usePermissionsStore = create<PermissionsState>((set, get) => ({
     try {
       const data = await fetchMyPermissions();
       const now = Date.now();
+      const effective = mergePermissions(
+        data.permissions ?? {},
+        data.rolePermissions ?? {},
+        data.schoolPermissions ?? {},
+        data.blockedBySchool ?? [],
+        data.blockedByRoleLimit ?? [],
+      );
       set({
-        permissions: data.permissions,
+        permissions: effective,
         role: data.role,
         isSuperAdmin: data.isSuperAdmin ?? false,
         loading: false,
         fetchedAt: now,
         error: false,
       });
-      writeCache({userId, role: data.role, permissions: data.permissions, isSuperAdmin: data.isSuperAdmin ?? false, fetchedAt: now});
+      writeCache({userId, role: data.role, permissions: effective, isSuperAdmin: data.isSuperAdmin ?? false, fetchedAt: now});
     } catch {
       const state = get();
       if (Object.keys(state.permissions).length === 0) {
@@ -94,6 +116,7 @@ export const usePermissionsStore = create<PermissionsState>((set, get) => ({
 
   can: (key: PermissionKey) => {
     const state = get();
+    console.log('checking permission', state.permissions);
     if (state.isSuperAdmin) return true;
     return state.permissions[key] === true;
   },
