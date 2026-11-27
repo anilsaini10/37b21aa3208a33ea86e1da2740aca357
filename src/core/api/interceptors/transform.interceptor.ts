@@ -51,7 +51,16 @@ export function transformErrorInterceptor(error: AxiosError): Promise<never> {
   }
   // Token missing/expired — clear the session app-wide so the root navigator
   // swaps back to the login flow, instead of every screen handling this itself.
-  if (status === 401) {
+  // Skip for public auth endpoints (login, signup, OTP, password reset) where
+  // 401 means "wrong credentials", not "session expired".
+  const url = error.config?.url ?? '';
+  const isPublicAuth =
+    url.includes('/auth/login') ||
+    url.includes('/auth/signup') ||
+    url.includes('/auth/forgot-password') ||
+    url.includes('/auth/reset-password') ||
+    url.includes('/auth/otp/');
+  if (status === 401 && !isPublicAuth) {
     notifyUnauthorized();
   }
   return Promise.reject(apiError);

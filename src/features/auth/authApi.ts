@@ -179,6 +179,43 @@ export const authApi = {
    * Public — no auth token, no role/schoolId. Always responds 200 (even for
    * an unknown email) so the UI must never treat "not found" as an error.
    */
+  async sendEmailLoginOtp(email: string, role: UserRole, schoolId?: string): Promise<SendLoginOtpResult> {
+    try {
+      const {data} = await axiosClient.post<SendLoginOtpResult>(Endpoints.auth.loginEmailOtpSend, {
+        email,
+        role: role.toUpperCase(),
+        schoolId,
+      });
+      return data;
+    } catch (e) {
+      logger.warn('authApi.sendEmailLoginOtp failed', e);
+      rethrowApiError(e, 'Failed to send OTP. Please try again.');
+    }
+  },
+
+  async verifyEmailLoginOtp(email: string, otp: string, role: UserRole, schoolId?: string): Promise<AuthSession> {
+    try {
+      const {data} = await axiosClient.post<AuthApiResponse>(Endpoints.auth.loginEmailOtpVerify, {
+        email,
+        otp,
+        role: role.toUpperCase(),
+        schoolId,
+      });
+      if (!data?.user) {
+        throw new Error('Login succeeded but the server response was missing user data.');
+      }
+      const tokens: AuthTokens = {
+        accessToken: data.tokens?.accessToken ?? data.accessToken ?? '',
+        refreshToken: data.tokens?.refreshToken ?? data.refreshToken ?? '',
+        expiresAt: toExpiresAtMs(data.tokens?.expiresAt, Date.now() + 15 * 60 * 1000),
+      };
+      return {user: toAuthUser(data.user, {role, schoolId}), tokens};
+    } catch (e) {
+      logger.warn('authApi.verifyEmailLoginOtp failed', e);
+      rethrowApiError(e, 'Invalid or expired OTP. Please try again.');
+    }
+  },
+
   async forgotPassword(email: string): Promise<{message: string}> {
     try {
       const {data} = await axiosClient.post<{message: string}>(Endpoints.auth.forgotPassword, {email});

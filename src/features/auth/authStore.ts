@@ -39,6 +39,7 @@ interface AuthState {
     schoolId?: string,
   ) => Promise<boolean>;
   loginWithOtp: (role: UserRole, phone: string, otp: string, schoolId?: string) => Promise<boolean>;
+  loginWithEmailOtp: (role: UserRole, email: string, otp: string, schoolId?: string) => Promise<boolean>;
   logout: () => Promise<void>;
   /** Marks the session as expired (shows the modal) without immediately clearing state. */
   forceLogout: () => void;
@@ -141,6 +142,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({isLoading: true, error: null, errorCode: null, errorDetails: null});
     try {
       const session = await authApi.verifyLoginOtp(phone, otp, role, schoolId);
+      persistSession(session);
+      set({user: session.user, isAuthenticated: true, isLoading: false});
+      registerDeviceTokenBestEffort();
+      cacheProfilePhotoBestEffort(session.user);
+      usePermissionsStore.getState().fetch(session.user.id);
+      return true;
+    } catch (e) {
+      const message = (e as {message?: string}).message ?? 'Login failed. Please try again.';
+      const code = (e as {code?: string}).code ?? null;
+      set({isLoading: false, error: message, errorCode: code, errorDetails: extractErrorDetails(e) ?? null});
+      return false;
+    }
+  },
+
+  loginWithEmailOtp: async (role, email, otp, schoolId) => {
+    set({isLoading: true, error: null, errorCode: null, errorDetails: null});
+    try {
+      const session = await authApi.verifyEmailLoginOtp(email, otp, role, schoolId);
       persistSession(session);
       set({user: session.user, isAuthenticated: true, isLoading: false});
       registerDeviceTokenBestEffort();

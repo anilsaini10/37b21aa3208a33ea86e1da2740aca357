@@ -1,10 +1,11 @@
 /** Student detail — profile, academic, parent, fee & documents + delete. */
-import React, {useState} from 'react';
-import {Linking, RefreshControl, ScrollView, View, StyleSheet} from 'react-native';
+import React, {useState, useCallback} from 'react';
+import {Image, Linking, RefreshControl, ScrollView, TouchableOpacity, View, StyleSheet} from 'react-native';
 import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
+import {useCachedImage} from '../../../core/utils/useCachedImage';
 import {
   Screen,
   AppText,
@@ -12,6 +13,7 @@ import {
   CustomCard,
   CustomButton,
   CustomModal,
+  ProfileImageModal,
   Avatar,
   Badge,
   Row,
@@ -22,7 +24,7 @@ import {
 } from '../../../shared/components';
 import {feeStatusTone, statusTone, capitalize} from '../../../shared/helpers';
 import {formatDate, formatCurrency} from '../../../core/utils/format';
-import {useStudent, useDeleteStudent} from '../students.service';
+import {useStudent, useDeleteStudent, useUploadStudentPhoto} from '../students.service';
 import {useStudentFee} from '../../fees/fees.service';
 import type {AdminStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
@@ -76,7 +78,15 @@ export function StudentDetailScreen(): React.JSX.Element {
   const {data: student, isLoading, isRefetching, isError, error, refetch} = useStudent(id, initial);
   const {data: fee} = useStudentFee(id);
   const deleteMutation = useDeleteStudent();
+  const uploadPhotoMutation = useUploadStudentPhoto();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [imageModalVisible, setImageModalVisible] = useState(false);
+
+  const displayPhoto = useCachedImage(student?.profilePhoto ?? student?.avatarUrl);
+
+  const handleUploadPhoto = useCallback(async (uri: string, type: string, name: string) => {
+    await uploadPhotoMutation.mutateAsync({id, uri, type, name});
+  }, [uploadPhotoMutation, id]);
   const styles = useThemedStyles(t2 => ({
     scrollContent: {
       padding: t2.spacing.lg,
@@ -126,7 +136,13 @@ export function StudentDetailScreen(): React.JSX.Element {
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => refetch()} />}>
         <CustomCard>
           <Row gap={theme.spacing.md}>
-            <Avatar name={student.name} uri={student.avatarUrl} size={72} />
+            <TouchableOpacity onPress={() => setImageModalVisible(true)} activeOpacity={0.7}>
+              {displayPhoto ? (
+                <Image source={{uri: displayPhoto}} style={{width: 72, height: 72, borderRadius: 36}} resizeMode="cover" />
+              ) : (
+                <Avatar name={student.name} uri={student.avatarUrl} size={72} />
+              )}
+            </TouchableOpacity>
             <View style={styles.avatarBlock}>
               <AppText variant="h2">{student.name}</AppText>
               <AppText variant="caption" color="textSecondary">
@@ -248,6 +264,13 @@ export function StudentDetailScreen(): React.JSX.Element {
           </View>
         </Row>
       </CustomModal>
+
+      <ProfileImageModal
+        visible={imageModalVisible}
+        onClose={() => setImageModalVisible(false)}
+        currentImageUri={displayPhoto}
+        onUpload={handleUploadPhoto}
+      />
     </Screen>
   );
 }

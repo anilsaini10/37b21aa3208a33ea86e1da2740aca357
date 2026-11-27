@@ -1,3 +1,4 @@
+import type React from 'react';
 import type {SchoolEvent} from './communication';
 
 export interface AdminDashboardData {
@@ -46,4 +47,5 @@ export interface StatCard {
   accent: 'primary' | 'success' | 'warning' | 'error' | 'info';
   delta?: number;
   onPress?: () => void;
+  svgIcon?: React.ReactNode;
 }

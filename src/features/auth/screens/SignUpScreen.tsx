@@ -1,16 +1,22 @@
 import React, {useState} from 'react';
-import {ActivityIndicator, Pressable, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import Svg, {Defs, LinearGradient, Rect, Stop} from 'react-native-svg';
+import Svg, {Path} from 'react-native-svg';
 import {lightTheme, ThemeContext, useTheme} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
-import {AppText, BackButton, CustomCard, CustomInput, Icon, Spacer} from '../../../shared/components';
+import {AppText, BackButton, CustomInput, Icon, Spacer} from '../../../shared/components';
 import {useAuthStore} from '../authStore';
 import {isValidEmail} from '../../../shared/utils/validators';
 import type {AuthScreenProps} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
-
-const LOGO_SIZE = 88;
 
 interface FieldErrors {
   schoolName?: string;
@@ -27,7 +33,6 @@ export function SignUpScreen({navigation}: AuthScreenProps<'SignUp'>): React.JSX
   const insets = useSafeAreaInsets();
   const {t} = useLanguage();
 
-  // Signup is admin-only — it creates the school along with the admin account.
   const {signup, isLoading, error, errorCode, clearError} = useAuthStore();
 
   const [schoolName, setSchoolName] = useState('');
@@ -38,9 +43,6 @@ export function SignUpScreen({navigation}: AuthScreenProps<'SignUp'>): React.JSX
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
-  const title = t('loginScreen_adminTitle');
-  const roleIcon = 'settings';
-
   const clearFieldError = (field: keyof FieldErrors) => {
     if (error) {
       clearError();
@@ -50,7 +52,6 @@ export function SignUpScreen({navigation}: AuthScreenProps<'SignUp'>): React.JSX
     }
   };
 
-  /** Mirrors the backend's validation rules so the user gets instant feedback. */
   const validate = (): FieldErrors => {
     const errors: FieldErrors = {};
     const trimmedSchool = schoolName.trim();
@@ -89,58 +90,39 @@ export function SignUpScreen({navigation}: AuthScreenProps<'SignUp'>): React.JSX
     if (!ok && useAuthStore.getState().errorCode === 'EMAIL_TAKEN') {
       setFieldErrors(prev => ({...prev, email: useAuthStore.getState().error ?? t('signUpScreen_emailTaken')}));
     }
-    // On success the root navigator swaps to the role stack automatically.
   };
 
-  // Non-field errors (network, unexpected server errors) still show as a banner.
   const bannerError = error && errorCode !== 'EMAIL_TAKEN' ? error : null;
 
   return (
     <ThemeContext.Provider value={{...themeCtx, theme: lightTheme}}>
-      <View style={[styles.root, {backgroundColor: '#F6F5FC'}]}>
+      <View style={styles.root}>
         <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
 
-        <View
-          pointerEvents="none"
-          style={[styles.blob, styles.blobTopRight, {backgroundColor: theme.colors.primary}]}
-        />
-        <View
-          pointerEvents="none"
-          style={[styles.blob, styles.blobBottomLeft, {backgroundColor: theme.colors.secondary}]}
-        />
-
         <ScrollView
-          style={styles.flex}
+          style={{flex: 1}}
           contentContainerStyle={{paddingBottom: insets.bottom + theme.spacing.xl}}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>
-          <View style={{paddingTop: insets.top + theme.spacing.sm, paddingHorizontal: theme.spacing.lg}}>
-            <Row>
-              <BackButton onPress={() => navigation.goBack()} style={styles.backButton} />
-              <AppText variant="headerTitle" style={styles.headerTitle}>
-                {title}
-              </AppText>
-            </Row>
+          {/* Back button */}
+          <View style={{paddingTop: insets.top + theme.spacing.sm, paddingHorizontal: 24}}>
+            <BackButton onPress={() => navigation.goBack()} style={styles.backButton} />
           </View>
 
-          <View style={styles.brand}>
-            <View style={styles.logoRing}>
-              <View style={[styles.logoCircle, {backgroundColor: theme.colors.surface}]}>
-                <Icon name={roleIcon} size={36} color={theme.colors.primary} />
-              </View>
-            </View>
-            <Spacer size={18} />
-            <AppText variant="h1" center>
+          {/* Hero */}
+          <View style={styles.heroSection}>
+            <AppText variant="h1" style={styles.heading}>
               {t('signUpScreen_title')}
             </AppText>
             <Spacer size={6} />
-            <AppText variant="body" color="textSecondary" center>
+            <AppText variant="body" color="textSecondary">
               {t('signUpScreen_subtitle')}
             </AppText>
           </View>
 
-          <View style={{paddingHorizontal: theme.spacing.lg, marginTop: theme.spacing.xl}}>
-            <CustomCard style={styles.formCard}>
+          {/* Form Card */}
+          <View style={styles.formWrap}>
+            <View style={styles.formCard}>
               <CustomInput
                 label={t('signUpScreen_schoolNameLabel')}
                 placeholder={t('signUpScreen_schoolNamePlaceholder')}
@@ -217,21 +199,37 @@ export function SignUpScreen({navigation}: AuthScreenProps<'SignUp'>): React.JSX
                   setConfirmPassword(val);
                   clearFieldError('confirmPassword');
                 }}
-                containerStyle={styles.lastInput}
                 required
               />
 
               {bannerError ? (
-                <AppText variant="caption" color="error" style={{marginTop: theme.spacing.sm}}>
+                <AppText variant="caption" color="error" style={{marginTop: 4}}>
                   {bannerError}
                 </AppText>
               ) : null}
-            </CustomCard>
+            </View>
 
             <Spacer size={22} />
-            <GradientButton title={t('signUpScreen_createAccount')} onPress={onSubmit} loading={isLoading} />
+
+            <TouchableOpacity
+              style={[styles.submitBtn, {opacity: isLoading ? 0.6 : 1}]}
+              onPress={onSubmit}
+              disabled={isLoading}
+              activeOpacity={0.8}>
+              {isLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <View style={styles.btnContent}>
+                  <Icon name="sign-in" size={20} color="#fff" />
+                  <AppText variant="button" style={styles.btnText}>
+                    {t('signUpScreen_createAccount')}
+                  </AppText>
+                </View>
+              )}
+            </TouchableOpacity>
+
             <Spacer size={16} />
-            <Row style={styles.center}>
+            <View style={styles.linkRow}>
               <AppText variant="caption" color="textSecondary">
                 {t('signUpScreen_alreadyHaveAccount')}
               </AppText>
@@ -240,99 +238,26 @@ export function SignUpScreen({navigation}: AuthScreenProps<'SignUp'>): React.JSX
                   {t('loginScreen_signIn')}
                 </AppText>
               </Pressable>
-            </Row>
-
-            <Spacer size={22} />
+            </View>
           </View>
         </ScrollView>
+
+        {/* Background wave */}
+        <View style={styles.bgWave} pointerEvents="none">
+          <Svg width="100%" height={140} viewBox="0 0 400 140" preserveAspectRatio="none">
+            <Path d="M0,70 C60,30 140,90 220,55 C300,20 360,75 400,50 L400,140 L0,140Z" fill="#4F46E5" opacity={0.06} />
+            <Path d="M0,95 C80,60 180,110 260,80 C340,50 390,85 400,70 L400,140 L0,140Z" fill="#4F46E5" opacity={0.04} />
+          </Svg>
+        </View>
       </View>
     </ThemeContext.Provider>
-  );
-}
-
-function Row({children, style}: {children: React.ReactNode; style?: object | object[]}): React.JSX.Element {
-  return <View style={[{flexDirection: 'row', alignItems: 'center'}, style]}>{children}</View>;
-}
-
-function GradientButton({
-  title,
-  onPress,
-  loading,
-}: {
-  title: string;
-  onPress: () => void;
-  loading?: boolean;
-}): React.JSX.Element {
-  const {theme} = useTheme();
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={loading}
-      style={({pressed}) => [styles.gradientButton, {opacity: pressed ? 0.9 : loading ? 0.7 : 1}]}>
-      <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
-        <Defs>
-          <LinearGradient id="ctaGradient" x1="0" y1="0" x2="1" y2="0">
-            <Stop offset="0%" stopColor={theme.colors.primary} />
-            <Stop offset="100%" stopColor={theme.colors.primaryVariant} />
-          </LinearGradient>
-        </Defs>
-        <Rect x={0} y={0} width="100%" height="100%" fill="url(#ctaGradient)" />
-      </Svg>
-      {loading ? (
-        <ActivityIndicator color="#fff" />
-      ) : (
-        <AppText variant="button" style={{color: '#fff'}}>
-          {title}
-        </AppText>
-      )}
-    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-  },
-  flex: {
-    flex: 1,
-  },
-  center: {
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    marginLeft: 12,
-  },
-  loginLink: {
-    marginLeft: 6,
-    fontWeight: '700',
-  },
-  lastInput: {
-    marginBottom: 0,
-  },
-  formCard: {
-    borderWidth: 0,
-    borderRadius: 28,
-    shadowOpacity: 0.08,
-    shadowRadius: 24,
-    shadowOffset: {width: 0, height: 12},
-    elevation: 3,
-  },
-  blob: {
-    position: 'absolute',
-    borderRadius: 999,
-    opacity: 0.1,
-  },
-  blobTopRight: {
-    width: 220,
-    height: 220,
-    top: -80,
-    right: -60,
-  },
-  blobBottomLeft: {
-    width: 180,
-    height: 180,
-    top: 260,
-    left: -80,
+    backgroundColor: '#EEF2FF',
   },
   backButton: {
     width: 38,
@@ -347,41 +272,62 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     elevation: 2,
   },
-  brand: {
-    alignItems: 'center',
+  heroSection: {
+    paddingTop: 20,
+    paddingBottom: 20,
     paddingHorizontal: 24,
-    marginTop: 18,
   },
-  logoRing: {
-    width: LOGO_SIZE + 16,
-    height: LOGO_SIZE + 16,
-    borderRadius: (LOGO_SIZE + 16) / 2,
-    backgroundColor: 'rgba(99,102,241,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
+  heading: {
+    fontSize: 28,
+    fontWeight: '800',
   },
-  logoCircle: {
-    width: LOGO_SIZE,
-    height: LOGO_SIZE,
-    borderRadius: LOGO_SIZE / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    shadowOffset: {width: 0, height: 6},
+  formWrap: {
+    paddingHorizontal: 20,
+  },
+  formCard: {
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    padding: 20,
+    shadowColor: '#4F46E5',
+    shadowOpacity: 0.08,
+    shadowRadius: 20,
+    shadowOffset: {width: 0, height: 10},
     elevation: 4,
   },
-  gradientButton: {
+  submitBtn: {
     height: 56,
-    borderRadius: 18,
-    overflow: 'hidden',
+    borderRadius: 28,
+    backgroundColor: '#4F46E5',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#4F46E5',
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.35,
     shadowRadius: 14,
     shadowOffset: {width: 0, height: 8},
-    elevation: 5,
+    elevation: 6,
+  },
+  btnContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  btnText: {
+    color: '#fff',
+    fontSize: 17,
+    marginLeft: 8,
+  },
+  linkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loginLink: {
+    marginLeft: 6,
+    fontWeight: '700',
+  },
+  bgWave: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 });

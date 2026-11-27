@@ -41,6 +41,7 @@ import {useQueryClient} from '@tanstack/react-query';
 import {usePermissions} from '../../auth/usePermissions';
 import {P} from '../../../core/config/permissions';
 import {usePermissionGate} from '../../auth/usePermissionGate';
+import {AttendanceIcon, BookIcon, ExamIcon, HomeworkIcon} from '../../../assets/svg/svgIcons';
 import type {TeacherStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {StatCard} from '../../../shared/types';
@@ -118,8 +119,9 @@ export function TeacherDashboardScreen(): React.JSX.Element {
       value: dashboardStats.todayClassesCount,
       icon: 'class',
       accent: 'primary',
+      svgIcon: <BookIcon size={24} />,
     },
-    {key: 'homework', label: t('teacherDashboard_pendingHomework'), value: data.pendingHomework, icon: 'homework', accent: 'warning'},
+    {key: 'homework', label: t('teacherDashboard_pendingHomework'), value: data.pendingHomework, icon: 'homework', accent: 'warning', svgIcon: <HomeworkIcon size={24} />},
     {
       key: 'exams',
       label: t('teacherDashboard_upcomingExams'),
@@ -127,6 +129,7 @@ export function TeacherDashboardScreen(): React.JSX.Element {
       icon: 'exam',
       accent: 'info',
       onPress: () => navigation.navigate(ScreenNames.TeacherExams),
+      svgIcon: <ExamIcon size={24} />,
     },
     {
       key: 'attendance',
@@ -134,6 +137,7 @@ export function TeacherDashboardScreen(): React.JSX.Element {
       value: data.attendanceMarkedToday ? t('teacherDashboard_marked') : t('teacherDashboard_pending'),
       icon: 'attendance',
       accent: data.attendanceMarkedToday ? 'success' : 'error',
+      svgIcon: <AttendanceIcon size={24} />,
     },
   ];
 

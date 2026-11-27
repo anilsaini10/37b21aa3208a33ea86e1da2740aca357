@@ -40,7 +40,10 @@ export type AuthStackParamList = {
     role: UserRole;
     schoolId?: string;
     schoolName?: string;
-    phone: string;
+    /** Phone-based OTP (mobile OTP flow — currently disabled). */
+    phone?: string;
+    /** Email-based OTP (active flow). */
+    email?: string;
     message: string;
     resendAfterSeconds: number;
     expiresInSeconds: number;

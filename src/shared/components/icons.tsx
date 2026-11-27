@@ -499,6 +499,13 @@ export const ICONS: Record<string, IconRenderer> = {
     </Frame>
   ),
 
+  'sign-in': p => (
+    <Frame {...p}>
+      <Path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+      <Polyline points="10 17 15 12 10 7" />
+      <Line x1={15} y1={12} x2={3} y2={12} />
+    </Frame>
+  ),
   query: p => (
     <Frame {...p}>
       <Path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />

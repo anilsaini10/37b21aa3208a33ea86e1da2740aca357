@@ -10,10 +10,12 @@ import {CustomBottomSheet} from './CustomBottomSheet';
 export interface LanguageSwitcherProps {
   /** Icon tint — override when placed over a dark/image background. */
   iconColor?: string;
+  /** Show selected language code label (e.g. "EN") next to the icon. */
+  showLabel?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
-export function LanguageSwitcher({iconColor, style}: LanguageSwitcherProps): React.JSX.Element {
+export function LanguageSwitcher({iconColor, showLabel, style}: LanguageSwitcherProps): React.JSX.Element {
   const {theme} = useTheme();
   const {language, setLanguage, t} = useLanguage();
   const [open, setOpen] = useState(false);
@@ -21,6 +23,15 @@ export function LanguageSwitcher({iconColor, style}: LanguageSwitcherProps): Rea
     trigger: {
       width: 40,
       height: 40,
+      borderRadius: t2.radius.pill,
+      backgroundColor: t2.colors.overlay,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    triggerWithLabel: {
+      flexDirection: 'row',
+      height: 40,
+      paddingHorizontal: t2.spacing.sm + 2,
       borderRadius: t2.radius.pill,
       backgroundColor: t2.colors.overlay,
       alignItems: 'center',
@@ -36,8 +47,13 @@ export function LanguageSwitcher({iconColor, style}: LanguageSwitcherProps): Rea
 
   return (
     <>
-      <Pressable onPress={() => setOpen(true)} hitSlop={8} style={[styles.trigger, style]}>
+      <Pressable onPress={() => setOpen(true)} hitSlop={8} style={[showLabel ? styles.triggerWithLabel : styles.trigger, style]}>
         <Icon name="globe" size={20} color={iconColor ?? theme.colors.text} />
+        {showLabel ? (
+          <AppText variant="label" style={{marginLeft: 4, color: iconColor ?? theme.colors.text, fontWeight: '700'}}>
+            {language.toUpperCase()}
+          </AppText>
+        ) : null}
       </Pressable>
 
       <CustomBottomSheet visible={open} onClose={() => setOpen(false)} title={t('selectLanguage')}>

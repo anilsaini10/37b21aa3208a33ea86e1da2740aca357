@@ -84,15 +84,9 @@ export function TeacherNavigator(): React.JSX.Element {
       <Stack.Screen name={ScreenNames.MarkAttendance}>
         {() => <PermissionGuard permission={P.ATTENDANCE_MARK}><MarkAttendanceScreen /></PermissionGuard>}
       </Stack.Screen>
-      <Stack.Screen name={ScreenNames.HomeworkForm}>
-        {() => <PermissionGuard permission={P.HOMEWORK_ASSIGN}><HomeworkFormScreen /></PermissionGuard>}
-      </Stack.Screen>
-      <Stack.Screen name={ScreenNames.HomeworkDetail}>
-        {() => <PermissionGuard permission={P.HOMEWORK_ASSIGN}><HomeworkDetailScreen /></PermissionGuard>}
-      </Stack.Screen>
-      <Stack.Screen name={ScreenNames.HomeworkSubmissions}>
-        {() => <PermissionGuard permission={P.HOMEWORK_ASSIGN}><HomeworkSubmissionsScreen /></PermissionGuard>}
-      </Stack.Screen>
+      <Stack.Screen name={ScreenNames.HomeworkForm} component={HomeworkFormScreen} />
+      <Stack.Screen name={ScreenNames.HomeworkDetail} component={HomeworkDetailScreen} />
+      <Stack.Screen name={ScreenNames.HomeworkSubmissions} component={HomeworkSubmissionsScreen} />
       <Stack.Screen name={ScreenNames.Timetable} component={TimetableScreen} />
       <Stack.Screen name={ScreenNames.MySchedule} component={MyScheduleScreen} />
       <Stack.Screen name={ScreenNames.ClassStudents} component={ClassStudentsScreen} />

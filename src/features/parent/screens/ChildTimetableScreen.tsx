@@ -1,6 +1,7 @@
 /** Parent — Child Timetable: inline child switcher + weekly timetable (read-only). */
 import React, {useState} from 'react';
 import {Pressable, ScrollView, View} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage, type TranslationKey} from '../../../core/i18n';
 import {
@@ -82,6 +83,7 @@ export function ChildTimetableScreen(): React.JSX.Element {
 function ChildTimetableDetail({child, allChildren, activeChildId, onSelectChild}: {child: ParentChild; allChildren: ParentChild[]; activeChildId: string; onSelectChild: (id: string) => void}): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
+  const navigation = useNavigation();
   const [day, setDay] = useState<TeacherWeekDay>('MONDAY');
   const {data, isLoading, isError, error, refetch} = useParentTimetable(child.id);
 
@@ -113,7 +115,7 @@ function ChildTimetableDetail({child, allChildren, activeChildId, onSelectChild}
     if (isError) {
       return (
         <Screen padded={false}>
-          <CustomHeader title={child.name} onBack={onBack} />
+          <CustomHeader title={t('childTimetable_title')} onBack={() => navigation.goBack()} />
           <EmptyState
             icon="warning"
             title={t('common_somethingWentWrong')}
@@ -132,10 +134,11 @@ function ChildTimetableDetail({child, allChildren, activeChildId, onSelectChild}
   return (
     <Screen padded={false}>
       <CustomHeader
-        title={child.name}
+        title={t('childTimetable_title')}
         subtitle={t('mySchedule_classSection', {className: data.className, sectionName: data.sectionName})}
-        onBack={onBack}
+        onBack={() => navigation.goBack()}
       />
+      <ChildSwitcher children={allChildren} activeChildId={activeChildId} onSelect={onSelectChild} />
       <View style={styles.daySelectorWrap}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dayScrollContent}>
           {DAYS.map(d => {

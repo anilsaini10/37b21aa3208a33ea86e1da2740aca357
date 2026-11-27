@@ -19,6 +19,8 @@ export const Endpoints = {
     otpVerify: '/api/auth/otp/verify',
     loginOtpSend: '/api/auth/login/otp/send',
     loginOtpVerify: '/api/auth/login/otp/verify',
+    loginEmailOtpSend: '/api/auth/login/email-otp/send',
+    loginEmailOtpVerify: '/api/auth/login/email-otp/verify',
     forgotPassword: '/api/auth/forgot-password',
     resetPassword: '/api/auth/reset-password',
     resetPasswordConfirm: '/api/auth/reset-password/confirm',
@@ -62,6 +64,8 @@ export const Endpoints = {
     students_byId: (id: string) => `/api/admin/students/${id}`,
     teachers: '/api/admin/teachers',
     teachers_byId: (id: string) => `/api/admin/teachers/${id}`,
+    students_profilePhoto: (id: string) => `/api/admin/students/${id}/profile-photo`,
+    teachers_profilePhoto: (id: string) => `/api/admin/teachers/${id}/profile-photo`,
     teachers_subjects: (teacherId: string) => `/api/admin/teachers/${teacherId}/subjects`,
     teachers_subject_byId: (teacherId: string, subjectId: string, classId: string) =>
       `/api/admin/teachers/${teacherId}/subjects/${subjectId}/${classId}`,

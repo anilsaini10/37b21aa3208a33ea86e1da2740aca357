@@ -1,17 +1,19 @@
 /** Teacher detail — gradient hero profile, floating contact card, employment info, and subject/class assignments. */
-import React, {useState} from 'react';
-import {Pressable, RefreshControl, ScrollView, View, StyleSheet, type StyleProp, type ViewStyle} from 'react-native';
+import React, {useState, useCallback} from 'react';
+import {Image, Pressable, RefreshControl, ScrollView, TouchableOpacity, View, StyleSheet, type StyleProp, type ViewStyle} from 'react-native';
 import Svg, {Defs, LinearGradient, Rect, Stop} from 'react-native-svg';
 import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
+import {useCachedImage} from '../../../core/utils/useCachedImage';
 import {
   Screen,
   AppText,
   CustomHeader,
   CustomModal,
   CustomButton,
+  ProfileImageModal,
   Select,
   Avatar,
   Badge,
@@ -25,7 +27,7 @@ import {
 } from '../../../shared/components';
 import {statusTone, capitalize} from '../../../shared/helpers';
 import {formatDate, formatCurrency} from '../../../core/utils/format';
-import {useTeacher, useAssignTeacherSubject, useRemoveTeacherSubject, useDeleteTeacher, useUpdateTeacher} from '../teachers.service';
+import {useTeacher, useAssignTeacherSubject, useRemoveTeacherSubject, useDeleteTeacher, useUpdateTeacher, useUploadTeacherPhoto} from '../teachers.service';
 import {useClasses, useUpdateSection} from '../../classes/classes.service';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {AdminStackParamList} from '../../../navigation/types';
@@ -145,7 +147,7 @@ function SubtleGradientCard({
 }
 
 /** Level-1 gradient — the visually prominent identity hero, primary → primaryVariant (a tonal shift of the SAME theme hue, so it never introduces an off-theme colour). */
-function TeacherHero({teacher}: {teacher: Teacher}): React.JSX.Element {
+function TeacherHero({teacher, onAvatarPress}: {teacher: Teacher; onAvatarPress?: () => void}): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
   const gradientId = React.useId();
@@ -180,7 +182,17 @@ function TeacherHero({teacher}: {teacher: Teacher}): React.JSX.Element {
       <View style={[styles.blobOne, blobColor]} pointerEvents="none" />
       <View style={[styles.blobTwo, blobColor]} pointerEvents="none" />
       <Row gap={theme.spacing.md} align="center">
-        <Avatar name={teacher.name} uri={teacher.avatarUrl} size={76} color={theme.colors.onPrimary} />
+        {(() => {
+          const photoUri = teacher.profilePhoto ?? teacher.avatarUrl;
+          const avatarEl = photoUri ? (
+            <Image source={{uri: photoUri}} style={{width: 76, height: 76, borderRadius: 38}} resizeMode="cover" />
+          ) : (
+            <Avatar name={teacher.name} uri={teacher.avatarUrl} size={76} color={theme.colors.onPrimary} />
+          );
+          return onAvatarPress ? (
+            <TouchableOpacity onPress={onAvatarPress} activeOpacity={0.7}>{avatarEl}</TouchableOpacity>
+          ) : avatarEl;
+        })()}
         <View style={styles.nameBlock}>
           <AppText variant="h2" color="onPrimary" numberOfLines={1}>
             {teacher.name}
@@ -258,6 +270,8 @@ export function TeacherDetailScreen(): React.JSX.Element {
   const deleteMutation = useDeleteTeacher();
   const restoreMutation = useUpdateTeacher();
   const updateSectionMutation = useUpdateSection();
+  const uploadPhotoMutation = useUploadTeacherPhoto();
+  const [imageModalVisible, setImageModalVisible] = useState(false);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [assignSubjectName, setAssignSubjectName] = useState('');
   const [assignClassId, setAssignClassId] = useState('');
@@ -301,6 +315,12 @@ export function TeacherDetailScreen(): React.JSX.Element {
 
   const subjectOptions = teacher.subjectsTaught.map(s => ({label: s, value: s}));
   const classOptions = (classes ?? []).map(c => ({label: c.name, value: c.id}));
+
+  const displayPhoto = useCachedImage(teacher?.profilePhoto ?? teacher?.avatarUrl);
+
+  const handleUploadPhoto = useCallback(async (uri: string, type: string, name: string) => {
+    await uploadPhotoMutation.mutateAsync({id: teacherId, uri, type, name});
+  }, [uploadPhotoMutation, teacherId]);
 
   const openAssignModal = (): void => {
     setAssignError(undefined);
@@ -410,7 +430,7 @@ export function TeacherDetailScreen(): React.JSX.Element {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => refetch()} />}>
-        <TeacherHero teacher={teacher} />
+        <TeacherHero teacher={teacher} onAvatarPress={() => setImageModalVisible(true)} />
         <ContactInfoCard teacher={teacher} />
 
         <View style={styles.contentWrap}>
@@ -670,6 +690,13 @@ export function TeacherDetailScreen(): React.JSX.Element {
         title={actionResult?.title ?? ''}
         message={actionResult?.message}
         onClose={() => setActionResult(null)}
+      />
+
+      <ProfileImageModal
+        visible={imageModalVisible}
+        onClose={() => setImageModalVisible(false)}
+        currentImageUri={displayPhoto}
+        onUpload={handleUploadPhoto}
       />
     </Screen>
   );

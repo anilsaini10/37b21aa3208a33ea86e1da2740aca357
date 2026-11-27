@@ -1,29 +1,39 @@
-/** Teacher profile — photo hero identity, quick links, and logout. */
-import React, {useState} from 'react';
+/** Teacher profile — quick links and logout. */
+import React from 'react';
 import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import type {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
 import {useThemedStyles} from '../../../core/theme';
 import {useLanguage, type TranslationKey} from '../../../core/i18n';
-import {useCachedImage} from '../../../core/utils/useCachedImage';
 import {P, type PermissionKey} from '../../../core/config/permissions';
 import {usePermissionGate} from '../../auth/usePermissionGate';
 import {
   Screen,
   CustomButton,
-  ProfileHero,
-  ProfileImageModal,
+  CustomHeader,
   MoreMenuTile,
   moreMenuAccentForIndex,
   SectionTitle,
   Spacer,
 } from '../../../shared/components';
-import {capitalize} from '../../../shared/helpers';
 import {useAuthStore} from '../../auth/authStore';
 import {TestPaymentButton} from '../../subscription/components/TestPaymentButton';
-import type {TeacherStackParamList, TeacherTabParamList} from '../../../navigation/types';
+import {ProfileIcon, HomeworkIcon, TimetableIcon, ExamIcon, AttendanceIcon, NotificationIcon, CalendarIcon, LockIcon, WalletIcon} from '../../../assets/svg/svgIcons';
+import type {TeacherStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
+
+const SVG_ICON: Record<string, React.ReactNode> = {
+  profile: <ProfileIcon size={28} />,
+  homework: <HomeworkIcon size={28} />,
+  timetable: <TimetableIcon size={28} />,
+  exam: <ExamIcon size={28} />,
+  attendance: <AttendanceIcon size={28} />,
+  announcement: <NotificationIcon size={28} />,
+  event: <CalendarIcon size={28} />,
+  calendar: <CalendarIcon size={28} />,
+  card: <WalletIcon size={28} />,
+  lock: <LockIcon size={28} />,
+};
 
 type Nav = NativeStackNavigationProp<TeacherStackParamList>;
 
@@ -65,28 +75,14 @@ export function TeacherProfileScreen(): React.JSX.Element {
     },
   }));
   const navigation = useNavigation<Nav>();
-  const tabNavigation = useNavigation<BottomTabNavigationProp<TeacherTabParamList>>();
   const {t} = useLanguage();
-  const user = useAuthStore(s => s.user);
   const logout = useAuthStore(s => s.logout);
   const {gate, PermissionModal} = usePermissionGate();
 
-  const [imageModalVisible, setImageModalVisible] = useState(false);
-  const displayPhoto = useCachedImage(user?.profilePhoto ?? user?.avatarUrl);
-
   return (
     <Screen padded={false}>
+      <CustomHeader title={t('teacherProfile_profile')} />
       <ScrollView showsVerticalScrollIndicator={false}>
-        <ProfileHero
-          name={user?.name ?? t('teacherProfile_teacher')}
-          avatarUri={user?.avatarUrl}
-          profilePhoto={user?.profilePhoto}
-          lines={[user?.email, user?.phone]}
-          badgeLabel={capitalize(user?.role ?? 'teacher')}
-          onBack={() => tabNavigation.navigate(ScreenNames.Dashboard)}
-          title={t('teacherProfile_profile')}
-          onAvatarPress={() => setImageModalVisible(true)}
-        />
 
         <View style={styles.content}>
           <SectionTitle title={t('teacherProfile_manage')} />
@@ -98,6 +94,7 @@ export function TeacherProfileScreen(): React.JSX.Element {
                   title={t(item.titleKey)}
                   accentColor={moreMenuAccentForIndex(index)}
                   onPress={gate(item.permission, () => navigation.navigate(item.route))}
+                  svgIcon={SVG_ICON[item.icon]}
                 />
               </View>
             ))}
@@ -111,11 +108,6 @@ export function TeacherProfileScreen(): React.JSX.Element {
         </View>
       </ScrollView>
       <PermissionModal />
-      <ProfileImageModal
-        visible={imageModalVisible}
-        onClose={() => setImageModalVisible(false)}
-        currentImageUri={displayPhoto}
-      />
     </Screen>
   );
 }

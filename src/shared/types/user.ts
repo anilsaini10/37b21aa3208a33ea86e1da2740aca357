@@ -50,6 +50,7 @@ export interface Student {
   parentPhone: string;
   parentEmail: string;
   avatarUrl?: string;
+  profilePhoto?: string;
   bloodGroup?: string;
   address?: string;
   status: Status;
@@ -105,6 +106,7 @@ export interface Teacher {
   /** Section(s) where this teacher is the Class Teacher (homeroom in-charge) — in practice at most one. */
   classTeacherOf: TeacherHomeroomSection[];
   avatarUrl?: string;
+  profilePhoto?: string;
   joiningDate: string;
   salary: number;
   status: Status;

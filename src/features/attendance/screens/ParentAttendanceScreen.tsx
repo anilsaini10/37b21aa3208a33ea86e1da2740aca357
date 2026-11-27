@@ -109,7 +109,7 @@ export function ParentAttendanceScreen(): React.JSX.Element {
   );
 }
 
-function ChildAttendance({child, onBack}: {child: ParentChild; onBack?: () => void}): React.JSX.Element {
+function ChildAttendance({child, allChildren, activeChildId, onSelectChild}: {child: ParentChild; allChildren: ParentChild[]; activeChildId: string; onSelectChild: (id: string) => void}): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
   const [fromDate, setFromDate] = useState(isoDaysAgo(30));
@@ -163,7 +163,8 @@ function ChildAttendance({child, onBack}: {child: ParentChild; onBack?: () => vo
 
   return (
     <Screen padded={false}>
-      <CustomHeader title={child.name} onBack={onBack} />
+      <CustomHeader title={t('parentAttendance_title')} />
+      <ChildSwitcher children={allChildren} activeChildId={activeChildId} onSelect={onSelectChild} />
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <DateRangeFilter
           fromDate={fromDate}

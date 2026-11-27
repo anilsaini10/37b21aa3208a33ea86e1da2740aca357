@@ -1,9 +1,9 @@
 /** Child profile — photo hero identity, personal + academic details of the parent's ward(s). Switch between children when there's more than one. */
 import React, {useState} from 'react';
-import {Pressable, View, ScrollView, StyleSheet} from 'react-native';
+import {View, ScrollView, StyleSheet} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useTheme, useThemedStyles} from '../../../core/theme';
+import {useThemedStyles} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
@@ -57,7 +57,6 @@ function DetailRow({label, value}: {label: string; value: string}): React.JSX.El
 }
 
 export function ChildProfileScreen(): React.JSX.Element {
-  const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
   const {t} = useLanguage();
   const {data, isLoading, isError, error, refetch} = useParentProfile();
@@ -66,17 +65,6 @@ export function ChildProfileScreen(): React.JSX.Element {
   const styles = useThemedStyles(t2 => ({
     content: {
       padding: t2.spacing.lg,
-    },
-    switcherWrap: {
-      marginBottom: t2.spacing.md,
-    },
-    switcherContent: {
-      columnGap: t2.spacing.sm,
-    },
-    childPill: {
-      paddingHorizontal: t2.spacing.lg,
-      paddingVertical: t2.spacing.sm,
-      borderRadius: t2.radius.pill,
     },
   }));
 
@@ -131,30 +119,9 @@ export function ChildProfileScreen(): React.JSX.Element {
           title={t('childProfile_childProfile')}
         />
 
-        <View style={styles.content}>
-          {children.length > 1 ? (
-            <View style={styles.switcherWrap}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.switcherContent}>
-                {children.map(c => {
-                  const active = c.id === child.id;
-                  return (
-                    <Pressable
-                      key={c.id}
-                      onPress={() => setActiveChildId(c.id)}
-                      style={[
-                        styles.childPill,
-                        {backgroundColor: active ? theme.colors.primary : theme.colors.surfaceVariant},
-                      ]}>
-                      <AppText variant="label" style={{color: active ? theme.colors.onPrimary : theme.colors.textSecondary}}>
-                        {c.name}
-                      </AppText>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-            </View>
-          ) : null}
+        <ChildSwitcher children={children} activeChildId={child.id} onSelect={setActiveChildId} />
 
+        <View style={styles.content}>
           <SectionTitle title={t('childProfile_personalDetails')} />
           <CustomCard>
             <DetailRow label={t('childProfile_gender')} value={capitalize(child.gender)} />

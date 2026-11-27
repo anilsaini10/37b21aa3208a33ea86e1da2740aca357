@@ -85,6 +85,7 @@ export interface TeacherApi {
   experienceYears: number;
   experienceMonths: number;
   subjectsTaught: string[];
+  profilePhoto?: string;
 }
 
 export function toTeacher(raw: TeacherApi): Teacher {
@@ -105,6 +106,7 @@ export function toTeacher(raw: TeacherApi): Teacher {
     experienceYears: raw.experienceYears,
     experienceMonths: raw.experienceMonths,
     subjectsTaught: raw.subjectsTaught ?? [],
+    profilePhoto: raw.profilePhoto,
   };
 }
 
@@ -198,6 +200,22 @@ export const teachersApi = {
       rethrowApiError(e, 'Failed to remove subject assignment.');
     }
   },
+
+  uploadProfilePhoto: async (id: string, uri: string, type: string, name: string): Promise<Teacher> => {
+    try {
+      const formData = new FormData();
+      formData.append('profilePhoto', {uri, type, name} as any);
+      const {data} = await axiosClient.patch<TeacherApi>(
+        Endpoints.admin.teachers_profilePhoto(id),
+        formData,
+        {headers: {'Content-Type': 'multipart/form-data'}},
+      );
+      return toTeacher(data);
+    } catch (e) {
+      console.error('teachersApi.uploadProfilePhoto failed', e);
+      rethrowApiError(e, 'Failed to upload profile photo.');
+    }
+  },
 };
 
 export const useTeachers = (params?: TeacherFilters) =>
@@ -260,6 +278,18 @@ export const useDeleteTeacher = () => {
   return useMutation({
     mutationFn: (id: string) => teachersApi.remove(id),
     onSuccess: (updated, id) => {
+      qc.setQueryData(['teacher', id], updated);
+      qc.invalidateQueries({queryKey: ['teachers']});
+    },
+  });
+};
+
+export const useUploadTeacherPhoto = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({id, uri, type, name}: {id: string; uri: string; type: string; name: string}) =>
+      teachersApi.uploadProfilePhoto(id, uri, type, name),
+    onSuccess: (updated, {id}) => {
       qc.setQueryData(['teacher', id], updated);
       qc.invalidateQueries({queryKey: ['teachers']});
     },

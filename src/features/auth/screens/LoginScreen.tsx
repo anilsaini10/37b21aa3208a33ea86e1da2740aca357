@@ -1,20 +1,57 @@
 import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, Image, Pressable, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  type ImageSourcePropType,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import Svg, {Defs, LinearGradient, Rect, Stop} from 'react-native-svg';
+import Svg, {Circle, Line, Path, Rect} from 'react-native-svg';
 import {lightTheme, ThemeContext, useTheme} from '../../../core/theme';
 import {useLanguage} from '../../../core/i18n';
-import {AppText, BackButton, CustomCard, CustomInput, CustomButton, Icon, Spacer} from '../../../shared/components';
+import {AppText, CustomInput, Icon, Spacer} from '../../../shared/components';
 import {useAuthStore} from '../authStore';
 import {authApi} from '../authApi';
 import {interpretOtpError} from '../otpErrorHandling';
-import {isValidEmail, isValidIndianMobile, isValidPhoneDigits} from '../../../shared/utils/validators';
+import {isValidEmail} from '../../../shared/utils/validators';
 import {formatCountdown} from '../../../core/utils/format';
 import type {AuthScreenProps} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 
-const LOGO_SIZE = 88;
-const LOGO_ICON = require('../../../assets/images/logo_icons.png');
+/* ---------- Role config ---------- */
+
+const ACCENT = '#4F46E5';
+
+type RoleKey = 'admin' | 'teacher' | 'parent';
+
+interface RoleConfig {
+  descKey: 'loginScreen_adminDesc' | 'loginScreen_teacherDesc' | 'loginScreen_parentDesc';
+  image: ImageSourcePropType;
+}
+
+const ROLE_CONFIG: Record<RoleKey, RoleConfig> = {
+  admin: {
+    descKey: 'loginScreen_adminDesc',
+    image: require('../../../assets/images/adminLogin.png'),
+  },
+  teacher: {
+    descKey: 'loginScreen_teacherDesc',
+    image: require('../../../assets/images/teacherLogin.png'),
+  },
+  parent: {
+    descKey: 'loginScreen_parentDesc',
+    image: require('../../../assets/images/parentsRole.png'),
+  },
+};
+
+const DEFAULT_CONFIG = ROLE_CONFIG.teacher;
+
+/* ---------- Component ---------- */
 
 type LoginMode = 'password' | 'otp';
 
@@ -36,9 +73,10 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [rememberMe, setRememberMe] = useState(false);
 
-  const [mobile, setMobile] = useState('');
-  const [mobileError, setMobileError] = useState('');
+  const [otpEmail, setOtpEmail] = useState('');
+  const [otpEmailError, setOtpEmailError] = useState('');
   const [otpSendError, setOtpSendError] = useState('');
   const [otpSending, setOtpSending] = useState(false);
   const [sendBlockedSeconds, setSendBlockedSeconds] = useState(0);
@@ -53,35 +91,38 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
   useEffect(() => {
     if (route.params.otpError) {
       setMode('otp');
-      setMobileError(route.params.otpError);
+      setOtpEmailError(route.params.otpError);
       navigation.setParams({otpError: undefined});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route.params.otpError]);
 
-  const title =
+  const cfg = ROLE_CONFIG[role as RoleKey] ?? DEFAULT_CONFIG;
+  const accent = ACCENT;
+
+  const fullTitle =
     role === 'admin'
       ? t('loginScreen_adminTitle')
       : role === 'teacher'
         ? t('loginScreen_teacherTitle')
         : t('loginScreen_parentTitle');
+
+  const spaceIdx = fullTitle.lastIndexOf(' ');
+  const roleName = spaceIdx > 0 ? fullTitle.substring(0, spaceIdx) : fullTitle;
+  const loginWord = (spaceIdx > 0 ? fullTitle.substring(spaceIdx + 1) : '');
+
   const clearFieldError = (field: keyof FieldErrors) => {
-    if (error) {
-      clearError();
-    }
-    if (fieldErrors[field]) {
-      setFieldErrors(prev => ({...prev, [field]: undefined}));
-    }
+    if (error) clearError();
+    if (fieldErrors[field]) setFieldErrors(prev => ({...prev, [field]: undefined}));
   };
 
-  /** identifier can be email or phone — validated as whichever format it looks like. */
   const validate = (): FieldErrors => {
     const errors: FieldErrors = {};
     const trimmed = identifier.trim();
     if (!trimmed) {
-      errors.identifier = t('loginScreen_identifierRequired');
-    } else if (trimmed.includes('@') ? !isValidEmail(trimmed) : !isValidPhoneDigits(trimmed)) {
-      errors.identifier = t('loginScreen_identifierInvalid');
+      errors.identifier = t('loginScreen_emailRequired');
+    } else if (!isValidEmail(trimmed)) {
+      errors.identifier = t('loginScreen_emailInvalid');
     }
     if (!password) {
       errors.password = t('loginScreen_passwordRequired');
@@ -93,33 +134,30 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
     clearError();
     const errors = validate();
     setFieldErrors(errors);
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
+    if (Object.keys(errors).length > 0) return;
     await loginWithPassword(role, identifier.trim(), password, schoolId);
-    // On success the root navigator swaps to the role stack automatically.
   };
 
   const sendOtp = async (): Promise<void> => {
     setOtpSendError('');
-    const trimmed = mobile.trim();
+    const trimmed = otpEmail.trim();
     if (!trimmed) {
-      setMobileError(t('loginScreen_mobileNumberRequired'));
+      setOtpEmailError(t('loginScreen_emailRequired'));
       return;
     }
-    if (!isValidIndianMobile(trimmed)) {
-      setMobileError(t('loginScreen_mobileNumberInvalid'));
+    if (!isValidEmail(trimmed)) {
+      setOtpEmailError(t('loginScreen_emailInvalid'));
       return;
     }
-    setMobileError('');
+    setOtpEmailError('');
     setOtpSending(true);
     try {
-      const result = await authApi.sendLoginOtp(trimmed, role, schoolId);
+      const result = await authApi.sendEmailLoginOtp(trimmed, role, schoolId);
       navigation.navigate(ScreenNames.OtpLogin, {
         role,
         schoolId,
         schoolName,
-        phone: trimmed,
+        email: trimmed,
         message: result.message,
         resendAfterSeconds: result.resendAfterSeconds,
         expiresInSeconds: result.expiresInSeconds,
@@ -128,24 +166,23 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
       const action = interpretOtpError(e);
       switch (action.kind) {
         case 'cooldown':
-          // A still-valid OTP already exists for this number — go straight to the OTP screen.
           navigation.navigate(ScreenNames.OtpLogin, {
             role,
             schoolId,
             schoolName,
-            phone: trimmed,
+            email: trimmed,
             message: action.message,
             resendAfterSeconds: action.retryAfterSeconds,
             expiresInSeconds: 0,
           });
           break;
         case 'limit_reached':
-          setMobileError(action.message);
+          setOtpEmailError(action.message);
           setSendBlockedSeconds(action.retryAfterSeconds);
           break;
         case 'field_error':
         case 'not_registered_or_inactive':
-          setMobileError(action.message);
+          setOtpEmailError(action.message);
           break;
         case 'invalid_otp':
         case 'attempts_exceeded':
@@ -159,94 +196,78 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
     }
   };
 
+  const isSubmitDisabled =
+    mode === 'password'
+      ? isLoading
+      : otpSending || !isValidEmail(otpEmail.trim()) || sendBlockedSeconds > 0;
+  const submitTitle =
+    mode === 'password'
+      ? t('loginScreen_signIn')
+      : sendBlockedSeconds > 0
+        ? t('loginScreen_sendOtp') + ` (${formatCountdown(sendBlockedSeconds)})`
+        : t('loginScreen_sendOtp');
+  const submitLoading = mode === 'password' ? isLoading : otpSending;
+
   return (
     <ThemeContext.Provider value={{...themeCtx, theme: lightTheme}}>
-      <View style={[styles.root, {backgroundColor: '#F6F5FC'}]}>
+      <View style={styles.root}>
         <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
-
-        {/* Soft decorative blobs — trending airy gradient-mesh backdrop */}
-        {/* <View
-          pointerEvents="none"
-          style={[styles.blob, styles.blobTopRight, {backgroundColor: theme.colors.primary}]}
-        />
-        <View
-          pointerEvents="none"
-          style={[styles.blob, styles.blobBottomLeft, {backgroundColor: theme.colors.secondary}]}
-        /> */}
 
         <ScrollView
           style={{flex: 1}}
           contentContainerStyle={{paddingBottom: insets.bottom + theme.spacing.xl}}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>
-          <View style={{paddingTop: insets.top + theme.spacing.sm, paddingHorizontal: theme.spacing.lg}}>
-            <Row>
-              <BackButton onPress={() => navigation.goBack()} style={styles.backButton} />
-              <AppText variant="headerTitle" style={{marginLeft: 12}}>
-                {title}
-              </AppText>
-            </Row>
+          {/* Back Button */}
+          <Pressable
+            onPress={() => navigation.goBack()}
+            style={[styles.backBtn, {top: insets.top + 10}]}
+            hitSlop={12}>
+            <Icon name="back" size={20} color="#374151" />
+          </Pressable>
+
+          {/* Role description at top */}
+          <View style={[styles.roleDescTop, {paddingTop: insets.top + 48}]}>
+            <AppText variant="caption" color="textSecondary" center style={styles.roleDesc}>
+              {/* {t(cfg.descKey)} */}
+            </AppText>
           </View>
 
-          <View style={styles.brand}>
-            <View style={styles.logoRing}>
-              {/* Silver-on-transparent mark — sits on a black badge so it stays visible (matches the app icon / splash). */}
-              <View style={styles.logoCircle}>
-                <Image source={LOGO_ICON} style={styles.logoImage} resizeMode="contain" />
+          <Spacer size={16} />
+
+          {/* Hero — Left-bar Title + Character Image */}
+          <View style={styles.heroSection}>
+            <View style={styles.heroTextWrap}>
+              <View style={styles.titleRow}>
+                <View style={[styles.titleBar, {backgroundColor: accent}]} />
+                <View style={styles.titleTextCol}>
+                  <AppText style={styles.heroTitleBold}>{roleName}</AppText>
+                  <AppText style={styles.heroTitleLight}>{loginWord}</AppText>
+                </View>
               </View>
+              <Spacer size={10} />
+              <AppText variant="body" style={[styles.heroDesc, {color: accent}]}>
+                {schoolName || ''}
+              </AppText>
             </View>
-            <Spacer size={18} />
-            <AppText variant="h1" center>
-              {t('loginScreen_welcomeBack')}
-            </AppText>
-            <Spacer size={6} />
-            <AppText variant="body" color="textSecondary" center>
-              {t('loginScreen_signInSubtitle')}
-            </AppText>
-            {schoolName ? (
-              <>
-                <Spacer size={4} />
-                <AppText variant="caption" color="primary" center style={{fontWeight: '700'}}>
-                  {schoolName}
-                </AppText>
-              </>
-            ) : null}
+            <Image
+              source={cfg.image}
+              style={styles.heroImage}
+              resizeMode="contain"
+            />
           </View>
 
-          <View style={{paddingHorizontal: theme.spacing.lg, marginTop: theme.spacing.xl}}>
-            <Row style={styles.tabRow}>
-              <Pressable
-                style={[styles.tabPill, {backgroundColor: mode === 'password' ? theme.colors.primary : theme.colors.surfaceVariant}]}
-                onPress={() => setMode('password')}>
-                <AppText variant="label" style={{color: mode === 'password' ? theme.colors.onPrimary : theme.colors.textSecondary}}>
-                  {t('loginScreen_tabPassword')}
-                </AppText>
-              </Pressable>
-              <Pressable
-                style={[styles.tabPill, {backgroundColor: mode === 'otp' ? theme.colors.primary : theme.colors.surfaceVariant}]}
-                onPress={() => setMode('otp')}>
-                <AppText variant="label" style={{color: mode === 'otp' ? theme.colors.onPrimary : theme.colors.textSecondary}}>
-                  {t('loginScreen_tabMobileOtp')}
-                </AppText>
-              </Pressable>
-            </Row>
-            <Spacer size={16} />
-
-            {mode === 'password' ? (
-              <CustomCard
-                style={{
-                  borderWidth: 0,
-                  borderRadius: 28,
-                  shadowOpacity: 0.08,
-                  shadowRadius: 24,
-                  shadowOffset: {width: 0, height: 12},
-                  elevation: 3,
-                }}>
+          {/* Form Card */}
+          <View style={styles.formSection}>
+            <View style={styles.formCard}>
+              {/* Email Input */}
+              {mode === 'password' ? (
                 <CustomInput
-                  label={t('loginScreen_emailOrMobileLabel')}
+                  label={t('loginScreen_emailLabel')}
                   placeholder={t('loginScreen_emailPlaceholder')}
                   iconLeft="email"
                   autoCapitalize="none"
+                  keyboardType="email-address"
                   value={identifier}
                   error={fieldErrors.identifier}
                   onChangeText={val => {
@@ -255,9 +276,79 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
                   }}
                   required
                 />
+              ) : (
+                <CustomInput
+                  label={t('loginScreen_emailLabel')}
+                  placeholder={t('loginScreen_emailPlaceholder')}
+                  iconLeft="email"
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  value={otpEmail}
+                  error={otpEmailError}
+                  onChangeText={val => {
+                    setOtpEmail(val);
+                    setOtpEmailError('');
+                    setOtpSendError('');
+                  }}
+                  required
+                />
+              )}
+
+              {/* Radio Buttons — Password / Email OTP */}
+              <View style={styles.radioRow}>
+                <Pressable
+                  onPress={() => setMode('password')}
+                  style={styles.radioOption}>
+                  <View
+                    style={[
+                      styles.radioOuter,
+                      mode === 'password' && {borderColor: accent},
+                    ]}>
+                    {mode === 'password' && (
+                      <View
+                        style={[styles.radioInner, {backgroundColor: accent}]}
+                      />
+                    )}
+                  </View>
+                  <AppText
+                    variant="label"
+                    style={{
+                      marginLeft: 6,
+                      color: mode === 'password' ? accent : '#6B7280',
+                    }}>
+                    {t('loginScreen_tabPassword')}
+                  </AppText>
+                </Pressable>
+                <Pressable
+                  onPress={() => setMode('otp')}
+                  style={styles.radioOption}>
+                  <View
+                    style={[
+                      styles.radioOuter,
+                      mode === 'otp' && {borderColor: accent},
+                    ]}>
+                    {mode === 'otp' && (
+                      <View
+                        style={[styles.radioInner, {backgroundColor: accent}]}
+                      />
+                    )}
+                  </View>
+                  <AppText
+                    variant="label"
+                    style={{
+                      marginLeft: 6,
+                      color: mode === 'otp' ? accent : '#6B7280',
+                    }}>
+                    {t('loginScreen_tabEmailOtp')}
+                  </AppText>
+                </Pressable>
+              </View>
+
+              {/* Password Input */}
+              {mode === 'password' && (
                 <CustomInput
                   label={t('loginScreen_passwordLabel')}
-                  placeholder="••••••••"
+                  placeholder={t('loginScreen_enterPassword')}
                   iconLeft="lock"
                   secure
                   value={password}
@@ -266,176 +357,134 @@ export function LoginScreen({route, navigation}: AuthScreenProps<'Login'>): Reac
                     setPassword(val);
                     clearFieldError('password');
                   }}
-                  containerStyle={{marginBottom: 0}}
                   required
                 />
+              )}
 
-                {error ? (
-                  <AppText variant="caption" color="error" style={{marginTop: theme.spacing.sm}}>
-                    {error}
-                  </AppText>
-                ) : null}
-              </CustomCard>
-            ) : (
-              <CustomCard
-                style={{
-                  borderWidth: 0,
-                  borderRadius: 28,
-                  shadowOpacity: 0.08,
-                  shadowRadius: 24,
-                  shadowOffset: {width: 0, height: 12},
-                  elevation: 3,
-                }}>
-                <CustomInput
-                  label={t('loginScreen_mobileNumberLabel')}
-                  placeholder={t('loginScreen_mobileNumberPlaceholder')}
-                  prefix="+91"
-                  keyboardType="number-pad"
-                  maxLength={10}
-                  value={mobile}
-                  error={mobileError}
-                  onChangeText={val => {
-                    setMobile(val.replace(/\D/g, ''));
-                    setMobileError('');
-                    setOtpSendError('');
-                  }}
-                  containerStyle={{marginBottom: 0}}
-                  required
-                />
-                {otpSendError ? (
-                  <AppText variant="caption" color="error" style={{marginTop: theme.spacing.sm}}>
-                    {otpSendError}
-                  </AppText>
-                ) : null}
-              </CustomCard>
-            )}
+              {/* Remember Me + Forgot Password */}
+              {mode === 'password' && (
+                <View style={styles.rememberRow}>
+                  <Pressable
+                    style={styles.rememberBtn}
+                    onPress={() => setRememberMe(prev => !prev)}
+                    hitSlop={4}>
+                    <View
+                      style={[
+                        styles.checkbox,
+                        rememberMe && [styles.checkboxChecked, {backgroundColor: accent, borderColor: accent}],
+                      ]}>
+                      {rememberMe && (
+                        <Icon name="check" size={12} color="#fff" />
+                      )}
+                    </View>
+                    <AppText variant="caption" style={styles.rememberText}>
+                      {t('loginScreen_rememberMe')}
+                    </AppText>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => navigation.navigate(ScreenNames.ForgotPassword)}
+                    hitSlop={8}>
+                    <AppText variant="caption" style={[styles.forgotText, {color: accent}]}>
+                      {t('loginScreen_forgotPassword')}
+                    </AppText>
+                  </Pressable>
+                </View>
+              )}
+
+              {/* Error Messages */}
+              {mode === 'password' && error ? (
+                <AppText variant="caption" color="error" style={{marginTop: 8}}>
+                  {error}
+                </AppText>
+              ) : null}
+              {mode === 'otp' && otpSendError ? (
+                <AppText variant="caption" color="error" style={{marginTop: 8}}>
+                  {otpSendError}
+                </AppText>
+              ) : null}
+            </View>
 
             <Spacer size={22} />
-            {mode === 'password' ? (
-              <>
-                <GradientButton title={t('loginScreen_signIn')} onPress={onSubmit} loading={isLoading} />
-                <Spacer size={6} />
-                <CustomButton
-                  title={t('loginScreen_forgotPassword')}
-                  variant="ghost"
-                  onPress={() => navigation.navigate('ForgotPassword')}
-                />
-              </>
-            ) : (
-              <>
-                <GradientButton
-                  title={
-                    sendBlockedSeconds > 0
-                      ? t('loginScreen_sendOtp') + ` (${formatCountdown(sendBlockedSeconds)})`
-                      : t('loginScreen_sendOtp')
-                  }
-                  onPress={sendOtp}
-                  loading={otpSending}
-                  disabled={!isValidIndianMobile(mobile) || sendBlockedSeconds > 0}
-                />
-              </>
-            )}
 
+            {/* Sign In / Send OTP Button */}
+            <TouchableOpacity
+              style={[
+                styles.signInBtn,
+                {backgroundColor: accent, shadowColor: accent, opacity: isSubmitDisabled ? 0.5 : 1},
+              ]}
+              onPress={mode === 'password' ? onSubmit : sendOtp}
+              disabled={isSubmitDisabled}
+              activeOpacity={0.8}>
+              {submitLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <View style={styles.signInContent}>
+                  <Icon name="sign-in" size={18} color="#fff" />
+                  <AppText variant="button" style={styles.signInText}>
+                    {submitTitle}
+                  </AppText>
+                </View>
+              )}
+            </TouchableOpacity>
+
+            {/* Admin: Sign Up */}
             {role === 'admin' ? (
               <>
-                <Spacer size={10} />
-                <Row style={{justifyContent: 'center'}}>
+                <Spacer size={16} />
+                <View style={styles.linkRow}>
                   <AppText variant="caption" color="textSecondary">
                     {t('loginScreen_noAccount')}
                   </AppText>
-                  <Pressable onPress={() => navigation.navigate(ScreenNames.SignUp)} hitSlop={8}>
-                    <AppText variant="caption" color="primary" style={{fontWeight: '700', marginLeft: 6}}>
+                  <Pressable
+                    onPress={() => navigation.navigate(ScreenNames.SignUp)}
+                    hitSlop={8}>
+                    <AppText
+                      variant="caption"
+                      style={{fontWeight: '700', marginLeft: 4, color: accent}}>
                       {t('loginScreen_signUp')}
                     </AppText>
                   </Pressable>
-                </Row>
+                </View>
               </>
             ) : null}
 
-            {role !== 'admin' ? (
-              <>
-                <Spacer size={10} />
-                <Pressable onPress={() => navigation.navigate(ScreenNames.RequestAdmin)} hitSlop={8} style={{alignSelf: 'center'}}>
-                  <AppText variant="caption" color="primary" style={{fontWeight: '600'}}>
-                    {t('loginScreen_requestAdmin')}
-                  </AppText>
-                </Pressable>
-              </>
-            ) : null}
-
-            <Spacer size={22} />
-
+            {/* Need help? Request Admin */}
+            <Spacer size={role === 'admin' ? 10 : 20} />
+            <View style={styles.helpRow}>
+              <View style={styles.helpLine} />
+              <AppText variant="caption" style={styles.helpLabel}>
+                {t('loginScreen_needHelp')}
+              </AppText>
+              <Pressable
+                onPress={() => navigation.navigate(ScreenNames.RequestAdmin)}
+                hitSlop={8}>
+                <AppText variant="caption" style={[styles.helpLink, {color: accent}]}>
+                  {t('loginScreen_requestAdminLink')}
+                </AppText>
+              </Pressable>
+              <View style={styles.helpLine} />
+            </View>
           </View>
+
+          <Spacer size={32} />
+
         </ScrollView>
       </View>
     </ThemeContext.Provider>
   );
 }
 
-function Row({children, style}: {children: React.ReactNode; style?: object | object[]}): React.JSX.Element {
-  return <View style={[{flexDirection: 'row', alignItems: 'center'}, style]}>{children}</View>;
-}
-
-function GradientButton({
-  title,
-  onPress,
-  loading,
-  disabled,
-}: {
-  title: string;
-  onPress: () => void;
-  loading?: boolean;
-  disabled?: boolean;
-}): React.JSX.Element {
-  const {theme} = useTheme();
-  const isDisabled = loading || disabled;
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={isDisabled}
-      style={({pressed}) => [styles.gradientButton, {opacity: pressed ? 0.9 : isDisabled ? 0.5 : 1}]}>
-      <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
-        <Defs>
-          <LinearGradient id="ctaGradient" x1="0" y1="0" x2="1" y2="0">
-            <Stop offset="0%" stopColor={theme.colors.primary} />
-            <Stop offset="100%" stopColor={theme.colors.primaryVariant} />
-          </LinearGradient>
-        </Defs>
-        <Rect x={0} y={0} width="100%" height="100%" fill="url(#ctaGradient)" />
-      </Svg>
-      {loading ? (
-        <ActivityIndicator color="#fff" />
-      ) : (
-        <AppText variant="button" style={{color: '#fff'}}>
-          {title}
-        </AppText>
-      )}
-    </Pressable>
-  );
-}
+/* ---------- Styles ---------- */
 
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+    backgroundColor: '#EEF2FF',
   },
-  blob: {
+  backBtn: {
     position: 'absolute',
-    borderRadius: 999,
-    opacity: 0.1,
-  },
-  blobTopRight: {
-    width: 220,
-    height: 220,
-    top: -80,
-    right: -60,
-  },
-  blobBottomLeft: {
-    width: 180,
-    height: 180,
-    top: 260,
-    left: -80,
-  },
-  backButton: {
+    left: 16,
+    zIndex: 10,
     width: 38,
     height: 38,
     borderRadius: 19,
@@ -448,61 +497,192 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     elevation: 2,
   },
-  brand: {
+
+  /* Role description top */
+  roleDescTop: {
     alignItems: 'center',
     paddingHorizontal: 24,
-    marginTop: 18,
   },
-  logoRing: {
-    width: LOGO_SIZE + 16,
-    height: LOGO_SIZE + 16,
-    borderRadius: (LOGO_SIZE + 16) / 2,
-    // backgroundColor: 'rgba(99,102,241,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
+  roleDesc: {
+    lineHeight: 20,
   },
-  logoCircle: {
-    width: LOGO_SIZE,
-    height: LOGO_SIZE,
-    borderRadius: LOGO_SIZE / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    shadowOffset: {width: 0, height: 6},
-    elevation: 4,
-    backgroundColor: '#000000',
+
+  /* Hero */
+  heroSection: {
+    flexDirection: 'row',
+    paddingLeft: 24,
+    paddingRight: 8,
+    alignItems: 'flex-start',
+    marginBottom: -4,
   },
-  logoImage: {
-    width: LOGO_SIZE * 0.62,
-    height: LOGO_SIZE * 0.62,
-  },
-  demoHint: {
-    padding: 14,
-    borderRadius: 16,
-  },
-  tabRow: {
-    backgroundColor: '#EFEEFB',
-    borderRadius: 999,
-    padding: 4,
-  },
-  tabPill: {
+  heroTextWrap: {
     flex: 1,
-    paddingVertical: 10,
-    borderRadius: 999,
-    alignItems: 'center',
+    paddingTop: 4,
   },
-  gradientButton: {
-    height: 56,
-    borderRadius: 18,
-    overflow: 'hidden',
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+  },
+  titleBar: {
+    width: 5,
+    borderRadius: 3,
+    marginRight: 12,
+  },
+  titleTextCol: {},
+  heroTitleBold: {
+    fontSize: 32,
+    lineHeight: 38,
+    fontFamily: 'Inter-Bold',
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  heroTitleLight: {
+    fontSize: 32,
+    lineHeight: 38,
+    fontFamily: 'Inter-Regular',
+    fontWeight: '400',
+    color: '#94A3B8',
+  },
+  heroDesc: {
+    color: '#64748B',
+    fontSize: 14,
+    lineHeight: 21,
+  },
+  heroImage: {
+    width: 160,
+    height: 160,
+    marginTop: -20,
+    marginRight: -8,
+  },
+
+  /* Form */
+  formSection: {
+    paddingHorizontal: 20,
+    marginTop: 25,
+  },
+  formCard: {
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 20,
+    shadowOffset: {width: 0, height: 10},
+    elevation: 4,
+  },
+
+  /* Radio buttons */
+  radioRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+    marginBottom: 12,
+    gap: 24,
+  },
+  radioOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  radioOuter: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#CBD5E1',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#4F46E5',
-    shadowOpacity: 0.3,
+  },
+  radioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+
+  /* Remember / Forgot */
+  rememberRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 4,
+  },
+  rememberBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: '#D1D5DB',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+  },
+  checkboxChecked: {
+    backgroundColor: '#4F46E5',
+    borderColor: '#4F46E5',
+  },
+  rememberText: {
+    color: '#475569',
+    marginLeft: 8,
+  },
+  forgotText: {
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+
+  /* Sign In button */
+  signInBtn: {
+    height: 46,
+    borderRadius: 23,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowOpacity: 0.35,
     shadowRadius: 14,
     shadowOffset: {width: 0, height: 8},
-    elevation: 5,
+    elevation: 6,
+    marginTop: 20
+  },
+  signInContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  signInText: {
+    color: '#fff',
+    fontSize: 15,
+    marginLeft: 8,
+  },
+
+  /* Bottom links */
+  linkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  helpRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  helpLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E5E7EB',
+  },
+  helpLabel: {
+    color: '#94A3B8',
+    marginHorizontal: 8,
+  },
+  helpLink: {
+    fontWeight: '700',
+    marginHorizontal: 8,
+  },
+
+  /* Building */
+  buildingWrap: {
+    alignItems: 'center',
+    marginBottom: 8,
   },
 });

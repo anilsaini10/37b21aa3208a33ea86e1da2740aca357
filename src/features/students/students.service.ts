@@ -62,6 +62,7 @@ export interface StudentApi {
   parentEmail: string;
   bloodGroup?: string;
   address?: string;
+  profilePhoto?: string;
   status: string;
   attendancePercentage: number;
 }
@@ -86,6 +87,7 @@ export function toStudent(raw: StudentApi): Student {
     parentEmail: raw.parentEmail,
     bloodGroup: raw.bloodGroup,
     address: raw.address,
+    profilePhoto: raw.profilePhoto,
     status: raw.status.toLowerCase() as Status,
     attendancePercentage: raw.attendancePercentage,
     // Document uploads aren't part of this API yet.
@@ -152,6 +154,22 @@ export const studentsApi = {
       rethrowApiError(e, 'Failed to remove student.');
     }
   },
+
+  uploadProfilePhoto: async (id: string, uri: string, type: string, name: string): Promise<Student> => {
+    try {
+      const formData = new FormData();
+      formData.append('profilePhoto', {uri, type, name} as any);
+      const {data} = await axiosClient.patch<StudentApi>(
+        Endpoints.admin.students_profilePhoto(id),
+        formData,
+        {headers: {'Content-Type': 'multipart/form-data'}},
+      );
+      return toStudent(data);
+    } catch (e) {
+      console.error('studentsApi.uploadProfilePhoto failed', e);
+      rethrowApiError(e, 'Failed to upload profile photo.');
+    }
+  },
 };
 
 export const useStudents = (params?: StudentFilters) =>
@@ -199,6 +217,18 @@ export const useDeleteStudent = () => {
       qc.invalidateQueries({queryKey: ['students']});
       // The student's class/section student count is now stale.
       qc.invalidateQueries({queryKey: ['classes']});
+    },
+  });
+};
+
+export const useUploadStudentPhoto = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({id, uri, type, name}: {id: string; uri: string; type: string; name: string}) =>
+      studentsApi.uploadProfilePhoto(id, uri, type, name),
+    onSuccess: (updated, {id}) => {
+      qc.setQueryData(['student', id], updated);
+      qc.invalidateQueries({queryKey: ['students']});
     },
   });
 };

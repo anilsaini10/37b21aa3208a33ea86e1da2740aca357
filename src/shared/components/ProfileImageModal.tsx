@@ -21,6 +21,8 @@ export interface ProfileImageModalProps {
   visible: boolean;
   onClose: () => void;
   currentImageUri?: string;
+  /** Custom upload handler — when provided, overrides the default auth-store upload (used by admin to upload other users' photos). */
+  onUpload?: (uri: string, type: string, name: string) => Promise<void>;
 }
 
 type ModalState = 'view' | 'preview';
@@ -29,6 +31,7 @@ export function ProfileImageModal({
   visible,
   onClose,
   currentImageUri,
+  onUpload,
 }: ProfileImageModalProps): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
@@ -44,6 +47,7 @@ export function ProfileImageModal({
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   const autoOpenedPicker = useRef(false);
+  const pickingRef = useRef(false);
 
   useEffect(() => {
     if (visible && !currentImageUri && !autoOpenedPicker.current) {
@@ -117,15 +121,17 @@ export function ProfileImageModal({
 
   const handlePickerClose = useCallback(() => {
     setPickerVisible(false);
-    if (!currentImageUri && !selectedImage) {
+    if (!currentImageUri && !selectedImage && !pickingRef.current) {
       handleClose();
     }
   }, [currentImageUri, selectedImage, handleClose]);
 
   const handleImageSelect = useCallback(async (source: ImageSource) => {
+    pickingRef.current = true;
     setPicking(true);
     try {
       const img = await pick(source);
+      pickingRef.current = false;
       if (!img) {
         setPicking(false);
         if (!currentImageUri && !selectedImage) handleClose();
@@ -135,6 +141,7 @@ export function ProfileImageModal({
       setState('preview');
       setPicking(false);
     } catch (e: any) {
+      pickingRef.current = false;
       setPicking(false);
       if (e?.code !== 'CANCELLED') console.warn(e);
       else if (!currentImageUri && !selectedImage) handleClose();
@@ -146,14 +153,18 @@ export function ProfileImageModal({
     try {
       setUploading(true);
       setUploadError(null);
-      await updateProfilePhoto(selectedImage.uri, selectedImage.type, selectedImage.name);
+      if (onUpload) {
+        await onUpload(selectedImage.uri, selectedImage.type, selectedImage.name);
+      } else {
+        await updateProfilePhoto(selectedImage.uri, selectedImage.type, selectedImage.name);
+      }
       handleClose();
     } catch (e: any) {
       setUploadError(t('profileImage_uploadFailed'));
     } finally {
       setUploading(false);
     }
-  }, [selectedImage, uploading, updateProfilePhoto, handleClose, t]);
+  }, [selectedImage, uploading, onUpload, updateProfilePhoto, handleClose, t]);
 
   const handleReUpload = useCallback(() => {
     setSelectedImage(null);

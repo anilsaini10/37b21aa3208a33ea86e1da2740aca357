@@ -36,8 +36,8 @@ export function ImagePickerSheet({
           key={opt.source}
           activeOpacity={0.7}
           onPress={() => {
-            onClose();
             onSelect(opt.source);
+            onClose();
           }}
           style={{
             paddingVertical: theme.spacing.md,

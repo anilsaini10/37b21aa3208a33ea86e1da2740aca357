@@ -46,6 +46,7 @@ export function interpretOtpError(e: unknown): OtpErrorAction {
 
   switch (code) {
     case 'PHONE_NOT_REGISTERED':
+    case 'EMAIL_NOT_REGISTERED':
     case 'ACCOUNT_INACTIVE':
       return {kind: 'not_registered_or_inactive', message};
 

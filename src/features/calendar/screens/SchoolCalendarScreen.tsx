@@ -25,6 +25,7 @@ import {
   Spacer,
   Loader,
   EmptyState,
+  ChildSwitcher,
 } from '../../../shared/components';
 import {useAuthStore} from '../../auth/authStore';
 import {useParentProfile} from '../../parent/parentStudents.service';
@@ -214,7 +215,6 @@ function CalendarView({
     hScroll: {flexGrow: 0},
     chipsRow: {columnGap: t2.spacing.sm, paddingRight: t2.spacing.lg, alignItems: 'center'},
     chip: {height: 32, paddingHorizontal: t2.spacing.md, borderRadius: t2.radius.pill, borderWidth: 1, justifyContent: 'center'},
-    childPill: {paddingHorizontal: t2.spacing.lg, paddingVertical: t2.spacing.sm, borderRadius: t2.radius.pill},
     sessionCard: {paddingVertical: t2.spacing.sm},
     arrowBack: {transform: [{rotate: '180deg'}]},
     statsGrid: {flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: t2.spacing.sm},
@@ -433,31 +433,13 @@ function CalendarView({
   return (
     <Screen padded={false}>
       <CustomHeader title={t('calendar_title')} onBack={() => navigation.goBack()} />
+      {childOptions && child ? (
+        <ChildSwitcher children={childOptions} activeChildId={child.id} onSelect={id => onSelectChild?.(id)} />
+      ) : null}
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => refetch()} />}>
-        {childOptions && child ? (
-          <>
-            <ScrollView horizontal style={styles.hScroll} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsRow}>
-              {childOptions.map(c => {
-                const active = c.id === child.id;
-                return (
-                  <Pressable
-                    key={c.id}
-                    onPress={() => onSelectChild?.(c.id)}
-                    style={[styles.childPill, {backgroundColor: active ? theme.colors.primary : theme.colors.surfaceVariant}]}>
-                    <AppText variant="label" style={{color: active ? theme.colors.onPrimary : theme.colors.textSecondary}}>
-                      {c.name}
-                    </AppText>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-            <Spacer size={theme.spacing.md} />
-          </>
-        ) : null}
-
         {renderSessionSelector()}
         <Spacer size={theme.spacing.md} />
 

@@ -20,6 +20,8 @@ import {
 import {statusTone, capitalize} from '../../../shared/helpers';
 import {formatDate} from '../../../core/utils/format';
 import {ScreenNames} from '../../../navigation/ScreenNames';
+import {useTeacherClasses} from '../teacherClasses.service';
+import {useAuthStore} from '../../auth/authStore';
 import type {TeacherStackParamList} from '../../../navigation/types';
 
 type Nav = NativeStackNavigationProp<TeacherStackParamList>;
@@ -58,6 +60,12 @@ export function StudentDetailScreen(): React.JSX.Element {
   const navigation = useNavigation<Nav>();
   const route = useRoute<RouteProp<TeacherStackParamList, 'StudentDetail'>>();
   const {student} = route.params;
+  const userId = useAuthStore(s => s.user?.id);
+  const {data: myClasses} = useTeacherClasses();
+  const isClassTeacher = (myClasses ?? []).some(c =>
+    c.classId === student.classId &&
+    c.sections.some(s => s.sectionId === student.sectionId && s.classTeacherId === userId),
+  );
 
   return (
     <Screen padded={false}>
@@ -89,16 +97,18 @@ export function StudentDetailScreen(): React.JSX.Element {
           <InfoRow label={t('studentDetail_rollNo')} value={String(student.rollNo)} />
           <InfoRow label={t('studentDetail_attendance')} value={`${student.attendancePercentage}%`} />
         </CustomCard>
-        <CustomButton
-          title={t('studentDetail_viewAttendanceHistory')}
-          variant="outline"
-          size="sm"
-          iconLeft="attendance"
-          onPress={() =>
-            navigation.navigate(ScreenNames.StudentAttendanceHistory, {studentId: student.id, studentName: student.name})
-          }
-          style={styles.attendanceHistoryButton}
-        />
+        {isClassTeacher ? (
+          <CustomButton
+            title={t('studentDetail_viewAttendanceHistory')}
+            variant="outline"
+            size="sm"
+            iconLeft="attendance"
+            onPress={() =>
+              navigation.navigate(ScreenNames.StudentAttendanceHistory, {studentId: student.id, studentName: student.name})
+            }
+            style={styles.attendanceHistoryButton}
+          />
+        ) : null}
 
         <SectionTitle title={t('studentDetail_personalSection')} />
         <CustomCard>
@@ -108,12 +118,12 @@ export function StudentDetailScreen(): React.JSX.Element {
           <InfoRow label={t('common_address')} value={student.address ?? '—'} />
         </CustomCard>
 
-        <SectionTitle title={t('studentDetail_parentGuardianSection')} />
+        {/* <SectionTitle title={t('studentDetail_parentGuardianSection')} />
         <CustomCard>
           <InfoRow label={t('common_name')} value={student.parentName} />
           <InfoRow label={t('common_phone')} value={student.parentPhone} />
           <InfoRow label={t('common_email')} value={student.parentEmail} />
-        </CustomCard>
+        </CustomCard> */}
 
         <Spacer size={24} />
       </ScrollView>

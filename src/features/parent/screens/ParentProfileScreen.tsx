@@ -1,16 +1,14 @@
-/** Parent profile — photo hero identity, navigation menu, logout. */
-import React, {useState} from 'react';
+/** Parent profile — navigation menu and logout. */
+import React from 'react';
 import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import type {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
 import {useThemedStyles} from '../../../core/theme';
 import {useLanguage, type TranslationKey} from '../../../core/i18n';
 import {
   Screen,
   CustomButton,
-  ProfileHero,
-  ProfileImageModal,
+  CustomHeader,
   MoreMenuTile,
   moreMenuAccentForIndex,
   Spacer,
@@ -19,9 +17,22 @@ import {useAuthStore} from '../../auth/authStore';
 import {P, type PermissionKey} from '../../../core/config/permissions';
 import {usePermissionGate} from '../../auth/usePermissionGate';
 import {TestPaymentButton} from '../../subscription/components/TestPaymentButton';
-import type {ParentStackParamList, ParentTabParamList} from '../../../navigation/types';
+import {StudentIcon, ExamIcon, TimetableIcon, HomeworkIcon, NotificationIcon, CalendarIcon, LockIcon, WalletIcon, MessageIcon} from '../../../assets/svg/svgIcons';
+import type {ParentStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
-import {useCachedImage} from '../../../core/utils/useCachedImage';
+
+const SVG_ICON: Record<string, React.ReactNode> = {
+  student: <StudentIcon size={28} />,
+  exam: <ExamIcon size={28} />,
+  timetable: <TimetableIcon size={28} />,
+  homework: <HomeworkIcon size={28} />,
+  announcement: <NotificationIcon size={28} />,
+  event: <CalendarIcon size={28} />,
+  calendar: <CalendarIcon size={28} />,
+  query: <MessageIcon size={28} />,
+  card: <WalletIcon size={28} />,
+  lock: <LockIcon size={28} />,
+};
 
 type Nav = NativeStackNavigationProp<ParentStackParamList>;
 
@@ -45,14 +56,9 @@ const MENU: {labelKey: TranslationKey; icon: string; route: MenuRoute; permissio
 
 export function ParentProfileScreen(): React.JSX.Element {
   const navigation = useNavigation<Nav>();
-  const tabNavigation = useNavigation<BottomTabNavigationProp<ParentTabParamList>>();
   const {t} = useLanguage();
-  const user = useAuthStore(s => s.user);
   const logout = useAuthStore(s => s.logout);
   const {gate, PermissionModal} = usePermissionGate();
-
-  const [imageModalVisible, setImageModalVisible] = useState(false);
-  const displayPhoto = useCachedImage(user?.profilePhoto ?? user?.avatarUrl);
 
   const styles = useThemedStyles(t2 => ({
     content: {
@@ -72,17 +78,8 @@ export function ParentProfileScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
+      <CustomHeader title={t('parentProfile_profile')} />
       <ScrollView showsVerticalScrollIndicator={false}>
-        <ProfileHero
-          name={user?.name ?? t('parentProfile_parent')}
-          avatarUri={user?.avatarUrl}
-          profilePhoto={user?.profilePhoto}
-          lines={[user?.phone, user?.email]}
-          badgeLabel={t('parentProfile_parent')}
-          onBack={() => tabNavigation.navigate(ScreenNames.Dashboard)}
-          title={t('parentProfile_profile')}
-          onAvatarPress={() => setImageModalVisible(true)}
-        />
 
         <View style={styles.content}>
           <Spacer size={4} />
@@ -94,6 +91,7 @@ export function ParentProfileScreen(): React.JSX.Element {
                   title={t(item.labelKey)}
                   accentColor={moreMenuAccentForIndex(index)}
                   onPress={gate(item.permission, () => navigation.navigate(item.route))}
+                  svgIcon={SVG_ICON[item.icon]}
                 />
               </View>
             ))}
@@ -107,11 +105,6 @@ export function ParentProfileScreen(): React.JSX.Element {
         </View>
       </ScrollView>
       <PermissionModal />
-      <ProfileImageModal
-        visible={imageModalVisible}
-        onClose={() => setImageModalVisible(false)}
-        currentImageUri={displayPhoto}
-      />
     </Screen>
   );
 }

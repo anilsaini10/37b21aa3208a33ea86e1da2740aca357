@@ -1,6 +1,6 @@
 /** Parent homework — read-only view of a child's assigned homework; tap a card for full details in a modal. */
 import React, {useState} from 'react';
-import {FlatList, Pressable, RefreshControl, ScrollView, View} from 'react-native';
+import {FlatList, RefreshControl, ScrollView, View} from 'react-native';
 import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage, type TranslationKey} from '../../../core/i18n';
 import {
@@ -16,6 +16,7 @@ import {
   Pagination,
   EmptyState,
   Loader,
+  ChildSwitcher,
 } from '../../../shared/components';
 import type {BadgeTone} from '../../../shared/components';
 import {formatDate} from '../../../core/utils/format';
@@ -96,7 +97,7 @@ export function ParentHomeworkScreen(): React.JSX.Element {
   return (
     <ChildHomeworkList
       child={child}
-      children={children.length > 1 ? children : undefined}
+      children={children}
       onSelectChild={setActiveChildId}
     />
   );
@@ -108,7 +109,7 @@ function ChildHomeworkList({
   onSelectChild,
 }: {
   child: ParentChild;
-  children?: ParentChild[];
+  children: ParentChild[];
   onSelectChild: (id: string) => void;
 }): React.JSX.Element {
   const {theme} = useTheme();
@@ -124,13 +125,6 @@ function ChildHomeworkList({
   const {data: detail} = useParentHomeworkItem(detailTarget?.id ?? '', child.id, detailTarget ?? undefined);
 
   const styles = useThemedStyles(t2 => ({
-    switcherWrap: {paddingHorizontal: t2.spacing.lg, paddingTop: t2.spacing.md},
-    switcherContent: {columnGap: t2.spacing.sm},
-    childPill: {
-      paddingHorizontal: t2.spacing.lg,
-      paddingVertical: t2.spacing.sm,
-      borderRadius: t2.radius.pill,
-    },
     listContent: {padding: t2.spacing.lg, flexGrow: 1},
     card: {marginBottom: t2.spacing.md},
     modalContent: {maxHeight: 420},
@@ -153,28 +147,7 @@ function ChildHomeworkList({
   return (
     <Screen padded={false}>
       <CustomHeader title={t('parentHomework_title')} />
-      {children ? (
-        <View style={styles.switcherWrap}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.switcherContent}>
-            {children.map(c => {
-              const active = c.id === child.id;
-              return (
-                <Pressable
-                  key={c.id}
-                  onPress={() => onSelectChild(c.id)}
-                  style={[
-                    styles.childPill,
-                    {backgroundColor: active ? theme.colors.primary : theme.colors.surfaceVariant},
-                  ]}>
-                  <AppText variant="label" style={{color: active ? theme.colors.onPrimary : theme.colors.textSecondary}}>
-                    {c.name}
-                  </AppText>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-        </View>
-      ) : null}
+      <ChildSwitcher children={children} activeChildId={child.id} onSelect={onSelectChild} />
 
       {isError ? (
         <EmptyState

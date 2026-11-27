@@ -90,7 +90,7 @@ type TabValue = LeaveStatus | 'ALL';
 
 const TABS: TabValue[] = ['ALL', 'PENDING', 'APPROVED', 'REJECTED'];
 
-function ChildLeaveHistory({child, onBack}: {child: ParentChild; onBack?: () => void}): React.JSX.Element {
+function ChildLeaveHistory({child, allChildren, activeChildId, onSelectChild}: {child: ParentChild; allChildren: ParentChild[]; activeChildId: string; onSelectChild: (id: string) => void}): React.JSX.Element {
   const {theme} = useTheme();
   const {t} = useLanguage();
   const navigation = useNavigation<Nav>();
@@ -166,7 +166,8 @@ function ChildLeaveHistory({child, onBack}: {child: ParentChild; onBack?: () => 
 
   return (
     <Screen padded={false}>
-      <CustomHeader title={child.name} onBack={onBack} actions={[{icon: 'add', onPress: openApply}]} />
+      <CustomHeader title={t('leave_history')} actions={[{icon: 'add', onPress: openApply}]} />
+      <ChildSwitcher children={allChildren} activeChildId={activeChildId} onSelect={onSelectChild} />
       <View style={styles.tabsWrap}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsContent}>
           {TABS.map(value => {

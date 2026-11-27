@@ -1,6 +1,6 @@
 /** Parent dashboard — child overview (real backend), quick links, upcoming events/announcements and trend charts. */
 import React, {useState} from 'react';
-import {Pressable, View, ScrollView, RefreshControl} from 'react-native';
+import {View, ScrollView, RefreshControl} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import type {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
@@ -21,7 +21,6 @@ import {
   ListRow,
   Badge,
   Avatar,
-  Icon,
   Row,
   Spacer,
   Divider,
@@ -45,6 +44,7 @@ import {TrialBanner} from '../../subscription/components/TrialBanner';
 import {SubscriptionPlansModal} from '../../subscription/components/SubscriptionPlansModal';
 import {useHasActiveSubscription} from '../../subscription/useFeature';
 import {useSubscriptionPlans} from '../../subscription/subscription.service';
+import {AttendanceIcon, ExamIcon, HomeworkIcon} from '../../../assets/svg/svgIcons';
 import type {ParentStackParamList, ParentTabParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {StatCard, ParentChild, AttendanceStatusCode} from '../../../shared/types';
@@ -110,10 +110,14 @@ export function ParentDashboardScreen(): React.JSX.Element {
 
 function ParentDashboardContent({
   child,
-  onSwitchChild,
+  allChildren,
+  activeChildId,
+  onSelectChild,
 }: {
   child: ParentChild;
-  onSwitchChild?: () => void;
+  allChildren: ParentChild[];
+  activeChildId: string;
+  onSelectChild: (id: string) => void;
 }): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation<Nav>();
@@ -178,7 +182,7 @@ function ParentDashboardContent({
     if (statsIsError) {
       return (
         <Screen padded={false}>
-          <CustomHeader title={t('parentDashboard_title')} onBack={onSwitchChild} />
+          <CustomHeader title={t('parentDashboard_title')} />
           <EmptyState
             icon="warning"
             title={t('common_somethingWentWrong')}
@@ -205,6 +209,7 @@ function ParentDashboardContent({
       value: attendanceStatus ? STATUS_LABEL[attendanceStatus] : t('parentDashboard_notMarkedYet'),
       icon: 'attendance',
       accent: attendanceStatus ? STATUS_ACCENT[attendanceStatus] : 'warning',
+      svgIcon: <AttendanceIcon size={24} />,
     },
     // {key: 'fees', label: t('parentDashboard_pendingFees'), value: formatCurrency(mockData.pendingFees), icon: 'fee', accent: 'error'},
     {
@@ -214,6 +219,7 @@ function ParentDashboardContent({
       icon: 'exam',
       accent: 'info',
       onPress: () => navigation.navigate(ScreenNames.Results),
+      svgIcon: <ExamIcon size={24} />,
     },
     {
       key: 'homework',
@@ -222,6 +228,7 @@ function ParentDashboardContent({
       icon: 'homework',
       accent: 'warning',
       onPress: () => tabNavigation.navigate(ScreenNames.Homework),
+      svgIcon: <HomeworkIcon size={24} />,
     },
   ];
 
@@ -235,6 +242,7 @@ function ParentDashboardContent({
           {icon: 'notification', onPress: () => navigation.navigate(ScreenNames.Notifications), badgeCount: unreadCount},
         ]}
       />
+      <ChildSwitcher children={allChildren} activeChildId={activeChildId} onSelect={onSelectChild} />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -272,19 +280,6 @@ function ParentDashboardContent({
               </AppText>
             </View>
           </Row>
-          {onSwitchChild ? (
-            <>
-              <Divider />
-              <Pressable onPress={onSwitchChild}>
-                <Row gap={theme.spacing.xs} align="center">
-                  <Icon name="forward" size={16} color={theme.colors.primary} />
-                  <AppText variant="label" color="primary">
-                    {t('parentDashboard_switchChild')}
-                  </AppText>
-                </Row>
-              </Pressable>
-            </>
-          ) : null}
         </CustomCard>
 
         <Spacer size={theme.spacing.md} />

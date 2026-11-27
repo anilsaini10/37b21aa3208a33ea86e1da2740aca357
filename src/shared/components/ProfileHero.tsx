@@ -1,24 +1,17 @@
 /**
- * Profile hero — a primary-colour banner that fades into the theme background,
- * with an identity card overlapping the fade line: avatar on the left, name +
- * details left-aligned, role badge on the right. Same fade technique as
- * the auth flow's `RoleSelectScreen` hero, reused across every role's Profile
- * screen (Admin/Teacher/Parent) so they open with the same treatment instead
- * of a plain header + card. Fills the space a `CustomHeader` used to occupy —
- * render it as the screen's first child, with no header above it.
+ * Profile hero — theme-aware header with a 3D elevated card showing
+ * avatar, name, details and role badge. Simple back button on top.
  */
 import React from 'react';
-import {Image, TouchableOpacity, View} from 'react-native';
-import {palette, useTheme, useThemedStyles} from '../../core/theme';
+import {Image, Platform, TouchableOpacity, View} from 'react-native';
+import {useThemedStyles} from '../../core/theme';
 import {useCachedImage} from '../../core/utils/useCachedImage';
 import {AppText} from './AppText';
 import {Avatar} from './Avatar';
-import {CustomCard} from './CustomCard';
 import {BackButton} from './BackButton';
 import {Row} from './layout';
 
-const HERO_HEIGHT = 150;
-const AVATAR_SIZE = 64;
+const AVATAR_SIZE = 72;
 
 export interface ProfileHeroProps {
   name: string;
@@ -46,54 +39,94 @@ export function ProfileHero({
   onAvatarPress,
   profilePhoto,
 }: ProfileHeroProps): React.JSX.Element {
-  const {theme} = useTheme();
   const styles = useThemedStyles(t => ({
-    hero: {
-      height: HERO_HEIGHT,
-      overflow: 'hidden',
-      backgroundColor: t.colors.primary,
-      borderBottomLeftRadius: 19,
-      borderBottomRightRadius: 19,
+    container: {
+      backgroundColor: t.colors.surface,
+      paddingBottom: t.spacing.lg,
     },
     topBar: {
-      position: 'absolute',
-      top: t.spacing.sm,
-      left: t.spacing.lg,
-      right: t.spacing.lg,
-    },
-    backButton: {
-      width: 38,
-      height: 38,
-      borderRadius: 19,
-      // backgroundColor: '#fff',
-      alignItems: 'center',
-      justifyContent: 'center',
-      // shadowColor: '#000',
-      // shadowOpacity: 0.15,
-      // shadowRadius: 6,
-      // shadowOffset: {width: 0, height: 2},
-      // elevation: 3,
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      paddingHorizontal: t.spacing.lg,
+      paddingTop: t.spacing.md,
+      paddingBottom: t.spacing.sm,
     },
     title: {
-      color: palette.white,
       marginLeft: t.spacing.sm,
-      textShadowColor: 'rgba(0,0,0,0.35)',
-      textShadowOffset: {width: 0, height: 1},
-      textShadowRadius: 3,
+      color: t.colors.text,
     },
-    brand: {
-      marginTop: -80,
+    cardWrapper: {
       paddingHorizontal: t.spacing.lg,
+      paddingTop: t.spacing.sm,
+    },
+    card: {
+      backgroundColor: t.colors.card,
+      borderRadius: t.radius.xl,
+      padding: t.spacing.lg,
+      borderWidth: 1,
+      borderColor: t.dark ? t.colors.border : 'rgba(0,0,0,0.04)',
+      // 3D shadow layers
+      shadowColor: t.dark ? '#000' : t.colors.primary,
+      shadowOpacity: t.dark ? 0.4 : 0.12,
+      shadowRadius: 16,
+      shadowOffset: {width: 0, height: 8},
+      ...Platform.select({
+        android: {elevation: 8},
+      }),
+    },
+    cardInnerShadow: {
+      backgroundColor: t.colors.card,
+      borderRadius: t.radius.xl,
+      // second layer for depth
+      shadowColor: '#000',
+      shadowOpacity: t.dark ? 0.25 : 0.06,
+      shadowRadius: 4,
+      shadowOffset: {width: 0, height: 2},
+    },
+    avatarRing: {
+      width: AVATAR_SIZE + 6,
+      height: AVATAR_SIZE + 6,
+      borderRadius: (AVATAR_SIZE + 6) / 2,
+      borderWidth: 2.5,
+      borderColor: t.colors.primary,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      backgroundColor: t.colors.surface,
     },
     nameBlock: {
       flex: 1,
+      marginLeft: t.spacing.md,
+    },
+    nameText: {
+      color: t.colors.text,
     },
     badge: {
-      alignSelf: 'flex-start',
+      alignSelf: 'flex-start' as const,
       backgroundColor: t.colors.primary,
-      paddingHorizontal: t.spacing.sm,
-      paddingVertical: 3,
+      paddingHorizontal: t.spacing.sm + 2,
+      paddingVertical: 4,
       borderRadius: t.radius.pill,
+      marginTop: t.spacing.xs,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: t.dark ? t.colors.border : 'rgba(0,0,0,0.06)',
+      marginTop: t.spacing.md,
+      marginHorizontal: t.spacing.xs,
+    },
+    infoRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      marginTop: t.spacing.sm,
+      paddingHorizontal: t.spacing.xs,
+    },
+    infoDot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: t.colors.primary,
+      marginRight: t.spacing.sm,
+      opacity: 0.6,
     },
   }));
 
@@ -111,49 +144,65 @@ export function ProfileHero({
   );
 
   return (
-    <View>
-      <View style={styles.hero}>
-        {onBack ? (
-          <Row style={styles.topBar}>
-            <BackButton onPress={onBack} color={palette.white} style={styles.backButton} />
-            {title ? (
-              <AppText variant="headerTitle" style={styles.title}>
-                {title}
-              </AppText>
-            ) : null}
-          </Row>
-        ) : null}
-      </View>
+    <View style={styles.container}>
+      {/* Simple back bar */}
+      {onBack ? (
+        <View style={styles.topBar}>
+          <BackButton onPress={onBack} />
+          {title ? (
+            <AppText variant="headerTitle" style={styles.title}>
+              {title}
+            </AppText>
+          ) : null}
+        </View>
+      ) : null}
 
-      <View style={styles.brand}>
-        <CustomCard>
-          <Row gap={theme.spacing.md} align="flex-start">
-            {onAvatarPress ? (
-              <TouchableOpacity onPress={onAvatarPress} activeOpacity={0.7}>
-                {avatarElement}
-              </TouchableOpacity>
-            ) : (
-              avatarElement
-            )}
-            <View style={styles.nameBlock}>
-              <AppText variant="h2" numberOfLines={1}>
-                {name}
-              </AppText>
-              {visibleLines.map((line, i) => (
-                <AppText key={i} variant="caption" color="textSecondary" numberOfLines={1}>
-                  {line}
-                </AppText>
-              ))}
-            </View>
-            {badgeLabel ? (
-              <View style={styles.badge}>
-                <AppText variant="label" color="onPrimary" style={{fontWeight: '700'}}>
-                  {badgeLabel}
-                </AppText>
+      {/* 3D Profile Card */}
+      <View style={styles.cardWrapper}>
+        <View style={styles.cardInnerShadow}>
+          <View style={styles.card}>
+            <Row gap={0} align="center">
+              {/* Avatar with ring */}
+              <View style={styles.avatarRing}>
+                {onAvatarPress ? (
+                  <TouchableOpacity onPress={onAvatarPress} activeOpacity={0.7}>
+                    {avatarElement}
+                  </TouchableOpacity>
+                ) : (
+                  avatarElement
+                )}
               </View>
+
+              <View style={styles.nameBlock}>
+                <AppText variant="h2" numberOfLines={1} style={styles.nameText}>
+                  {name}
+                </AppText>
+                {badgeLabel ? (
+                  <View style={styles.badge}>
+                    <AppText variant="label" color="onPrimary" style={{fontWeight: '700', fontSize: 11}}>
+                      {badgeLabel}
+                    </AppText>
+                  </View>
+                ) : null}
+              </View>
+            </Row>
+
+            {/* Info lines below divider */}
+            {visibleLines.length > 0 ? (
+              <>
+                <View style={styles.divider} />
+                {visibleLines.map((line, i) => (
+                  <View key={i} style={styles.infoRow}>
+                    <View style={styles.infoDot} />
+                    <AppText variant="caption" color="textSecondary" numberOfLines={1}>
+                      {line}
+                    </AppText>
+                  </View>
+                ))}
+              </>
             ) : null}
-          </Row>
-        </CustomCard>
+          </View>
+        </View>
       </View>
     </View>
   );

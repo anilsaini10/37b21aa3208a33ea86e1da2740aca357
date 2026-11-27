@@ -1,28 +1,32 @@
-/** Admin profile — photo hero identity, quick links, and logout. */
-import React, {useState} from 'react';
+/** Admin profile — quick links and logout. */
+import React from 'react';
 import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import type {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
 import {useTheme, useThemedStyles} from '../../../core/theme';
 import {useLanguage, type TranslationKey} from '../../../core/i18n';
-import {useCachedImage} from '../../../core/utils/useCachedImage';
 import {
   Screen,
   CustomCard,
   CustomButton,
-  ProfileHero,
-  ProfileImageModal,
+  CustomHeader,
   MoreMenuItem,
   moreMenuAccentForIndex,
   SectionTitle,
   Spacer,
 } from '../../../shared/components';
-import {capitalize} from '../../../shared/helpers';
 import {useAuthStore} from '../../auth/authStore';
 import {TestPaymentButton} from '../../subscription/components/TestPaymentButton';
-import type {AdminStackParamList, AdminTabParamList} from '../../../navigation/types';
+import {SettingsIcon, NotificationIcon, WalletIcon, LockIcon} from '../../../assets/svg/svgIcons';
+import type {AdminStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
+
+const SVG_ICON: Record<string, React.ReactNode> = {
+  settings: <SettingsIcon size={26} />,
+  notification: <NotificationIcon size={26} />,
+  card: <WalletIcon size={26} />,
+  lock: <LockIcon size={26} />,
+};
 
 type Nav = NativeStackNavigationProp<AdminStackParamList>;
 
@@ -48,27 +52,13 @@ export function AdminProfileScreen(): React.JSX.Element {
       : {paddingVertical: t2.spacing.sm, borderRadius: 22, borderColor: 'rgba(100, 100, 150, 0.08)'},
   }));
   const navigation = useNavigation<Nav>();
-  const tabNavigation = useNavigation<BottomTabNavigationProp<AdminTabParamList>>();
   const {t} = useLanguage();
-  const user = useAuthStore(s => s.user);
   const logout = useAuthStore(s => s.logout);
-
-  const [imageModalVisible, setImageModalVisible] = useState(false);
-  const displayPhoto = useCachedImage(user?.profilePhoto ?? user?.avatarUrl);
 
   return (
     <Screen padded={false}>
+      <CustomHeader title={t('teacherProfile_profile')} onBack={() => navigation.goBack()} />
       <ScrollView showsVerticalScrollIndicator={false}>
-        <ProfileHero
-          name={user?.name ?? t('adminProfile_admin')}
-          avatarUri={user?.avatarUrl}
-          profilePhoto={user?.profilePhoto}
-          lines={[user?.email, user?.phone, user?.schoolName]}
-          badgeLabel={capitalize(user?.role ?? 'admin')}
-          onBack={tabNavigation.goBack}
-          title={t('teacherProfile_profile')}
-          onAvatarPress={() => setImageModalVisible(true)}
-        />
 
         <View style={styles.content}>
           <SectionTitle title={t('teacherProfile_manage')} />
@@ -80,6 +70,7 @@ export function AdminProfileScreen(): React.JSX.Element {
                 title={t(item.titleKey)}
                 accentColor={moreMenuAccentForIndex(index)}
                 onPress={() => navigation.navigate(item.route)}
+                svgIcon={SVG_ICON[item.icon]}
               />
             ))}
           </CustomCard>
@@ -91,11 +82,6 @@ export function AdminProfileScreen(): React.JSX.Element {
           <Spacer size={24} />
         </View>
       </ScrollView>
-      <ProfileImageModal
-        visible={imageModalVisible}
-        onClose={() => setImageModalVisible(false)}
-        currentImageUri={displayPhoto}
-      />
     </Screen>
   );
 }

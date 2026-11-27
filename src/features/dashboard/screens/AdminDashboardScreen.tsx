@@ -37,6 +37,7 @@ import {SubscriptionPlansModal} from '../../subscription/components/Subscription
 import {useHasActiveSubscription} from '../../subscription/useFeature';
 import {useSubscriptionPlans} from '../../subscription/subscription.service';
 import {usePermissions} from '../../auth/usePermissions';
+import {AdminIcon, BookIcon, StudentIcon, TeacherIcon} from '../../../assets/svg/svgIcons';
 import type {AdminStackParamList} from '../../../navigation/types';
 import {ScreenNames} from '../../../navigation/ScreenNames';
 import type {AdminAnnouncement, StatCard} from '../../../shared/types';
@@ -110,10 +111,10 @@ export function AdminDashboardScreen(): React.JSX.Element {
     .slice(0, MAX_UPCOMING_ANNOUNCEMENTS);
 
   const stats: StatCard[] = [
-    {key: 'students', label: t('adminDashboard_students'), value: statsData.studentsCount ?? 0, icon: 'students', accent: 'primary'},
-    {key: 'teachers', label: t('adminDashboard_teachers'), value: statsData.teachersCount ?? 0, icon: 'teacher', accent: 'info'},
-    {key: 'staff', label: t('adminDashboard_staff'), value: statsData.staffCount ?? 0, icon: 'staff', accent: 'success'},
-    {key: 'classes', label: t('adminDashboard_classes'), value: statsData.classesCount ?? 0, icon: 'class', accent: 'warning'},
+    {key: 'students', label: t('adminDashboard_students'), value: statsData.studentsCount ?? 0, icon: 'students', accent: 'primary', svgIcon: <StudentIcon size={24} />},
+    {key: 'teachers', label: t('adminDashboard_teachers'), value: statsData.teachersCount ?? 0, icon: 'teacher', accent: 'info', svgIcon: <TeacherIcon size={24} />},
+    {key: 'staff', label: t('adminDashboard_staff'), value: statsData.staffCount ?? 0, icon: 'staff', accent: 'success', svgIcon: <AdminIcon size={24} />},
+    {key: 'classes', label: t('adminDashboard_classes'), value: statsData.classesCount ?? 0, icon: 'class', accent: 'warning', svgIcon: <BookIcon size={24} />},
   ];
 
   return (

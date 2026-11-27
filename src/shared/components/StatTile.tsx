@@ -114,7 +114,7 @@ export function StatTile({stat, onPress}: {stat: StatCard; onPress?: () => void}
         {/* backgroundColor is derived at runtime from the stat's accent key
             (one of 5 theme colors) so it stays inline rather than a static style */}
         <View style={[styles.iconCircle, {backgroundColor: accent + '22'}]}>
-          <Icon name={stat.icon} size={20} color={accent} />
+          {stat.svgIcon ?? <Icon name={stat.icon} size={20} color={accent} />}
         </View>
         {stat.delta !== undefined ? (
           <View style={[styles.deltaBadge, stat.delta >= 0 ? styles.deltaBadgePositive : styles.deltaBadgeNegative]}>

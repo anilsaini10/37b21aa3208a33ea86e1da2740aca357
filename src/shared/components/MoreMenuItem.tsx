@@ -35,9 +35,10 @@ export interface MoreMenuItemProps {
   icon: string;
   accentColor: string;
   onPress: () => void;
+  svgIcon?: React.ReactNode;
 }
 
-export function MoreMenuItem({title, icon, accentColor, onPress}: MoreMenuItemProps): React.JSX.Element {
+export function MoreMenuItem({title, icon, accentColor, onPress, svgIcon}: MoreMenuItemProps): React.JSX.Element {
   const {theme} = useTheme();
   const titleColor = theme.dark ? theme.colors.text : '#111827';
   const chevronColor = theme.dark ? theme.colors.textMuted : '#9AA6B5';
@@ -75,8 +76,8 @@ export function MoreMenuItem({title, icon, accentColor, onPress}: MoreMenuItemPr
       style={({pressed}) => [styles.row, pressed && styles.rowPressed]}
       accessibilityRole="button">
       <View style={[styles.accentBar, {backgroundColor: accentColor}]} />
-      <View style={[styles.iconBox, {backgroundColor: accentColor + '1F'}]}>
-        <Icon name={icon} size={22} color={accentColor} />
+      <View style={[styles.iconBox, {backgroundColor: svgIcon ? 'transparent' : accentColor + '1F'}]}>
+        {svgIcon ?? <Icon name={icon} size={22} color={accentColor} />}
       </View>
       <AppText numberOfLines={1} style={[styles.title, {color: titleColor, fontSize: 16, fontWeight: '600'}]}>
         {title}
@@ -91,10 +92,11 @@ export interface MoreMenuTileProps {
   icon: string;
   accentColor: string;
   onPress: () => void;
+  svgIcon?: React.ReactNode;
 }
 
 /** Grid-tile variant of the same menu row — icon in a pastel circle, short centered label below. Used by grid-style More screens. */
-export function MoreMenuTile({title, icon, accentColor, onPress}: MoreMenuTileProps): React.JSX.Element {
+export function MoreMenuTile({title, icon, accentColor, onPress, svgIcon}: MoreMenuTileProps): React.JSX.Element {
   const {theme} = useTheme();
   const titleColor = theme.dark ? theme.colors.text : '#111827';
   const styles = useThemedStyles(t => ({
@@ -129,8 +131,8 @@ export function MoreMenuTile({title, icon, accentColor, onPress}: MoreMenuTilePr
       onPress={onPress}
       style={({pressed}) => [styles.tile, pressed && styles.tilePressed]}
       accessibilityRole="button">
-      <View style={[styles.iconCircle, {backgroundColor: accentColor + '1F'}]}>
-        <Icon name={icon} size={22} color={accentColor} />
+      <View style={[styles.iconCircle, {backgroundColor: svgIcon ? 'transparent' : accentColor + '1F'}]}>
+        {svgIcon ?? <Icon name={icon} size={22} color={accentColor} />}
       </View>
       <AppText numberOfLines={2} center style={{color: titleColor, fontSize: 12.5, fontWeight: '600'}}>
         {title}
