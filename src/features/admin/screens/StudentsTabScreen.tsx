@@ -32,7 +32,6 @@ export function StudentsTabScreen(): React.JSX.Element {
   }
   return (
     <Screen padded={false}>
-      <CustomHeader title={t('studentsWiseClassList_headerTitle')} subtitle={t('studentsWiseClassList_subtitle')} />
       {switcher}
       <AttendanceReportScreen embedded fixedTab="students" />
     </Screen>

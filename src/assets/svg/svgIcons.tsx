@@ -485,124 +485,280 @@ export const FeedbackIcon = MessageIcon;
 // --- ROLE SELECT ILLUSTRATIONS ---
 
 // AI ICON NAME: RoleAdminIllustration — Detailed admin character illustration for role selection screen.
+
 export function RoleAdminIllustration() {
   return (
-    <Svg width={48} height={48} viewBox="0 0 48 48" fill="none">
+    <Svg width={50} height={50} viewBox="0 0 96 96" fill="none">
       <Defs>
-        <LinearGradient id="adminSuit" x1="5" y1="23" x2="28" y2="46">
-          <Stop offset="0" stopColor="#60A5FA" />
-          <Stop offset="0.5" stopColor="#2563EB" />
+        <LinearGradient id="adminSuit2" x1="20" y1="35" x2="70" y2="90">
+          <Stop offset="0" stopColor="#3B82F6" />
           <Stop offset="1" stopColor="#172554" />
         </LinearGradient>
-        <LinearGradient id="adminSkin" x1="11" y1="5" x2="23" y2="22">
+        <LinearGradient id="adminSkin2" x1="35" y1="10" x2="55" y2="42">
           <Stop offset="0" stopColor="#FFE4C7" />
-          <Stop offset="0.6" stopColor="#F4B183" />
           <Stop offset="1" stopColor="#D8895B" />
         </LinearGradient>
-        <LinearGradient id="adminHair" x1="10" y1="3" x2="25" y2="16">
-          <Stop offset="0" stopColor="#475569" />
-          <Stop offset="1" stopColor="#0F172A" />
+        <LinearGradient id="adminLaptop" x1="30" y1="50" x2="75" y2="78">
+          <Stop offset="0" stopColor="#E2E8F0" />
+          <Stop offset="1" stopColor="#64748B" />
         </LinearGradient>
-        <LinearGradient id="adminGold" x1="28" y1="23" x2="44" y2="40">
-          <Stop offset="0" stopColor="#FEF3C7" />
-          <Stop offset="0.4" stopColor="#FBBF24" />
-          <Stop offset="1" stopColor="#B45309" />
+        <LinearGradient id="adminTie" x1="45" y1="30" x2="53" y2="65">
+          <Stop offset="0" stopColor="#F87171" />
+          <Stop offset="1" stopColor="#991B1B" />
         </LinearGradient>
       </Defs>
-      <Ellipse cx="21" cy="46" rx="17" ry="2" fill="#0F172A" opacity={0.2} />
-      <Path d="M3 45 Q3 26 16 25 Q29 25 32 45 Z" fill="url(#adminSuit)" />
-      <Path d="M12 26 L17 33 L22 26 L20 25 L17 29 L14 25 Z" fill="#FFFFFF" />
-      <Path d="M16 30 L14.5 33 L17 41 L19.5 33 L18 30 Z" fill="url(#adminGold)" />
-      <Rect x="13" y="19" width="8" height="9" rx="3" fill="#E9A174" />
-      <Circle cx="10" cy="14" r="2.5" fill="#E9A174" />
-      <Circle cx="24" cy="14" r="2.5" fill="#E9A174" />
-      <Ellipse cx="17" cy="13" rx="7.5" ry="9.5" fill="url(#adminSkin)" />
-      <Path d="M9.5 12 Q7 3 17 3 Q26 3 25 13 L22 10 Q18 7 13 9 Q11 10 9.5 12 Z" fill="url(#adminHair)" />
-      <Path d="M9.5 11 Q8 17 11 20 L12 13 Z M24 11 Q26 16 23 20 L22 13 Z" fill="#1E293B" />
-      <Circle cx="14.5" cy="14" r="0.8" fill="#334155" />
-      <Circle cx="20" cy="14" r="0.8" fill="#334155" />
-      <Path d="M14.5 18 Q17.5 20.5 20.5 18" stroke="#A85542" strokeWidth={1} fill="none" strokeLinecap="round" />
-      <Ellipse cx="14" cy="9" rx="2.5" ry="1.5" fill="#FFFFFF" opacity={0.45} />
-      <Circle cx="36" cy="34" r="9" fill="#92400E" opacity={0.25} />
-      <G fill="url(#adminGold)">
-        <Rect x="34.5" y="23" width="3" height="5" rx="1" />
-        <Rect x="34.5" y="40" width="3" height="5" rx="1" />
-        <Rect x="25" y="32.5" width="5" height="3" rx="1" />
-        <Rect x="42" y="32.5" width="5" height="3" rx="1" />
-        <Rect x="28" y="25" width="4" height="4" rx="1" transform="rotate(-45 30 27)" />
-        <Rect x="40" y="25" width="4" height="4" rx="1" transform="rotate(45 42 27)" />
-        <Rect x="28" y="39" width="4" height="4" rx="1" transform="rotate(45 30 41)" />
-        <Rect x="40" y="39" width="4" height="4" rx="1" transform="rotate(-45 42 41)" />
-      </G>
-      <Circle cx="36" cy="34" r="7" fill="url(#adminGold)" />
-      <Circle cx="36" cy="34" r="3.2" fill="#7C2D12" />
-      <Circle cx="36" cy="34" r="2" fill="#FDE68A" />
-      <Ellipse cx="33.5" cy="30.5" rx="2" ry="1" fill="#FFFFFF" opacity={0.55} />
-      <Path d="M7 37 Q9 29 14 28" stroke="#BFDBFE" strokeWidth={1.5} strokeLinecap="round" opacity={0.5} />
+
+      {/* Background */}
+      <Circle cx="48" cy="48" r="45" fill="#DBEAFE" />
+      <Ellipse cx="49" cy="88" rx="36" ry="4" fill="#1E3A8A" opacity={0.16} />
+
+      {/* Office chair */}
+      <Rect x="17" y="35" width="53" height="43" rx="13" fill="#A16207" />
+      <Rect x="20" y="38" width="47" height="35" rx="10" fill="#D6A16D" />
+      <Path d="M43 76V85M30 87H58" stroke="#475569" strokeWidth="3" strokeLinecap="round" />
+
+      {/* Formal trousers */}
+      <Path
+        d="M30 59H66L70 83H53L48 69L43 83H26L30 59Z"
+        fill="#172554"
+      />
+      <Path d="M48 68L48 83" stroke="#475569" strokeWidth="1.5" />
+
+      {/* Formal coat */}
+      <Path
+        d="M25 37Q31 29 42 29H56Q68 30 73 40L77 65H20L25 37Z"
+        fill="url(#adminSuit2)"
+      />
+
+      {/* White shirt */}
+      <Path d="M39 29H58L61 59H36L39 29Z" fill="#FFFFFF" />
+
+      {/* Coat lapels */}
+      <Path d="M37 31L47 43L39 59L29 36Z" fill="#2563EB" />
+      <Path d="M59 31L49 43L58 59L68 36Z" fill="#1E40AF" />
+
+      {/* Tie */}
+      <Path d="M44 34L52 34L54 40L50 45L55 60H41L46 45L42 40Z" fill="url(#adminTie)" />
+      <Path d="M45 34L52 34L50 39H46Z" fill="#FCA5A5" />
+
+      {/* Neck */}
+      <Rect x="41" y="23" width="14" height="11" rx="4" fill="#E9A174" />
+
+      {/* Face */}
+      <Ellipse cx="48" cy="18" rx="14" ry="16" fill="url(#adminSkin2)" />
+
+      {/* Hair */}
+      <Path
+        d="M34 17Q30 2 47 3Q64 2 63 17L59 12Q52 8 45 11Q38 11 34 17Z"
+        fill="#292524"
+      />
+      <Path d="M35 15Q34 23 38 27L39 15Z" fill="#292524" />
+      <Path d="M61 14Q63 22 58 27L57 15Z" fill="#292524" />
+
+      {/* Eyes and smile */}
+      <Circle cx="42" cy="19" r="1.5" fill="#292524" />
+      <Circle cx="54" cy="19" r="1.5" fill="#292524" />
+      <Path d="M42 25Q48 30 54 25" stroke="#9A3412" strokeWidth="1.8" strokeLinecap="round" />
+
+      {/* Laptop */}
+      <Path d="M30 49Q30 46 34 46H70Q73 46 73 49V69H30V49Z" fill="url(#adminLaptop)" stroke="#475569" strokeWidth="1.5" />
+      <Path d="M26 69H77L72 75H31L26 69Z" fill="#94A3B8" stroke="#475569" strokeWidth="1.2" />
+      <Path d="M43 51H60V63H43Z" rx="2" fill="#BFDBFE" />
+      <Path d="M51 53L57 56L51 60L45 56Z" fill="#2563EB" />
+      <Path d="M48 59H54" stroke="#1E40AF" strokeWidth="1.3" />
+
+      {/* Hands on laptop */}
+      <Path d="M25 55Q30 51 35 57L39 64Q39 68 35 68L26 63Z" fill="#F4B183" />
+      <Path d="M69 55Q74 53 77 58L74 66Q70 69 67 65Z" fill="#F4B183" />
+
+      {/* Shoes */}
+      <Path d="M26 82H44L43 87H25Q22 85 26 82Z" fill="#0F172A" />
+      <Path d="M54 82H70L73 87H54Q51 85 54 82Z" fill="#0F172A" />
+
+      {/* Small school badge */}
+      <Circle cx="64" cy="37" r="4" fill="#FBBF24" />
+      <Path d="M62 37L64 35L66 37L64 39Z" fill="#92400E" />
     </Svg>
   );
 }
 
+
 // AI ICON NAME: RoleTeacherIllustration — Detailed teacher character illustration for role selection screen.
+
 export function RoleTeacherIllustration() {
   return (
     <Svg width={48} height={48} viewBox="0 0 48 48" fill="none">
       <Defs>
-        <LinearGradient id="teacherCoat" x1="8" y1="24" x2="30" y2="46">
-          <Stop offset="0" stopColor="#60A5FA" />
-          <Stop offset="0.5" stopColor="#2563EB" />
-          <Stop offset="1" stopColor="#1E40AF" />
-        </LinearGradient>
-        <LinearGradient id="teacherSkin" x1="12" y1="5" x2="25" y2="23">
+        <LinearGradient id="teacherSkinNew" x1="12" y1="5" x2="25" y2="23">
           <Stop offset="0" stopColor="#FFE4C7" />
           <Stop offset="0.65" stopColor="#F4B183" />
           <Stop offset="1" stopColor="#D8895B" />
         </LinearGradient>
-        <LinearGradient id="teacherHair" x1="12" y1="3" x2="25" y2="17">
+
+        <LinearGradient id="teacherHairNew" x1="12" y1="3" x2="25" y2="17">
           <Stop offset="0" stopColor="#64748B" />
           <Stop offset="1" stopColor="#1E293B" />
         </LinearGradient>
-        <Rect x={27} y={4} width={18} height={18} rx={2.5} fill="#475569" />
-        <Rect x={28} y={5} width={16} height={15} rx={1.5} fill="#111827" />
-        <Path d="M31 9 L40 9 M31 12 L38 12 M31 15 L40 15" stroke="#FFFFFF" strokeWidth={1} strokeLinecap="round" opacity={0.95} />
-        <Path d="M32 17 L34 14 L36 17 Z" stroke="#FFFFFF" strokeWidth={0.7} fill="none" opacity={0.9} />
-        <Path d="M28 20 L44 20 L43 21.5 L29 21.5 Z" fill="#64748B" />
-        <Rect x={37} y={20} width={3} height={0.8} rx={0.4} fill="#FFFFFF" />
-        <LinearGradient id="teacherBook" x1="28" y1="27" x2="41" y2="40">
+
+        <LinearGradient id="teacherShirt" x1="10" y1="25" x2="25" y2="46">
+          <Stop offset="0" stopColor="#FFFFFF" />
+          <Stop offset="1" stopColor="#CBD5E1" />
+        </LinearGradient>
+
+        <LinearGradient id="teacherVest" x1="8" y1="25" x2="28" y2="46">
+          <Stop offset="0" stopColor="#475569" />
+          <Stop offset="0.5" stopColor="#1E293B" />
+          <Stop offset="1" stopColor="#020617" />
+        </LinearGradient>
+
+        <LinearGradient id="teacherBookNew" x1="28" y1="27" x2="42" y2="42">
           <Stop offset="0" stopColor="#FDE68A" />
           <Stop offset="1" stopColor="#D97706" />
         </LinearGradient>
+
+        <LinearGradient id="teacherBoardNew" x1="27" y1="4" x2="45" y2="22">
+          <Stop offset="0" stopColor="#166534" />
+          <Stop offset="1" stopColor="#064E3B" />
+        </LinearGradient>
       </Defs>
-      <Ellipse cx="23" cy="45" rx="17" ry="2" fill="#0F172A" opacity={0.15} />
-      <Rect x="27" y="4" width="18" height="18" rx="2.5" fill="#854D0E" />
-      <Rect x="28" y="5" width="16" height="15" rx="1.5" fill="url(#teacherBoard)" />
-      <Path d="M31 10 L40 10 M31 13 L37 13 M31 16 L39 16" stroke="#FFFFFF" strokeWidth="1" strokeLinecap="round" opacity={0.8} />
-      <Path d="M4 46 Q4 26 17 25 Q30 25 34 46 Z" fill="url(#teacherCoat)" />
-      <Path d="M13 26 L18 33 L23 26 L21 25 L17 29 L14 25 Z" fill="#FFFFFF" />
-      <Path d="M17 30 L15.5 33 L17 40 L19 33 Z" fill="#FBBF24" />
-      <Rect x="14" y="20" width="7" height="8" rx="2.5" fill="#E9A174" />
-      <Circle cx="10.5" cy="15" r="2.5" fill="#E9A174" />
-      <Circle cx="25" cy="15" r="2.5" fill="#E9A174" />
-      <Ellipse cx="18" cy="14" rx="8" ry="10" fill="url(#teacherSkin)" />
-      <Path d="M10 13 Q8 4 17 3 Q26 3 26 12 L23 10 Q20 7 16 8 Q13 8 10 13 Z" fill="url(#teacherHair)" />
-      <Path d="M10 11 Q8 16 11 20 L12 14 Z M24 10 Q28 17 24 20 L23 13 Z" fill="#334155" />
-      <Ellipse cx="15" cy="15" rx="1" ry="1.3" fill="#334155" />
-      <Ellipse cx="21" cy="15" rx="1" ry="1.3" fill="#334155" />
-      <Circle cx="15.3" cy="14.6" r="0.35" fill="#FFFFFF" />
-      <Circle cx="21.3" cy="14.6" r="0.35" fill="#FFFFFF" />
-      <Path d="M15 19 Q18 22 21 19" stroke="#A85542" strokeWidth="1" strokeLinecap="round" fill="none" />
-      <Ellipse cx="14" cy="9" rx="2.5" ry="1.5" fill="#FFFFFF" opacity={0.4} />
-      <Path d="M29 29 Q34 26 41 29 L41 41 Q34 38 29 41 Z" fill="url(#teacherBook)" />
-      <Path d="M30 30 Q34 28 35 30 L35 40 Q33 38 30 40 Z" fill="#FFF7ED" />
-      <Path d="M36 30 Q38 28 40 30 L40 40 Q38 38 36 40 Z" fill="#FFFFFF" />
-      <Path d="M35.5 29 L35.5 40" stroke="#B45309" strokeWidth={1} />
-      <Path d="M31 32 L34 32 M31 34 L34 34 M37 32 L39 32 M37 34 L39 34" stroke="#D6A16D" strokeWidth={0.6} />
-      <Path d="M7 35 Q9 29 14 28" stroke="#BFDBFE" strokeWidth={1.5} opacity={0.6} strokeLinecap="round" />
-      <Path d="M28 25 L32 19" stroke="#FBBF24" strokeWidth={1.5} strokeLinecap="round" />
-      <Circle cx="32" cy="19" r="1" fill="#FBBF24" />
+
+      {/* Ground shadow */}
+      <Ellipse cx="23" cy="45.5" rx="18" ry="2"
+        fill="#0F172A" opacity={0.15} />
+
+      {/* Classroom blackboard - no graduation cap */}
+      <Rect x="27" y="4" width="18" height="18" rx="2.5"
+        fill="#854D0E" />
+      <Rect x="28" y="5" width="16" height="15" rx="1.5"
+        fill="url(#teacherBoardNew)" />
+
+      <Path
+        d="M31 10H40M31 13H38M31 16H40"
+        stroke="#FFFFFF"
+        strokeWidth={0.9}
+        strokeLinecap="round"
+        opacity={0.85}
+      />
+
+      {/* Black formal trousers */}
+      <Path
+        d="M11 38H27L29 46H21L19 41L17 46H9Z"
+        fill="#111827"
+      />
+      <Path d="M18 39V45" stroke="#475569" strokeWidth={0.7} />
+
+      {/* White full-sleeve shirt */}
+      <Path
+        d="M9 28Q12 25 17 25H21Q27 25 30 30L32 43H5L7 31Z"
+        fill="url(#teacherShirt)"
+      />
+
+      {/* Shirt sleeves */}
+      <Path
+        d="M10 29L6 31L4 41L9 42L13 33Z"
+        fill="#FFFFFF"
+        stroke="#CBD5E1"
+        strokeWidth={0.5}
+      />
+      <Path
+        d="M27 29L31 31L33 40L28 42L25 33Z"
+        fill="#E2E8F0"
+        stroke="#94A3B8"
+        strokeWidth={0.5}
+      />
+
+      {/* Black sleeveless formal waistcoat */}
+      <Path
+        d="M13 26L17 31L20 26L23 26L28 31L26 44H8L7 31L12 26Z"
+        fill="url(#teacherVest)"
+      />
+
+      {/* Waistcoat lapels */}
+      <Path d="M12 26L17 32L14 38L10 29Z" fill="#64748B" />
+      <Path d="M21 26L17 32L20 38L24 29Z" fill="#0F172A" />
+
+      {/* White shirt collar */}
+      <Path d="M13 25L17 31L15 34L11 27Z" fill="#FFFFFF" />
+      <Path d="M21 25L17 31L19 34L23 27Z" fill="#FFFFFF" />
+
+      {/* Red tie */}
+      <Path
+        d="M15.5 29L18.5 29L19 32L17 34L19 41H15L17 34L15 32Z"
+        fill="#DC2626"
+      />
+      <Path d="M16 29H18L17.5 31H16.5Z" fill="#FCA5A5" />
+
+      {/* Waistcoat buttons */}
+      <Circle cx="21.5" cy="35" r="0.55" fill="#FBBF24" />
+      <Circle cx="22" cy="39" r="0.55" fill="#FBBF24" />
+
+      {/* Neck */}
+      <Rect x="14" y="19" width="7" height="9" rx="2.5"
+        fill="#E9A174" />
+
+      {/* Face */}
+      <Ellipse cx="17.5" cy="14" rx="8" ry="10"
+        fill="url(#teacherSkinNew)" />
+
+      {/* Hair */}
+      <Path
+        d="M9.5 13Q7 4 17 3Q26 2 26 12L23 10Q20 7 16 8Q12 8 9.5 13Z"
+        fill="url(#teacherHairNew)"
+      />
+      {/* <Path d="M10 12Q8 17 11 20L12 14Z" fill="#334155" /> */}
+      {/* <Path d="M24 11Q27 16 24 20L23 13Z" fill="#1E293B" /> */}
+
+      {/* Eyes */}
+      <Circle cx="14.5" cy="14.5" r="1.1" fill="#334155" />
+      <Circle cx="20.5" cy="14.5" r="1.1" fill="#334155" />
+      <Circle cx="14.8" cy="14.2" r="0.4" fill="#FFFFFF" />
+      <Circle cx="20.8" cy="14.2" r="0.4" fill="#FFFFFF" />
+
+      {/* Smile */}
+      <Path
+        d="M14 19Q17.5 22 21 19"
+        stroke="#A85542"
+        strokeWidth={1}
+        strokeLinecap="round"
+      />
+
+      {/* Shirt neckline */}
+      <Path
+        d="M13 24L17 27L21 24"
+        stroke="#FFFFFF"
+        strokeWidth={0.8}
+      />
+
+      {/* Book */}
+      <Path
+        d="M29 29Q35 26 42 29V41Q35 38 29 41Z"
+        fill="url(#teacherBookNew)"
+      />
+      <Path d="M30 30Q33 28 35 30V40Q32 38 30 40Z"
+        fill="#FFF7ED" />
+      <Path d="M36 30Q39 28 41 30V40Q38 38 36 40Z"
+        fill="#FFFFFF" />
+      <Path d="M35.5 29V40"
+        stroke="#B45309" strokeWidth={0.8} />
+
+      {/* Hand holding book */}
+      <Path
+        d="M26 36Q28 34 30 36L33 39Q33 42 30 42L26 40Z"
+        fill="#F4B183"
+      />
+
+      {/* Teacher pointer */}
+      <Path
+        d="M28 25L33 19"
+        stroke="#FBBF24"
+        strokeWidth={1.4}
+        strokeLinecap="round"
+      />
+      <Circle cx="33" cy="19" r={0.9} fill="#FBBF24" />
     </Svg>
   );
 }
+
 
 // AI ICON NAME: RoleParentIllustration — Detailed parent family illustration for role selection screen.
 export function RoleParentIllustration() {

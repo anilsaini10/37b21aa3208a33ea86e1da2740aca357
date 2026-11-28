@@ -78,7 +78,6 @@ export function ParentProfileScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader title={t('parentProfile_profile')} />
       <ScrollView showsVerticalScrollIndicator={false}>
 
         <View style={styles.content}>

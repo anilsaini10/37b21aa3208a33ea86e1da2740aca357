@@ -8,6 +8,8 @@ import {Icon} from '../shared/components';
 import type {AdminStackParamList, AdminTabParamList} from './types';
 import {ScreenNames} from './ScreenNames';
 import {floatingTabBarStyle} from './floatingTabBar';
+import {TabHeader} from './TabHeader';
+import {DashboardIcon, StudentIcon, TeacherIcon, SettingsIcon} from '../assets/svg/svgIcons';
 import {PermissionGuard} from '../features/auth/PermissionGuard';
 import {P} from '../core/config/permissions';
 
@@ -88,13 +90,22 @@ const TAB_ICON: Record<keyof AdminTabParamList, string> = {
   More: 'settings',
 };
 
+const TAB_SVG: Record<keyof AdminTabParamList, (size: number) => React.ReactNode> = {
+  Dashboard: s => <DashboardIcon size={s} />,
+  Students: s => <StudentIcon size={s} />,
+  Teachers: s => <TeacherIcon size={s} />,
+  More: s => <SettingsIcon size={s} />,
+};
+
 function AdminTabs(): React.JSX.Element {
   const {theme} = useTheme();
   const insets = useSafeAreaInsets();
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
-        headerShown: false,
+        header: () => (
+          <TabHeader title={route.name} icon={TAB_SVG[route.name](24)} />
+        ),
         tabBarActiveTintColor: theme.colors.tabActive,
         tabBarInactiveTintColor: theme.colors.tabInactive,
         tabBarStyle: floatingTabBarStyle(theme, insets),

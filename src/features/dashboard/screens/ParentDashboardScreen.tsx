@@ -234,14 +234,6 @@ function ParentDashboardContent({
 
   return (
     <Screen padded={false}>
-      <DashboardGreetingHeader
-        name={stats.parentName.split(' ')[0] ?? 'Parent'}
-        schoolName={stats.schoolName}
-        actions={[
-          {icon: 'announcement', onPress: () => navigation.navigate(ScreenNames.Announcements)},
-          {icon: 'notification', onPress: () => navigation.navigate(ScreenNames.Notifications), badgeCount: unreadCount},
-        ]}
-      />
       <ChildSwitcher children={allChildren} activeChildId={activeChildId} onSelect={onSelectChild} />
       <ScrollView
         contentContainerStyle={styles.scrollContent}

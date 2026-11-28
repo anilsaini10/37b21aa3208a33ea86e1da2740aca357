@@ -146,7 +146,6 @@ function ChildHomeworkList({
 
   return (
     <Screen padded={false}>
-      <CustomHeader title={t('parentHomework_title')} />
       <ChildSwitcher children={children} activeChildId={child.id} onSelect={onSelectChild} />
 
       {isError ? (

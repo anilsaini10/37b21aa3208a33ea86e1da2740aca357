@@ -83,7 +83,7 @@ const MODULES: ModuleItem[] = [
   // {labelKey: 'moreScreen_library', icon: 'library', route: ScreenNames.Library},
   // {labelKey: 'moreScreen_inventory', icon: 'inventory', route: ScreenNames.Inventory},
   // {labelKey: 'moreScreen_reports', icon: 'reports', route: ScreenNames.Reports, permission: P.REPORTS_VIEW},
-  {labelKey: 'moreScreen_settings', icon: 'settings', route: ScreenNames.Settings, permission: P.SCHOOL_SETTINGS},
+  // {labelKey: 'moreScreen_settings', icon: 'settings', route: ScreenNames.Settings, permission: P.SCHOOL_SETTINGS},
   // {labelKey: 'moreScreen_notifications', icon: 'notification', route: ScreenNames.Notifications},
 ];
 
@@ -158,39 +158,14 @@ export function MoreScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false} style={styles.screen}>
-      <View style={styles.header}>
-        <Row justify="space-between" align="flex-start">
-          <View style={{flex: 1}}>
-            <AppText variant="h1" style={styles.headerTitleColor}>
-              {t('moreScreen_title')}
-            </AppText>
-            <AppText variant="caption" color="textSecondary">
-              {t('moreScreen_subtitle')}
-            </AppText>
-          </View>
-          <Row gap={theme.spacing.sm} align="center">
-            <Pressable
-              onPress={() => navigation.navigate(ScreenNames.Notifications)}
-              hitSlop={8}
-              style={styles.iconButton}
-              accessibilityRole="button">
-              <Icon name="notification" size={19} color={theme.colors.primary} />
-            </Pressable>
-            <Pressable onPress={() => navigation.navigate(ScreenNames.Profile)} hitSlop={4} accessibilityRole="button">
-              <Avatar name={user?.name ?? 'Admin'} uri={user?.avatarUrl} size={38} />
-            </Pressable>
-          </Row>
-        </Row>
-      </View>
-
       <View style={styles.searchSection}>
         <Row gap={theme.spacing.sm} align="center">
           <View style={{flex: 1}}>
             <SearchBar value={search} onChangeText={setSearch} placeholder={t('moreScreen_searchPlaceholder')} />
           </View>
-          <Pressable style={styles.filterButton} accessibilityRole="button">
+          {/* <Pressable style={styles.filterButton} accessibilityRole="button">
             <Icon name="filter" size={18} color={theme.colors.primary} />
-          </Pressable>
+          </Pressable> */}
         </Row>
       </View>
 

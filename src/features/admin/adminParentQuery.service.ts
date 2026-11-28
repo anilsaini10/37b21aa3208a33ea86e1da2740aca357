@@ -57,7 +57,7 @@ export const adminParentQueryApi = {
         Endpoints.admin.parentQueries,
         {params},
       );
-      return data.data;
+      return data.data ?? {items: [], page, pageSize, total: 0, totalPages: 0, statusCounts: {OPEN: 0, IN_PROGRESS: 0, RESOLVED: 0, CLOSED: 0}};
     } catch (e) {
       rethrowApiError(e, 'Failed to load parent queries.');
     }

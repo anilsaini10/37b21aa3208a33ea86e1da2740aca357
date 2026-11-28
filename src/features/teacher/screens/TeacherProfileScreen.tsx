@@ -81,7 +81,6 @@ export function TeacherProfileScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader title={t('teacherProfile_profile')} />
       <ScrollView showsVerticalScrollIndicator={false}>
 
         <View style={styles.content}>

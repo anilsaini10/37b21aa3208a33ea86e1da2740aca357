@@ -8,7 +8,6 @@ import {useLanguage} from '../../../core/i18n';
 import {
   Screen,
   AppText,
-  DashboardGreetingHeader,
   CustomCard,
   CustomButton,
   StatGrid,
@@ -143,14 +142,6 @@ export function TeacherDashboardScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <DashboardGreetingHeader
-        name={user?.name?.split(' ')[0] ?? 'Teacher'}
-        schoolName={user?.schoolName}
-        actions={[
-          {icon: 'announcement', onPress: () => navigation.navigate(ScreenNames.Announcements)},
-          {icon: 'notification', onPress: () => navigation.navigate(ScreenNames.Notifications), badgeCount: unreadCount},
-        ]}
-      />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}

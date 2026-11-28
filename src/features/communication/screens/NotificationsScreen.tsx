@@ -137,7 +137,7 @@ export function NotificationsScreen(): React.JSX.Element {
   return (
     <Screen padded={false}>
       <CustomHeader title={t('notifications_title')} onBack={() => navigation.goBack()} />
-      <CustomButton
+      {/* <CustomButton
         title="Send Notifee notification"
         onPress={sendTestNotification}
         variant="outline"
@@ -150,7 +150,7 @@ export function NotificationsScreen(): React.JSX.Element {
         variant="outline"
         size="sm"
         style={styles.testButton}
-      />
+      /> */}
       <Row justify="space-between" align="center" style={styles.filterRow}>
         <Row gap={theme.spacing.xs}>
           {(['ALL', 'UNREAD'] as ReadFilter[]).map(value => {

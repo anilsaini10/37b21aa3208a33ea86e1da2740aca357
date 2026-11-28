@@ -163,7 +163,6 @@ function ChildAttendance({child, allChildren, activeChildId, onSelectChild}: {ch
 
   return (
     <Screen padded={false}>
-      <CustomHeader title={t('parentAttendance_title')} />
       <ChildSwitcher children={allChildren} activeChildId={activeChildId} onSelect={onSelectChild} />
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <DateRangeFilter

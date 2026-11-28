@@ -1,7 +1,7 @@
 import React from 'react';
-import {Pressable, ScrollView, View} from 'react-native';
-import {useTheme, useThemedStyles} from '../../core/theme';
-import {AppText} from './AppText';
+import {View} from 'react-native';
+import {useThemedStyles} from '../../core/theme';
+import {Select} from './Select';
 import type {ParentChild} from '../types';
 
 export interface ChildSwitcherProps {
@@ -15,72 +15,27 @@ export function ChildSwitcher({
   activeChildId,
   onSelect,
 }: ChildSwitcherProps): React.JSX.Element | null {
-  const {theme} = useTheme();
   const styles = useThemedStyles(t => ({
     container: {
       paddingHorizontal: t.spacing.lg,
-      paddingVertical: t.spacing.sm,
-    },
-    content: {
-      columnGap: t.spacing.sm,
-    },
-    pill: {
-      paddingHorizontal: t.spacing.lg,
-      paddingVertical: t.spacing.sm,
-      borderRadius: t.radius.pill,
-      alignItems: 'center',
-    },
-    pillActive: {
-      backgroundColor: t.colors.primary,
-    },
-    pillInactive: {
-      backgroundColor: t.colors.surfaceVariant,
-    },
-    subtitle: {
-      marginTop: 1,
+      paddingTop: t.spacing.sm,
     },
   }));
 
   if (children.length <= 1) return null;
 
+  const options = children.map(child => ({
+    value: child.id,
+    label: `${child.name} - ${child.className}, ${child.sectionName}`,
+  }));
+
   return (
     <View style={styles.container}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.content}>
-        {children.map(child => {
-          const active = child.id === activeChildId;
-          return (
-            <Pressable
-              key={child.id}
-              onPress={() => onSelect(child.id)}
-              style={[styles.pill, active ? styles.pillActive : styles.pillInactive]}>
-              <AppText
-                variant="label"
-                style={{
-                  color: active ? theme.colors.onPrimary : theme.colors.text,
-                  fontWeight: '600',
-                }}>
-                {child.name}
-              </AppText>
-              <AppText
-                variant="label"
-                style={[
-                  styles.subtitle,
-                  {
-                    color: active
-                      ? theme.colors.onPrimary + 'CC'
-                      : theme.colors.textMuted,
-                    fontSize: 10,
-                  },
-                ]}>
-                {child.className} - {child.sectionName}
-              </AppText>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+      <Select
+        value={activeChildId}
+        options={options}
+        onChange={onSelect}
+      />
     </View>
   );
 }

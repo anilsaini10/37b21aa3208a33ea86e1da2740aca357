@@ -89,7 +89,6 @@ export function ClassListScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader title={t('classList_headerTitle')} />
       <View style={styles.searchSection}>
         <SearchBar value={search} onChangeText={setSearch} placeholder={t('classList_searchPlaceholder')} />
       </View>

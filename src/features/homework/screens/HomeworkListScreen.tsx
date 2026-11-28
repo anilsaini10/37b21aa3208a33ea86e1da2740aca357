@@ -161,10 +161,6 @@ export function HomeworkListScreen(): React.JSX.Element {
 
   return (
     <Screen padded={false}>
-      <CustomHeader
-        title={t('homeworkList_myHomeworkTitle')}
-        actions={[{icon: 'add', onPress: () => navigation.navigate(ScreenNames.HomeworkForm, {})}]}
-      />
       <View style={styles.searchBarWrap}>
         <SearchBar value={search} onChangeText={setSearch} placeholder={t('homeworkList_searchPlaceholder')} />
       </View>

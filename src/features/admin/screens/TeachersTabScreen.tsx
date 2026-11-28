@@ -37,10 +37,6 @@ export function TeachersTabScreen(): React.JSX.Element {
   }
   return (
     <Screen padded={false}>
-      <CustomHeader
-        title={t('teachersList_headerTitle')}
-        actions={[{icon: 'attendance', onPress: () => navigation.navigate(ScreenNames.MarkStaffAttendance)}]}
-      />
       {switcher}
       <StaffAttendanceRegisterScreen embedded />
     </Screen>

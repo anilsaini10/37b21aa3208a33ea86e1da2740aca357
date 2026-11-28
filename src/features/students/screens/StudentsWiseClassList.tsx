@@ -137,7 +137,6 @@ export function StudentsWiseClassListScreen({
 
   return (
     <Screen padded={false}>
-      <CustomHeader title={t('studentsWiseClassList_headerTitle')} subtitle={t('studentsWiseClassList_subtitle')} />
       {topSlot}
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <AppText variant="caption" color="textSecondary">

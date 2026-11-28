@@ -1,4 +1,4 @@
-/** Admin profile — quick links and logout. */
+/** Admin profile — profile details, quick links and logout. */
 import React from 'react';
 import {View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
@@ -10,9 +10,9 @@ import {
   CustomCard,
   CustomButton,
   CustomHeader,
+  DashboardProfileCard,
   MoreMenuItem,
   moreMenuAccentForIndex,
-  SectionTitle,
   Spacer,
 } from '../../../shared/components';
 import {useAuthStore} from '../../auth/authStore';
@@ -53,6 +53,7 @@ export function AdminProfileScreen(): React.JSX.Element {
   }));
   const navigation = useNavigation<Nav>();
   const {t} = useLanguage();
+  const user = useAuthStore(s => s.user);
   const logout = useAuthStore(s => s.logout);
 
   return (
@@ -61,7 +62,14 @@ export function AdminProfileScreen(): React.JSX.Element {
       <ScrollView showsVerticalScrollIndicator={false}>
 
         <View style={styles.content}>
-          <SectionTitle title={t('teacherProfile_manage')} />
+          <DashboardProfileCard
+            name={user?.name ?? 'Admin'}
+            avatarUri={user?.avatarUrl}
+            schoolName={user?.schoolName}
+            roleLabel={t('adminProfile_admin')}
+            email={user?.email}
+          />
+
           <CustomCard padded={false} style={styles.menuCard}>
             {MENU.map((item, index) => (
               <MoreMenuItem

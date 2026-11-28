@@ -8,6 +8,8 @@ import {Icon} from '../shared/components';
 import type {TeacherStackParamList, TeacherTabParamList} from './types';
 import {ScreenNames} from './ScreenNames';
 import {floatingTabBarStyle} from './floatingTabBar';
+import {TabHeader} from './TabHeader';
+import {DashboardIcon, HomeworkIcon, BookIcon, ProfileIcon} from '../assets/svg/svgIcons';
 import {PermissionGuard} from '../features/auth/PermissionGuard';
 import {P} from '../core/config/permissions';
 
@@ -56,13 +58,22 @@ const TAB_ICON: Record<keyof TeacherTabParamList, string> = {
   Profile: 'profile',
 };
 
+const TAB_SVG: Record<keyof TeacherTabParamList, (size: number) => React.ReactNode> = {
+  Dashboard: s => <DashboardIcon size={s} />,
+  Homework: s => <HomeworkIcon size={s} />,
+  Classes: s => <BookIcon size={s} />,
+  Profile: s => <ProfileIcon size={s} />,
+};
+
 function TeacherTabs(): React.JSX.Element {
   const {theme} = useTheme();
   const insets = useSafeAreaInsets();
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
-        headerShown: false,
+        header: () => (
+          <TabHeader title={route.name} icon={TAB_SVG[route.name](24)} />
+        ),
         tabBarActiveTintColor: theme.colors.tabActive,
         tabBarInactiveTintColor: theme.colors.tabInactive,
         tabBarStyle: floatingTabBarStyle(theme, insets),

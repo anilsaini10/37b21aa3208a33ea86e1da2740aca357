@@ -38,7 +38,7 @@ export const parentQueryApi = {
         params.status = status;
       }
       const {data} = await axiosClient.get<{data: ParentQueryListResponse}>(Endpoints.students.parentQueries, {params});
-      return data.data;
+      return data.data ?? {items: [], page, pageSize, total: 0, totalPages: 0};
     } catch (e) {
       rethrowApiError(e, 'Failed to load queries.');
     }

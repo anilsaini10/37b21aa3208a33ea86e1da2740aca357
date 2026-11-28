@@ -31,12 +31,10 @@ export function CustomHeader({
   const styles = useThemedStyles(t => ({
     header: {
       minHeight: t.components.header.height,
-      backgroundColor: t.colors.headerBackground,
+      backgroundColor: t.colors.background,
       flexDirection: 'row',
       alignItems: 'center',
       paddingHorizontal: t.spacing.lg,
-      borderBottomWidth: 1,
-      borderBottomColor: t.colors.divider,
       columnGap: t.spacing.sm,
     },
     backButton: {paddingRight: t.spacing.xs},

@@ -249,7 +249,7 @@ export const ICONS: Record<string, IconRenderer> = {
     </Frame>
   ),
  back: p => (
-  <Frame {...p}>
+  <Frame {...p} strokeWidth={2.5}>
     <Path d="M18 12H6M10 8L6 12L10 16" />
   </Frame>
 ),

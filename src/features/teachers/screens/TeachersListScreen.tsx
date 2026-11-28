@@ -105,16 +105,6 @@ export function TeachersListScreen({
 
   return (
     <Screen padded={false}>
-      <CustomHeader
-        title={t('teachersList_headerTitle')}
-        actions={[
-          ...(isTodayMarked
-            ? []
-            : [{icon: 'attendance', onPress: () => navigation.navigate(ScreenNames.MarkStaffAttendance)}]),
-          {icon: 'clock', onPress: () => navigation.navigate(ScreenNames.TeacherAvailability)},
-          {icon: 'add', onPress: () => navigation.navigate(ScreenNames.TeacherForm), circle: true},
-        ]}
-      />
       {topSlot}
       <View style={styles.searchBarWrap}>
         <SearchBar

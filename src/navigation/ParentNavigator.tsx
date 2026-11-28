@@ -8,6 +8,8 @@ import {Icon} from '../shared/components';
 import type {ParentStackParamList, ParentTabParamList} from './types';
 import {ScreenNames} from './ScreenNames';
 import {floatingTabBarStyle} from './floatingTabBar';
+import {TabHeader} from './TabHeader';
+import {DashboardIcon, AttendanceIcon, HomeworkIcon, ProfileIcon} from '../assets/svg/svgIcons';
 
 import {ParentDashboardScreen} from '../features/dashboard/screens/ParentDashboardScreen';
 import {ParentAttendanceScreen} from '../features/attendance/screens/ParentAttendanceScreen';
@@ -52,13 +54,22 @@ const TAB_ICON: Record<keyof ParentTabParamList, string> = {
   Profile: 'profile',
 };
 
+const TAB_SVG: Record<keyof ParentTabParamList, (size: number) => React.ReactNode> = {
+  Dashboard: s => <DashboardIcon size={s} />,
+  Attendance: s => <AttendanceIcon size={s} />,
+  Homework: s => <HomeworkIcon size={s} />,
+  Profile: s => <ProfileIcon size={s} />,
+};
+
 function ParentTabs(): React.JSX.Element {
   const {theme} = useTheme();
   const insets = useSafeAreaInsets();
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
-        headerShown: false,
+        header: () => (
+          <TabHeader title={route.name} icon={TAB_SVG[route.name](24)} />
+        ),
         tabBarActiveTintColor: theme.colors.tabActive,
         tabBarInactiveTintColor: theme.colors.tabInactive,
         tabBarStyle: floatingTabBarStyle(theme, insets),
